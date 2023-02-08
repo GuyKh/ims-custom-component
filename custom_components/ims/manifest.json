@@ -1,9 +1,9 @@
 {
     "domain": "ims",
     "name": "The Israel Meteorological Service integration",
-    "documentation": "https://github.com/home-assistant/example-custom-config/tree/master/custom_components/hello_world/",
+    "documentation": "https://github.com/t0mer/ims-custom-component",
     "dependencies": [],
-    "codeowners": [],
+    "codeowners": ["Tomer Klein"],
     "requirements": ["weatheril"],
     "iot_class": "local_polling",
     "version": "0.1.0"

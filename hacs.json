@@ -1,4 +1,5 @@
 {
 	"name": "Israel Meteorological Service / sensor",
-	"render_readme": true
+	"render_readme": true,
+	"country": "IL"
   }
