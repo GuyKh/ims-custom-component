@@ -10,12 +10,13 @@ from homeassistant.const import TEMP_CELSIUS
 CONF_UPDATE_INTERVAL = 'update_interval'
 CONF_CITY = 'city'
 CONF_LANGUAGE = 'language'
-
+IMAGES_PATH = "images_path"
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_CITY): cv.string,
     vol.Required(CONF_LANGUAGE): cv.string,
+    vol.Required(IMAGES_PATH, default="/tmp"): cv.string,
     vol.Optional(CONF_UPDATE_INTERVAL, default=10): cv.positive_int,
 })
 
@@ -31,6 +32,8 @@ async def async_setup_platform(hass, config, add_entities, discovery_info=None):
     add_entities([ImsWindSpeed(hass, config,api_client)])
     add_entities([ImsRain(hass, config,api_client)])
     add_entities([ImsDateTime(hass, config,api_client)])
+
+    return True
 
 class ImsApiClient:
     def __init__(self,config):
@@ -264,8 +267,6 @@ class ImsWindSpeed(Entity):
         else:
             return "kph"
 
-    def unique_id(self):
-        return f"sensor.ims_windspeed"
 
     @property
     def icon(self):
@@ -306,5 +307,8 @@ class ImsDateTime(Entity):
 
     def update(self):
         self._state = self._api_client.current_weather.forecast_time 
+
+
+
 
 
