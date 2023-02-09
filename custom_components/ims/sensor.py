@@ -23,16 +23,18 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 weather  = None
 
 
-async def async_setup_platform(hass, config, add_entities, discovery_info=None):
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     api_client = ImsApiClient(config)
-    add_entities([ImsCity(hass, config,api_client)])
-    add_entities([ImsTemprature(hass, config,api_client)])
-    add_entities([ImsRealFeel(hass, config,api_client)])
-    add_entities([ImsHumidity(hass, config,api_client)])
-    add_entities([ImsWindSpeed(hass, config,api_client)])
-    add_entities([ImsRain(hass, config,api_client)])
-    add_entities([ImsDateTime(hass, config,api_client)])
-
+    entities = []
+    entities.append(ImsCity(hass, config,api_client))
+    entities.append(ImsTemprature(hass, config,api_client))
+    entities.append(ImsRealFeel(hass, config,api_client))
+    entities.append(ImsHumidity(hass, config,api_client))
+    entities.append(ImsWindSpeed(hass, config,api_client))
+    entities.append(ImsRain(hass, config,api_client))
+    entities.append(ImsDateTime(hass, config,api_client))
+    async_add_entities(entities, True)
+    await entities[0].async_update()
     return True
 
 class ImsApiClient:
@@ -55,6 +57,7 @@ class ImsCity(Entity):
         self._update_interval = config.get(CONF_UPDATE_INTERVAL)
         self.entity_id = f"sensor.ims_city"
         self._api_client = api_client
+        # self._api_client.get_data()
 
     @property
     def name(self):
@@ -72,7 +75,7 @@ class ImsCity(Entity):
         return "mdi:city"
 
     async def async_update(self):
-        await self.hass.async_add_executor_job(self.update)
+        await self._hass.async_add_executor_job(self.update)
 
     def update(self):
         self._api_client.get_data()
@@ -82,6 +85,7 @@ class ImsTemprature(Entity):
 
     def __init__(self, hass, config,api_client):
         self._hass = hass
+        self._config = config
         self._language = config.get(CONF_LANGUAGE)
         self._update_interval = config.get(CONF_UPDATE_INTERVAL)
         self.entity_id = f"sensor.ims_temprature"
@@ -149,7 +153,7 @@ class ImsRealFeel(Entity):
         return "mdi:thermometer"
 
     async def async_update(self):
-        await self.hass.async_add_executor_job(self.update)
+        await self._hass.async_add_executor_job(self.update)
 
     def update(self):
         self._state = self._api_client.current_weather.feels_like 
@@ -188,7 +192,7 @@ class ImsHumidity(Entity):
         return "mdi:water-percent"
 
     async def async_update(self):
-        await self.hass.async_add_executor_job(self.update)
+        await self._hass.async_add_executor_job(self.update)
 
     def update(self):
         self._state = self._api_client.current_weather.humidity 
@@ -272,6 +276,9 @@ class ImsWindSpeed(Entity):
     def icon(self):
         return "mdi:weather-windy"
 
+    async def async_update(self):
+        await self.hass.async_add_executor_job(self.update)
+
     def update(self):
         self._state = self._api_client.current_weather.wind_speed 
 
@@ -307,8 +314,4 @@ class ImsDateTime(Entity):
 
     def update(self):
         self._state = self._api_client.current_weather.forecast_time 
-
-
-
-
 
