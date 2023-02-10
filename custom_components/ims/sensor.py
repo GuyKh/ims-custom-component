@@ -24,7 +24,9 @@ weather  = None
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+    #Init the API Client
     api_client = ImsApiClient(config)
+    #Add Ims Entities
     entities = []
     entities.append(ImsCity(hass, config,api_client))
     entities.append(ImsTemprature(hass, config,api_client))
@@ -34,7 +36,16 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     entities.append(ImsRain(hass, config,api_client))
     entities.append(ImsDateTime(hass, config,api_client))
     async_add_entities(entities, True)
+    #Call the update method to grab data from the api
     await entities[0].async_update()
+
+    #Add forcast entities
+    async_add_entities([ImsForcast(hass, config,api_client,"today",api_client.forcast.days[0])],True)
+    async_add_entities([ImsForcast(hass, config,api_client,"day1",api_client.forcast.days[1])],True)
+    async_add_entities([ImsForcast(hass, config,api_client,"day2",api_client.forcast.days[2])],True)
+    async_add_entities([ImsForcast(hass, config,api_client,"day3",api_client.forcast.days[3])],True)
+
+    # _LOGGER.error("Test: " + api_client.forcast.days[0].weather)
     return True
 
 class ImsApiClient:
@@ -110,12 +121,17 @@ class ImsTemprature(Entity):
         return TEMP_CELSIUS
 
     @property
+    def device_state_attributes(self):
+        return self._attributes
+
+
+    @property
     def icon(self):
         return "mdi:thermometer"
 
     async def async_update(self):
         await self.hass.async_add_executor_job(self.update)
-
+        
     def update(self):
         self._state = self._api_client.current_weather.temperature
 
@@ -167,7 +183,6 @@ class ImsHumidity(Entity):
         self._update_interval = config.get(CONF_UPDATE_INTERVAL)
         self.entity_id = f"sensor.ims_humidity"
         self._api_client = api_client
-        
 
     @property
     def name(self):
@@ -190,6 +205,8 @@ class ImsHumidity(Entity):
     @property
     def icon(self):
         return "mdi:water-percent"
+
+
 
     async def async_update(self):
         await self._hass.async_add_executor_job(self.update)
@@ -315,3 +332,40 @@ class ImsDateTime(Entity):
     def update(self):
         self._state = self._api_client.current_weather.forecast_time 
 
+class ImsForcast(Entity):
+    def __init__(self, hass, config,api_client,sensor_name, forcast):
+        self._hass = hass
+        self._forcast = forcast
+        self._language = config.get(CONF_LANGUAGE)
+        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self.entity_id = f"sensor.ims_forcast_" + sensor_name
+        self._name = sensor_name
+        self._api_client = api_client
+        self._attributes = {}
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def extra_state_attributes(self):
+        return self._attributes
+
+    @property
+    def state(self):
+        return self._forcast.day
+
+    async def async_update(self):
+        await self.hass.async_add_executor_job(self.update)
+
+    def update(self):
+        self._attributes = {
+        "temp_min": {
+            "value": self._forcast.minimum_temperature,
+            "unit": TEMP_CELSIUS
+        },
+        "temp_max": {
+            "value": self._forcast.maximum_temperature,
+            "unit": TEMP_CELSIUS
+        },
+        }
