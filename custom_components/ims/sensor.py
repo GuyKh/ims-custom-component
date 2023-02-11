@@ -39,13 +39,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     #Call the update method to grab data from the api
     await entities[0].async_update()
 
-    #Add forcast entities
-    async_add_entities([ImsForcast(hass, config,api_client,"today",api_client.forcast.days[0])],True)
-    async_add_entities([ImsForcast(hass, config,api_client,"day1",api_client.forcast.days[1])],True)
-    async_add_entities([ImsForcast(hass, config,api_client,"day2",api_client.forcast.days[2])],True)
-    async_add_entities([ImsForcast(hass, config,api_client,"day3",api_client.forcast.days[3])],True)
+    #Add forecast entities
+    async_add_entities([Imsforecast(hass, config,api_client,"today",api_client.forecast.days[0])],True)
+    async_add_entities([Imsforecast(hass, config,api_client,"day1",api_client.forecast.days[1])],True)
+    async_add_entities([Imsforecast(hass, config,api_client,"day2",api_client.forecast.days[2])],True)
+    async_add_entities([Imsforecast(hass, config,api_client,"day3",api_client.forecast.days[3])],True)
+    async_add_entities([Imsforecast(hass, config,api_client,"day4",api_client.forecast.days[4])],True)
+   
 
-    # _LOGGER.error("Test: " + api_client.forcast.days[0].weather)
+    # _LOGGER.error("Test: " + api_client.forecast.days[0].weather)
     return True
 
 class ImsApiClient:
@@ -55,7 +57,7 @@ class ImsApiClient:
     
     def get_data(self):
         self.current_weather = self.weather.get_current_analysis()
-        self.forcast = self.weather.get_forcast()
+        self.forecast = self.weather.get_forecast()
         self.images = self.weather.get_radar_images()
 
 class ImsCity(Entity):
@@ -332,13 +334,13 @@ class ImsDateTime(Entity):
     def update(self):
         self._state = self._api_client.current_weather.forecast_time 
 
-class ImsForcast(Entity):
-    def __init__(self, hass, config,api_client,sensor_name, forcast):
+class Imsforecast(Entity):
+    def __init__(self, hass, config,api_client,sensor_name, forecast):
         self._hass = hass
-        self._forcast = forcast
+        self._forecast = forecast
         self._language = config.get(CONF_LANGUAGE)
         self._update_interval = config.get(CONF_UPDATE_INTERVAL)
-        self.entity_id = f"sensor.ims_forcast_" + sensor_name
+        self.entity_id = f"sensor.ims_forecast_" + sensor_name
         self._name = sensor_name
         self._api_client = api_client
         self._attributes = {}
@@ -353,19 +355,69 @@ class ImsForcast(Entity):
 
     @property
     def state(self):
-        return self._forcast.day
+        return self._forecast.day
+
+    def get_weather_icon(self,weather_code):
+        '''
+        Converts the weather code to ison
+        '''
+        weather = {
+                "1250": "mdi:weather-sunny",
+                "1220": "mdi:weather-partly-cloudy",
+                "1230": "mdi:weather-cloudy",
+                "1570": "mdi:weather-dust",
+                "1010": "mdi:weather-dust",
+                "1160": "mdi:weather-fog",
+                "1310": "mdi:weather-sunny-alert",
+                "1580": "mdi:weather-sunny-alert",
+                "1270": "mdi:weather-fog",
+                "1320": "mdi:snowflake-alert",
+                "1590": "mdi:snowflake-alert",
+                "1300": "mdi:snowflake-melt",
+                "1530": "mdi:weather-partly-rainy",
+                "1540": "mdi:weather-partly-rainy",
+                "1560": "mdi:weather-partly-rainy",
+                "1140": "mdi:weather-pourin",
+                "1020": "mdi:weather-lightning-rainy",
+                "1510": "mdi:weather-lightning",
+                "1260": "mdi:weather-windy",
+                "1080": "mdi:weather-snowy-rainy",
+                "1070": "mdi:weather-snowy-rainy",
+                "1060": "mdi:weather-snowy",
+                "1520": "mdi:weather-snowy-heavy",
+            }
+        return weather.get(str(weather_code), "mdi:weather-sunny")
 
     async def async_update(self):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
+        date = self._forecast.date.split("-")
         self._attributes = {
-        "temp_min": {
-            "value": self._forcast.minimum_temperature,
+        "minimum_temperature": {
+            "value": self._forecast.minimum_temperature,
             "unit": TEMP_CELSIUS
         },
-        "temp_max": {
-            "value": self._forcast.maximum_temperature,
+        "maximum_temperature": {
+            "value": self._forecast.maximum_temperature,
             "unit": TEMP_CELSIUS
         },
+        "uvi": {
+            "value": self._forecast.maximum_uvi,
+            "unit": "uv"
+        },
+        "weather ": {
+            "value": self._forecast.weather,
+            "icon": self.get_weather_icon(self._forecast.weather_code)
+        },
+        "description": {
+            "value": self._forecast.description
+            
+        },
+        "date": {
+            "value": date[2] + "/" + date[1] + "/" + date[0]
+            
+        },
+    
+
         }
