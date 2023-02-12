@@ -59,6 +59,8 @@ Now click the doanload button on the lower left corner:
 
 [![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_integration.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_integration.png?raw=true "IMS custom component")
 
+**Restart** the Home Assistant instance to load ims integration before moving on
+
 Finally, add the following code to your configuration file:
 
 ```yaml
