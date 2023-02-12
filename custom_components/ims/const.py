@@ -99,7 +99,7 @@ WIND_DIRECTIONS = {
     "14": "113",
     "15": "135",
     "16": "158",
-    "17": "180"
+    "17": "180",
 }
 
 WEATHER_SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
@@ -219,7 +219,7 @@ FORECAST_DAILY_SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     SensorEntityDescription(
         key=ATTR_API_MAXIMUM_UV_INDEX,
         name="Miximum UV index",
-        native_unit_of_measurement=UV_INDEX
+        native_unit_of_measurement=UV_INDEX,
     ),
     SensorEntityDescription(
         key=ATTR_API_WEATHER_CODE,

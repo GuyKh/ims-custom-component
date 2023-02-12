@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 ATTRIBUTION = "Powered by Pirate Weather"
 
-        
+
 class WeatherUpdateCoordinator(DataUpdateCoordinator):
     """Weather data update coordinator."""
 
@@ -31,7 +31,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         self.city = city
         self.language = language
         self.update_interval = update_interval
-        self.weather  = WeatherIL(str(city),language)
+        self.weather = WeatherIL(str(city), language)
 
         self.data = None
         self.currently = None
@@ -39,12 +39,8 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         self.daily = None
         self._connect_error = False
 
-        super().__init__(
-            hass, _LOGGER, name=DOMAIN, update_interval=update_interval
-        )
-               
-                 
-                        
+        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
+
     async def _async_update_data(self):
         """Update the data."""
         data = {}
@@ -55,15 +51,15 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed(error) from error
         return data
 
-
     async def _get_ims_weather(self):
-        """Poll weather data from IMS."""   
-    
+        """Poll weather data from IMS."""
+
         current_weather = self.weather.get_current_analysis()
         forcast = self.weather.get_forcast()
         images = self.weather.get_radar_images()
 
         return WeatherData(current_weather, forcast)
+
 
 class WeatherData:
     def __init__(self, current_weather, forecast, images):
