@@ -436,4 +436,4 @@ class Imsforecast(Entity):
             }
             attributes[hour.hour] = attr
         
-        self._attributes = json.loads(attributes)
+        self._attributes = attributes
