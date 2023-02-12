@@ -4,8 +4,6 @@ from requests.exceptions import ConnectionError as ConnectError, HTTPError, Time
 from weatheril import *
 import voluptuous as vol
 from __future__ import annotations
-from datetime import timedelta
-
 
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
@@ -43,24 +41,24 @@ from homeassistant.const import (
 )
 
 from .const import {
-    ATTR_API_FEELS_LIKE_TEMPERATURE
-    ATTR_API_DEW_POINT
-    ATTR_API_FORECAST_TIME
-    ATTR_API_FORECAST_DATE
-    ATTR_API_HEAT_STRESS
-    ATTR_API_HEAT_STRESS_LEVEL
-    ATTR_API_MAXIMUM_TEMPERATURE
-    ATTR_API_MAXIMUM_UV_INDEX
-    ATTR_API_MINIMUM_TEMPERATURE
-    ATTR_API_RAIN
-    ATTR_API_RELATIVE_HUMIDITY
-    ATTR_API_TEMPERATURE
-    ATTR_API_UV_INDEX
-    ATTR_API_UV_LEVEL
-    ATTR_API_WEATHER_CODE
-    ATTR_API_WIND_BEARING
-    ATTR_API_WIND_CHILL
-    ATTR_API_WIND_SPEED
+    ATTR_API_FEELS_LIKE_TEMPERATURE,
+    ATTR_API_DEW_POINT,
+    ATTR_API_FORECAST_TIME,
+    ATTR_API_FORECAST_DATE,
+    ATTR_API_HEAT_STRESS,
+    ATTR_API_HEAT_STRESS_LEVEL,
+    ATTR_API_MAXIMUM_TEMPERATURE,
+    ATTR_API_MAXIMUM_UV_INDEX,
+    ATTR_API_MINIMUM_TEMPERATURE,
+    ATTR_API_RAIN,
+    ATTR_API_RELATIVE_HUMIDITY,
+    ATTR_API_TEMPERATURE,
+    ATTR_API_UV_INDEX,
+    ATTR_API_UV_LEVEL,
+    ATTR_API_WEATHER_CODE,
+    ATTR_API_WIND_BEARING,
+    ATTR_API_WIND_CHILL,
+    ATTR_API_WIND_SPEED,
     WIND_DIRECTIONS
 }
 
@@ -124,7 +122,6 @@ async def async_setup_entry(
     ims_weather = IMSWeather(name, unique_id, forecast_mode, weather_coordinator, city, outputRound)
 
     async_add_entities([ims_weather], False)
-    #_LOGGER.info(pw_weather.__dict__)
     return True
 
 #asda sd asd

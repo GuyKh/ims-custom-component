@@ -36,11 +36,7 @@ from .const import (
     DEFAULT_UNITS,
     FORECASTS_DAILY,
     FORECASTS_HOURLY,
-    ALL_CONDITIONS,
-    PW_PLATFORMS,
-    PW_PLATFORM,
-    PW_PREVPLATFORM,
-    PW_ROUND,
+    ALL_CONDITIONS
 )
 
 ATTRIBUTION = "Powered by Pirate Weather"
@@ -93,7 +89,6 @@ class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             image_path = user_input[CONF_IMAGES_PATH]
 
             
-            
             # Convert scan interval to timedelta
             if isinstance(user_input[CONF_UPDATE_INTERVAL], str):
               user_input[CONF_UPDATE_INTERVAL] = cv.time_period_str(user_input[CONF_UPDATE_INTERVAL])
@@ -105,7 +100,6 @@ class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
               
 
             # Unique value includes the location and forcastHours/ forecastDays to seperate WeatherEntity/ Sensor            
-#            await self.async_set_unique_id(f"pw-{latitude}-{longitude}-{forecastDays}-{forecastHours}-{forecastMode}-{entityNamee}")            
             await self.async_set_unique_id(f"ims-{city}-{language}-{forecastMode}-{entityNamee}")      
                         
             self._abort_if_unique_id_configured()
@@ -164,12 +158,6 @@ class PirateWeatherOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             entry = self.config_entry
             
-            #if self.config_entry.options:
-            #  user_input[PW_PREVPLATFORM] = self.config_entry.options[PW_PLATFORM]
-            #else:
-            #user_input[PW_PREVPLATFORM] = self.hass.data[DOMAIN][entry.entry_id][PW_PLATFORM]
-            #self.hass.data[DOMAIN][entry.entry_id][PW_PREVPLATFORM] = self.hass.data[DOMAIN][entry.entry_id][PW_PLATFORM]
-            #user_input[PW_PREVPLATFORM] = self.hass.data[DOMAIN][entry.entry_id][PW_PLATFORM]
             #_LOGGER.warning('async_step_init_Options')
             return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
             

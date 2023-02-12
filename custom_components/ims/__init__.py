@@ -10,11 +10,9 @@ from datetime import timedelta
 
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 
-
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
-    CONF_MONITORED_CONDITIONS,
     Platform,
 )
 from homeassistant.core import HomeAssistant
@@ -30,17 +28,7 @@ from .const import (
     ENTRY_NAME,
     ENTRY_WEATHER_COORDINATOR,
     FORECAST_MODES,
-    PLATFORMS,
     UPDATE_LISTENER,
-    CONF_UNITS,
-    DEFAULT_UNITS,
-    DEFAULT_NAME,
-    FORECASTS_HOURLY,
-    FORECASTS_DAILY,
-    PW_PLATFORMS,
-    PW_PLATFORM, 
-    PW_PREVPLATFORM,   
-    PW_ROUND,
 )
 
 CONF_FORECAST = "forecast"
@@ -92,8 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_UPDATE_INTERVAL: ims_scan_Int,
     }
 
-    await hass.config_entries.async_forward_entry_setup(entry, Platform.WEATHER)
-    
+    await hass.config_entries.async_forward_entry_setup(entry, Platform.WEATHER)    
     
     update_listener = entry.add_update_listener(async_update_options)
     hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
@@ -104,11 +91,9 @@ async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Update options."""
     await hass.config_entries.async_reload(entry.entry_id)
 
-  
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    
     
     unload_ok = await hass.config_entries.async_unload_platforms(entry, Platform.WEATHER)
     
