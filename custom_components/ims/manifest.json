@@ -3,10 +3,9 @@
     "name": "The Israel Meteorological Service integration",
     "documentation": "https://github.com/t0mer/ims-custom-component",
     "dependencies": [],
-    "codeowners": ["Tomer Klein", "Guy Khmelnitsky"],
-    "requirements": ["weatheril"],
+    "codeowners": ["Tomer Klein"],
+    "requirements": ["weatheril>=0.16.0"],
     "iot_class": "cloud_polling",
-    "version": "0.3.0",
+    "version": "0.1.0",
     "config_flow": true
-
 }
