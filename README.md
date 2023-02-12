@@ -55,7 +55,7 @@ Now, click the big blue button on the lower lef corner "Explor & Download reposi
 
 [![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_repo.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_repo.png?raw=true "IMS custom component")
 
-Now click the doanload button on the lower left corner:
+Now click the download button on the lower left corner:
 
 [![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_integration.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_integration.png?raw=true "IMS custom component")
 
