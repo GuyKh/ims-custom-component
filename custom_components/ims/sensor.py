@@ -1,3 +1,4 @@
+import json
 import logging
 import asyncio
 from weatheril import *
@@ -435,4 +436,4 @@ class Imsforecast(Entity):
             }
             attributes[hour.hour] = attr
         
-        self._attributes = attributes
+        self._attributes = json.loads(attributes)
