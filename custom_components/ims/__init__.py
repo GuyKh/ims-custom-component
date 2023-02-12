@@ -45,6 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     name = entry.data[CONF_NAME]
     city = _get_config_value(entry, CONF_CITY)
     forecast_mode = _get_config_value(entry, CONF_MODE)
+    images_path = _get_config_value(entry, CONF_IMAGES_PATH)
     language = _get_config_value(entry, CONF_LANGUAGE)
     ims_scan_Int = entry.data[CONF_UPDATE_INTERVAL]
 
@@ -77,6 +78,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_CITY: city,
         CONF_LANGUAGE: language,
         CONF_MODE: forecast_mode,
+        CONF_IMAGES_PATH: images_path,
         CONF_UPDATE_INTERVAL: ims_scan_Int,
     }
 

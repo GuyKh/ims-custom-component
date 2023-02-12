@@ -20,8 +20,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-ATTRIBUTION = "Powered by Pirate Weather"
-
+ATTRIBUTION = "Powered by IMS Weather"
 
 class WeatherUpdateCoordinator(DataUpdateCoordinator):
     """Weather data update coordinator."""
@@ -63,6 +62,6 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
 
 class WeatherData:
     def __init__(self, current_weather, forecast, images):
-        self.current_weather = current_weather.json
+        self.current_weather = current_weather
         self.forecast = forecast
-        self.images = images.json
+        self.images = images

@@ -3,8 +3,6 @@ import voluptuous as vol
 import logging
 from datetime import timedelta
 
-import forecastio
-from forecastio.models import Forecast
 import json
 import aiohttp
 
@@ -12,8 +10,6 @@ from homeassistant import config_entries
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
-    CONF_MONITORED_CONDITIONS,
-    CONF_SCAN_INTERVAL,
 )
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
@@ -32,18 +28,10 @@ from .const import (
     DOMAIN,
     FORECAST_MODES,
     LANGUAGES,
-    CONF_UNITS,
-    DEFAULT_UNITS,
-    FORECASTS_DAILY,
-    FORECASTS_HOURLY,
-    ALL_CONDITIONS,
 )
 
-ATTRIBUTION = "Powered by Pirate Weather"
+ATTRIBUTION = "Powered by IMS Weather"
 _LOGGER = logging.getLogger(__name__)
-
-CONF_FORECAST = "forecast"
-CONF_HOURLY_FORECAST = "hourly_forecast"
 
 
 class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
