@@ -22,6 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 ATTRIBUTION = "Powered by IMS Weather"
 
+
 class WeatherUpdateCoordinator(DataUpdateCoordinator):
     """Weather data update coordinator."""
 
