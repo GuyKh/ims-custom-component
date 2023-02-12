@@ -393,7 +393,7 @@ class Imsforecast(Entity):
 
     def update(self):
         date = self._forecast.date.split("-")
-        self._attributes = {
+        attributes = {
         "minimum_temperature": {
             "value": self._forecast.minimum_temperature,
             "unit": TEMP_CELSIUS
@@ -418,6 +418,21 @@ class Imsforecast(Entity):
             "value": date[2] + "/" + date[1] + "/" + date[0]
             
         },
-    
-
         }
+
+        for hour in self._forecast.hours:
+            attr = {
+                    "weather":
+                    {
+                        "value": hour.weather,
+                        "icon": self.get_weather_icon(hour.weather_code)
+                    },
+                      "temperature":
+                    {
+                        "value": hour.temperature,
+                        "unit": TEMP_CELSIUS
+                    },     
+            }
+            attributes[hour.hour] = attr
+        
+        self._attributes = attributes

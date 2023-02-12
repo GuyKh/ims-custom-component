@@ -4,7 +4,7 @@
     "documentation": "https://github.com/t0mer/ims-custom-component",
     "dependencies": [],
     "codeowners": ["Tomer Klein"],
-    "requirements": ["weatheril"],
+    "requirements": ["weatheril>=0.16.0"],
     "iot_class": "local_polling",
-    "version": "0.4.0"
+    "version": "0.1.0"
 }
