@@ -1,6 +1,10 @@
 # ims-custom-component
 
-IMS custom component for HomeAssistant allows you to integrate the Israel Meteorology System easily and with minimal configuration.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=techblog_ims-custom-component&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=techblog_ims-custom-component)
+
+
+
+IMS custom component for HomeAssistant allows you to integrate the Israel Meteorological Service easily and with minimal configuration.
 With IMS, you can get the following information for the current status (Updates every hour):
 * Temperature
 * Real feel
