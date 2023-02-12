@@ -82,6 +82,7 @@ FORECAST_MODE_DAILY = "daily"
 
 LANGUAGES = ["en", "he"]
 
+# Based on https://ims.gov.il/en/wind_directions
 WIND_DIRECTIONS = {
     "1": float(180),
     "2": float(203),
