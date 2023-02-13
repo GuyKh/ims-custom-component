@@ -79,6 +79,11 @@ UPDATE_LISTENER = "update_listener"
 
 FORECAST_MODE_HOURLY = "hourly"
 FORECAST_MODE_DAILY = "daily"
+DEFAULT_FORECAST_MODE = FORECAST_MODE_DAILY
+FORECAST_MODES = [
+    FORECAST_MODE_HOURLY,
+    FORECAST_MODE_DAILY
+]
 
 LANGUAGES = ["en", "he"]
 
@@ -167,10 +172,6 @@ WEATHER_SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         name="UV level",
         native_unit_of_measurement=UV_INDEX,
         state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_CONDITION,
-        name="Condition",
     ),
     SensorEntityDescription(
         key=ATTR_API_WEATHER_CODE,

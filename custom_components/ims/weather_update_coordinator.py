@@ -2,6 +2,7 @@
 from datetime import timedelta
 import logging
 
+import asyncio
 import async_timeout
 
 import json
@@ -34,9 +35,6 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         self.weather = WeatherIL(str(city), language)
 
         self.data = None
-        self.currently = None
-        self.hourly = None
-        self.daily = None
         self._connect_error = False
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
@@ -54,11 +52,18 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
     async def _get_ims_weather(self):
         """Poll weather data from IMS."""
 
-        current_weather = self.weather.get_current_analysis()
-        forcast = self.weather.get_forcast()
-        images = self.weather.get_radar_images()
+        loop = None
+        try:
+            loop = asyncio.get_event_loop()
+        except:
+            loop = asyncio.new_event_loop()
 
-        return WeatherData(current_weather, forcast)
+
+        current_weather = await loop.run_in_executor(None, self.weather.get_current_analysis)
+        forecast = await loop.run_in_executor(None, self.weather.get_forecast)
+        images = await loop.run_in_executor(None, self.weather.get_radar_images)
+
+        return WeatherData(current_weather, forecast, images)
 
 
 class WeatherData:

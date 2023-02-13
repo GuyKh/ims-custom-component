@@ -1,14 +1,15 @@
+from __future__ import annotations
 import logging
+import pytz
 import asyncio
+from datetime import datetime
 from requests.exceptions import ConnectionError as ConnectError, HTTPError, Timeout
 from weatheril import *
 import voluptuous as vol
-from __future__ import annotations
 
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
 from homeassistant.util import Throttle
-from homeassistant.util.dt import utc_from_timestamp
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.device_registry import DeviceEntryType
@@ -54,6 +55,12 @@ from .const import (
     ATTR_API_WIND_BEARING,
     ATTR_API_WIND_CHILL,
     ATTR_API_WIND_SPEED,
+    CONF_CITY,
+    CONF_LANGUAGE,
+    CONF_IMAGES_PATH,
+    CONF_UPDATE_INTERVAL,
+    DOMAIN,
+    ENTRY_WEATHER_COORDINATOR,
     WIND_DIRECTIONS,
 )
 
@@ -61,11 +68,14 @@ from homeassistant.const import TEMP_CELSIUS
 
 _LOGGER = logging.getLogger(__name__)
 
+ATTRIBUTION = "Powered by IMS Weather"
+
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_CITY): cv.string,
+        vol.Required(CONF_CITY): cv.positive_int,
         vol.Required(CONF_LANGUAGE): cv.string,
-        vol.Required(IMAGES_PATH, default="/tmp"): cv.string,
+        vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
         vol.Optional(CONF_UPDATE_INTERVAL, default=10): cv.positive_int,
     }
 )
@@ -161,10 +171,11 @@ class IMSWeather(WeatherEntity):
         self._mode = forecast_mode
         self._unique_id = unique_id
         self._city = city
+        self.outputRound = outputRound
         self._ds_data = self._weather_coordinator.data
-        self._ds_currently = self._weather_coordinator.data.current_weather
-        self._ds_hourly = self._weather_coordinator.data.forecast.hourly
-        self._ds_daily = self._weather_coordinator.data.forecast.daily
+        #self._ds_currently = self._weather_coordinator.data.current_weather
+        #self._ds_hourly = self._weather_coordinator.data.forecast
+        #self._ds_daily = self._weather_coordinator.forecast.daily
 
     @property
     def unique_id(self):
@@ -173,7 +184,7 @@ class IMSWeather(WeatherEntity):
 
     @property
     def available(self):
-        """Return if weather data is available from PirateWeather."""
+        """Return if weather data is available from IMSWeather."""
         return self._weather_coordinator.data is not None
 
     @property
@@ -189,7 +200,7 @@ class IMSWeather(WeatherEntity):
     @property
     def native_temperature(self):
         """Return the temperature."""
-        temperature = self._weather_coordinator.data.current_weather.temperature
+        temperature = float(self._weather_coordinator.data.current_weather.temperature)
 
         if self.outputRound == "Yes":
             return round(temperature, 0) + 0
@@ -199,7 +210,7 @@ class IMSWeather(WeatherEntity):
     @property
     def humidity(self):
         """Return the humidity."""
-        humidity = self._weather_coordinator.data.current_weather.humidity
+        humidity = float(self._weather_coordinator.data.current_weather.humidity)
 
         if self.outputRound == "Yes":
             return round(humidity, 0) + 0
@@ -209,7 +220,7 @@ class IMSWeather(WeatherEntity):
     @property
     def native_wind_speed(self):
         """Return the wind speed."""
-        windspeed = self._weather_coordinator.data.current_weather.windspeed
+        windspeed = float(self._weather_coordinator.data.current_weather.wind_speed)
 
         if self.outputRound == "Yes":
             return round(windspeed, 0) + 0
@@ -219,12 +230,12 @@ class IMSWeather(WeatherEntity):
     @property
     def wind_bearing(self):
         """Return the wind bearing."""
-        return WIND_DIRECTIONS[self._weather_coordinator.json["wind_direction_id"]]
+        return WIND_DIRECTIONS[self._weather_coordinator.data.current_weather.json["wind_direction_id"]]
 
     @property
     def condition(self):
         """Return the weather condition."""
-        return self._weather_coordinator.data.current_weather.weather
+        return self._weather_coordinator.data.current_weather.description
 
     @property
     def forecast(self):
@@ -234,22 +245,20 @@ class IMSWeather(WeatherEntity):
         if self._mode == "daily":
             data = [
                 {
-                    ATTR_FORECAST_TIME: utc_from_timestamp(entry.date).isoformat(),
+                    ATTR_FORECAST_TIME: datetime.strptime(entry.date, "%Y-%m-%d").astimezone(pytz.UTC).isoformat(),
                     ATTR_FORECAST_NATIVE_TEMP: entry.maximum_temperature,
                     ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
                     ATTR_FORECAST_CONDITION: entry.weather,
                 }
-                for entry in self._weather_coordinator.forecast.days
+                for entry in self._weather_coordinator.data.forecast.days
             ]
         else:
             data = []
-            for entry in self._weather_coordinator.forecast.days:
+            for entry in self._weather_coordinator.data.forecast.days:
                 for hour in entry.hours:
                     data.append(
                         {
-                            ATTR_FORECAST_TIME: utc_from_timestamp(
-                                hour.forecast_time
-                            ).isoformat(),
+                            ATTR_FORECAST_TIME: datetime.strptime(hour.forecast_time, "%Y-%m-%d %H:%M:%S").astimezone(pytz.UTC).isoformat(),
                             ATTR_FORECAST_NATIVE_TEMP: hour.temperature,
                             ATTR_FORECAST_CONDITION: hour.weather,
                         }

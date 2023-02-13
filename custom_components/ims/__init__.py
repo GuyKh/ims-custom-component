@@ -37,11 +37,11 @@ CONF_HOURLY_FORECAST = "hourly_forecast"
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-ATTRIBUTION = "Powered by Pirate Weather"
+ATTRIBUTION = "Powered by IMS Weather"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Pirate Weather as config entry."""
+    """Set up IMS Weather as config entry."""
     name = entry.data[CONF_NAME]
     city = _get_config_value(entry, CONF_CITY)
     forecast_mode = _get_config_value(entry, CONF_MODE)

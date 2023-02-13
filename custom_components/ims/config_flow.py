@@ -1,4 +1,4 @@
-"""Config flow for Pirate Weather."""
+"""Config flow for IMS Weather."""
 import voluptuous as vol
 import logging
 from datetime import timedelta
@@ -34,8 +34,8 @@ ATTRIBUTION = "Powered by IMS Weather"
 _LOGGER = logging.getLogger(__name__)
 
 
-class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for PirateWeather."""
+class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow for IMSWeather."""
 
     VERSION = CONFIG_FLOW_VERSION
 
@@ -43,7 +43,7 @@ class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return PirateWeatherOptionsFlow(config_entry)
+        return IMSWeatherOptionsFlow(config_entry)
 
     async def async_step_user(self, user_input=None):
         """Handle a flow initialized by the user."""
@@ -52,7 +52,7 @@ class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema(
             {
                 vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
-                vol.Required(CONF_CITY, default=1): str,
+                vol.Required(CONF_CITY, default=1): int,
                 vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(
                     LANGUAGES
                 ),
@@ -85,7 +85,7 @@ class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             # Unique value includes the location and forcastHours/ forecastDays to seperate WeatherEntity/ Sensor
             await self.async_set_unique_id(
-                f"ims-{city}-{language}-{forecastMode}-{entityNamee}"
+                f"ims-{city}-{language}-{forecast_mode}-{entityNamee}"
             )
 
             self._abort_if_unique_id_configured()
@@ -129,7 +129,7 @@ class PirateWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return await self.async_step_user(config)
 
 
-class PirateWeatherOptionsFlow(config_entries.OptionsFlow):
+class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
     """Handle options."""
 
     def __init__(self, config_entry):
@@ -163,7 +163,7 @@ class PirateWeatherOptionsFlow(config_entries.OptionsFlow):
                                 CONF_CITY, self.hass.config.city
                             ),
                         ),
-                    ): str,
+                    ): int,
                     vol.Optional(
                         CONF_LANGUAGE,
                         default=self.config_entry.options.get(
@@ -180,6 +180,15 @@ class PirateWeatherOptionsFlow(config_entries.OptionsFlow):
                             ),
                         ),
                     ): vol.In(FORECAST_MODES),
+                    vol.Optional(
+                        CONF_UPDATE_INTERVAL,
+                        default=self.config_entry.options.get(
+                            CONF_UPDATE_INTERVAL,
+                            self.config_entry.data.get(
+                                CONF_UPDATE_INTERVAL, DEFAULT_SCAN_INTERVAL
+                            ),
+                        ),
+                    ): int,
                     vol.Optional(
                         CONF_IMAGES_PATH,
                         default=self.config_entry.options.get(
