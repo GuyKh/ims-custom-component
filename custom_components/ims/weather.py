@@ -229,7 +229,7 @@ class IMSWeather(WeatherEntity):
     def condition(self):
         """Return the weather condition."""
         condition = self._weather_coordinator.data.current_weather.description
-        if not condition or condition == 'Nothing':
+        if not condition or condition == "Nothing":
             condition = self._weather_coordinator.data.forecast.days[0].weather
         return condition
 
@@ -254,7 +254,9 @@ class IMSWeather(WeatherEntity):
                 for hour in entry.hours:
                     data.append(
                         {
-                            ATTR_FORECAST_TIME: hour.forecast_time.astimezone(pytz.UTC).isoformat(),
+                            ATTR_FORECAST_TIME: hour.forecast_time.astimezone(
+                                pytz.UTC
+                            ).isoformat(),
                             ATTR_FORECAST_NATIVE_TEMP: hour.temperature,
                             ATTR_FORECAST_CONDITION: hour.weather,
                         }
