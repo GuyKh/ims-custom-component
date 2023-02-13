@@ -160,12 +160,6 @@ class IMSWeather(WeatherEntity):
     ) -> None:
         """Initialize the sensor."""
         self._attr_name = name
-        # self._attr_device_info = DeviceInfo(
-        #    entry_type=DeviceEntryType.SERVICE,
-        #    identifiers={(DOMAIN, unique_id)},
-        #    manufacturer=MANUFACTURER,
-        #    name=DEFAULT_NAME,
-        # )
         self._weather_coordinator = weather_coordinator
         self._name = name
         self._mode = forecast_mode
@@ -173,9 +167,6 @@ class IMSWeather(WeatherEntity):
         self._city = city
         self.outputRound = outputRound
         self._ds_data = self._weather_coordinator.data
-        # self._ds_currently = self._weather_coordinator.data.current_weather
-        # self._ds_hourly = self._weather_coordinator.data.forecast
-        # self._ds_daily = self._weather_coordinator.forecast.daily
 
     @property
     def unique_id(self):
@@ -247,9 +238,7 @@ class IMSWeather(WeatherEntity):
         if self._mode == "daily":
             data = [
                 {
-                    ATTR_FORECAST_TIME: datetime.strptime(entry.date, "%Y-%m-%d")
-                    .astimezone(pytz.UTC)
-                    .isoformat(),
+                    ATTR_FORECAST_TIME: entry.date.astimezone(pytz.UTC).isoformat(),
                     ATTR_FORECAST_NATIVE_TEMP: entry.maximum_temperature,
                     ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
                     ATTR_FORECAST_CONDITION: entry.weather,
@@ -262,11 +251,7 @@ class IMSWeather(WeatherEntity):
                 for hour in entry.hours:
                     data.append(
                         {
-                            ATTR_FORECAST_TIME: datetime.strptime(
-                                hour.forecast_time, "%Y-%m-%d %H:%M:%S"
-                            )
-                            .astimezone(pytz.UTC)
-                            .isoformat(),
+                            ATTR_FORECAST_TIME: hour.forecast_time.astimezone(pytz.UTC).isoformat(),
                             ATTR_FORECAST_NATIVE_TEMP: hour.temperature,
                             ATTR_FORECAST_CONDITION: hour.weather,
                         }
