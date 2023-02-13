@@ -58,8 +58,9 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         except:
             loop = asyncio.new_event_loop()
 
-
-        current_weather = await loop.run_in_executor(None, self.weather.get_current_analysis)
+        current_weather = await loop.run_in_executor(
+            None, self.weather.get_current_analysis
+        )
         forecast = await loop.run_in_executor(None, self.weather.get_forecast)
         images = await loop.run_in_executor(None, self.weather.get_radar_images)
 
