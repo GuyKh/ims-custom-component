@@ -160,7 +160,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             CONF_CITY,
                             self.config_entry.data.get(
-                                CONF_CITY, self.hass.config.city
+                                CONF_CITY, 1
                             ),
                         ),
                     ): int,
