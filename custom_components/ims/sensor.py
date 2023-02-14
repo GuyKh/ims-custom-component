@@ -21,7 +21,7 @@ from .const import (
     ENTRY_NAME,
     ENTRY_WEATHER_COORDINATOR,
     PLATFORMS,
-    UPDATE_LISTENER,       
+    UPDATE_LISTENER,
     CONF_CITY,
     CONF_MODE,
     CONF_LANGUAGE,
@@ -47,7 +47,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_CITY): cv.positive_int,
         vol.Required(CONF_LANGUAGE): cv.string,
         vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
-        vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): cv.positive_int,
+        vol.Optional(
+            CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
+        ): cv.positive_int,
         vol.Optional(IMS_PLATFORM): cv.string,
         vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
     }
@@ -67,25 +69,25 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     config_entry[IMS_PLATFORM] = [IMS_PLATFORMS[0]]
 
     # Set as no rounding for compatability
-    config_entry[PW_ROUND] = "No"    
+    config_entry[PW_ROUND] = "No"
 
     # Set as no rounding for compatability
-    config_entry[PW_ROUND] = "No"    
-    
+    config_entry[PW_ROUND] = "No"
+
     hass.async_create_task(
-      hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": SOURCE_IMPORT}, data = config_entry
-      )
+        hass.config_entries.flow.async_init(
+            DOMAIN, context={"source": SOURCE_IMPORT}, data=config_entry
+        )
     )
 
+
 async def async_setup_entry(
-    hass: HomeAssistant, 
+    hass: HomeAssistant,
     config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up IMS Weather sensor entities based on a config entry."""
-    
-    
+
     domain_data = hass.data[DOMAIN][config_entry.entry_id]
 
     name = domain_data[CONF_NAME]
@@ -95,7 +97,6 @@ async def async_setup_entry(
     # units = domain_data[CONF_UNITS]
     forecast_mode = domain_data[CONF_MODE]
 
-    
     # Add IMS Sensors
     sensors: list[Entity] = []
     sensors.append(ImsCity(hass, city, langauge, weather_coordinator))
@@ -105,16 +106,32 @@ async def async_setup_entry(
     sensors.append(ImsWindSpeed(hass, city, langauge, weather_coordinator))
     sensors.append(ImsRain(hass, city, langauge, weather_coordinator))
     sensors.append(ImsDateTime(hass, langauge, weather_coordinator))
-   
+
     # Add forecast entities
-    sensors.append(IMSForecast(hass, langauge, weather_coordinator, "today", weather_coordinator.data.forecast.days[0]))
-    for day_index in range(1, 4):
-        sensors.append(IMSForecast(hass, langauge, weather_coordinator, "day" + day_index, weather_coordinator.data.forecast.days[day_index])
+    sensors.append(
+        IMSForecast(
+            hass,
+            langauge,
+            weather_coordinator,
+            "today",
+            weather_coordinator.data.forecast.days[0],
+        )
     )
-    
-    async_add_entities(sensors, update_before_add=True]
+    for day_index in range(1, 4):
+        sensors.append(
+            IMSForecast(
+                hass,
+                langauge,
+                weather_coordinator,
+                "day" + day_index,
+                weather_coordinator.data.forecast.days[day_index],
+            )
+        )
+
+    async_add_entities(sensors, update_before_add=True)
 
     return True
+
 
 class ImsCity(Entity):
     def __init__(self, hass, city, langauge, weather_coordinator):
@@ -146,7 +163,9 @@ class ImsCity(Entity):
 
     def update(self):
         self._weather_coordinator.get_data()
-        self._state = self._weather_coordinator.weather.get_location_name_by_id(self._city)
+        self._state = self._weather_coordinator.weather.get_location_name_by_id(
+            self._city
+        )
 
 
 class ImsTemprature(Entity):

@@ -57,7 +57,9 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(
                     LANGUAGES
                 ),
-                vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): int,
+                vol.Optional(
+                    CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
+                ): int,
                 vol.Required(IMS_PLATFORM, default=[IMS_PLATFORMS[1]]): cv.multi_select(
                     IMS_PLATFORMS
                 ),
@@ -147,7 +149,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
-            #entry = self.config_entry
+            # entry = self.config_entry
 
             # _LOGGER.warning('async_step_init_Options')
             return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)

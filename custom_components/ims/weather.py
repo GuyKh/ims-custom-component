@@ -83,7 +83,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_CITY): cv.positive_int,
         vol.Required(CONF_LANGUAGE): cv.string,
         vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
-        vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): cv.positive_int,
+        vol.Optional(
+            CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
+        ): cv.positive_int,
         vol.Optional(IMS_PLATFORM): cv.string,
         vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
     }
