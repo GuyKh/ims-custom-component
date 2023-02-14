@@ -235,6 +235,14 @@ class IMSWeather(WeatherEntity):
         return condition
 
     @property
+    def description(self):
+        """Return the weather description."""
+        description = self._weather_coordinator.data.current_weather.description
+        if not description or description == "Nothing":
+            description = self._weather_coordinator.data.forecast.days[0].weather
+        return description
+
+    @property
     def forecast(self):
         """Return the forecast array."""
         data = None
