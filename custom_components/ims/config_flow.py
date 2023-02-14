@@ -28,6 +28,8 @@ from .const import (
     DOMAIN,
     FORECAST_MODES,
     LANGUAGES,
+    IMS_PLATFORMS,
+    IMS_PLATFORM,
 )
 
 ATTRIBUTION = "Powered by IMS Weather"
@@ -57,6 +59,9 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     LANGUAGES
                 ),
                 vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
+                vol.Required(IMS_PLATFORM, default=[IMS_PLATFORMS[1]]): cv.multi_select(
+                  IMS_PLATFORMS
+                ),
                 vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
                     FORECAST_MODES
                 ),
@@ -70,6 +75,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             forecast_mode = user_input[CONF_MODE]
             entityNamee = user_input[CONF_NAME]
             image_path = user_input[CONF_IMAGES_PATH]
+            forecastPlatform = user_input[IMS_PLATFORM]
 
             # Convert scan interval to timedelta
             if isinstance(user_input[CONF_UPDATE_INTERVAL], str):
@@ -85,7 +91,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             # Unique value includes the location and forcastHours/ forecastDays to seperate WeatherEntity/ Sensor
             await self.async_set_unique_id(
-                f"ims-{city}-{language}-{forecast_mode}-{entityNamee}"
+                f"ims-{city}-{language}-{forecast_mode}-{forecastPlatform}-{entityNamee}"
             )
 
             self._abort_if_unique_id_configured()
@@ -120,6 +126,8 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             config[CONF_LANGUAGE] = self.hass.config.language
         if CONF_MODE not in config:
             config[CONF_MODE] = DEFAULT_FORECAST_MODE
+        if IMS_PLATFORM not in config:
+            config[IMS_PLATFORM] = None     
         if CONF_LANGUAGE not in config:
             config[CONF_LANGUAGE] = DEFAULT_LANGUAGE
         if CONF_UPDATE_INTERVAL not in config:
@@ -171,6 +179,13 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                             self.config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
                         ),
                     ): vol.In(LANGUAGES),
+                    vol.Required(
+                        IMS_PLATFORM,
+                        default=self.config_entry.options.get(
+                            IMS_PLATFORM,
+                            self.config_entry.data.get(IMS_PLATFORM, []),
+                        ),
+                    ): cv.multi_select(IMS_PLATFORMS),
                     vol.Optional(
                         CONF_MODE,
                         default=self.config_entry.options.get(

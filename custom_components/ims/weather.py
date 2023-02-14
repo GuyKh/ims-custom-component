@@ -56,10 +56,16 @@ from .const import (
     ATTR_API_WIND_CHILL,
     ATTR_API_WIND_SPEED,
     CONF_CITY,
+    CONF_MODE,
     CONF_LANGUAGE,
     CONF_IMAGES_PATH,
     CONF_UPDATE_INTERVAL,
     DOMAIN,
+    FORECAST_MODES,
+    FORECAST_MODE_HOURLY,
+    IMS_PLATFORMS,
+    IMS_PLATFORM,
+    IMS_PREVPLATFORM,
     ENTRY_WEATHER_COORDINATOR,
     WEATHER_CODE_TO_CONDITION,
     WIND_DIRECTIONS,
@@ -78,6 +84,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_LANGUAGE): cv.string,
         vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
         vol.Optional(CONF_UPDATE_INTERVAL, default=10): cv.positive_int,
+        vol.Optional(IMS_PLATFORM): cv.string,
+        vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
     }
 )
 
@@ -100,6 +108,9 @@ async def async_setup_platform(
         "Your existing configuration has been imported into the UI automatically "
         "and can be safely removed from your configuration.yaml file"
     )
+
+    # Add source to config
+    config_entry[IMS_PLATFORM] = [IMS_PLATFORMS[1]]
 
     hass.async_create_task(
         hass.config_entries.flow.async_init(

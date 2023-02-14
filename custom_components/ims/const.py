@@ -77,6 +77,10 @@ ATTR_API_MAXIMUM_TEMPERATURE = "maximum_temperature"
 ATTR_API_MINIMUM_TEMPERATURE = "minimum_temperature"
 ATTR_API_MAXIMUM_UV_INDEX = "maximum_uvi"
 UPDATE_LISTENER = "update_listener"
+PLATFORMS = [Platform.SENSOR, Platform.WEATHER]
+IMS_PLATFORMS = ["Sensor", "Weather"]
+IMS_PLATFORM = "ims_platform"
+IMS_PREVPLATFORM = "ims_prevplatform"
 
 FORECAST_MODE_HOURLY = "hourly"
 FORECAST_MODE_DAILY = "daily"
