@@ -30,7 +30,7 @@ from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
     PRESSURE_MBAR,
-    SPEED_METERS_PER_SECOND,
+    SPEED_KILOMETERS_PER_HOUR,
     LENGTH_KILOMETERS,
     LENGTH_MILLIMETERS,
     TEMP_CELSIUS,
@@ -159,7 +159,7 @@ class IMSWeather(WeatherEntity):
     _attr_native_pressure_unit = PRESSURE_MBAR
     _attr_native_temperature_unit = TEMP_CELSIUS
     _attr_native_visibility_unit = LENGTH_KILOMETERS
-    _attr_native_wind_speed_unit = SPEED_METERS_PER_SECOND
+    _attr_native_wind_speed_unit = SPEED_KILOMETERS_PER_HOUR
 
     def __init__(
         self,
@@ -240,9 +240,13 @@ class IMSWeather(WeatherEntity):
     @property
     def condition(self):
         """Return the weather condition."""
-        condition = WEATHER_CODE_TO_CONDITION[self._weather_coordinator.data.current_weather.json['weather_code']]
+        condition = WEATHER_CODE_TO_CONDITION[
+            self._weather_coordinator.data.current_weather.json["weather_code"]
+        ]
         if not condition or condition == "Nothing":
-            condition = WEATHER_CODE_TO_CONDITION[self._weather_coordinator.data.forecast.days[0].weather_code]
+            condition = WEATHER_CODE_TO_CONDITION[
+                self._weather_coordinator.data.forecast.days[0].weather_code
+            ]
         return condition
 
     @property

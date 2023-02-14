@@ -1,10 +1,9 @@
 """Config flow for IMS Weather."""
-import voluptuous as vol
 import logging
 from datetime import timedelta
 
-import json
 import aiohttp
+import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import (
@@ -60,7 +59,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
                 vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
                 vol.Required(IMS_PLATFORM, default=[IMS_PLATFORMS[1]]): cv.multi_select(
-                  IMS_PLATFORMS
+                    IMS_PLATFORMS
                 ),
                 vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
                     FORECAST_MODES
@@ -73,9 +72,9 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             city = user_input[CONF_CITY]
             language = user_input[CONF_LANGUAGE]
             forecast_mode = user_input[CONF_MODE]
-            entityNamee = user_input[CONF_NAME]
+            entity_name = user_input[CONF_NAME]
             image_path = user_input[CONF_IMAGES_PATH]
-            forecastPlatform = user_input[IMS_PLATFORM]
+            forecast_platform = user_input[IMS_PLATFORM]
 
             # Convert scan interval to timedelta
             if isinstance(user_input[CONF_UPDATE_INTERVAL], str):
@@ -89,28 +88,29 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_UPDATE_INTERVAL
                 ].total_minutes()
 
-            # Unique value includes the location and forcastHours/ forecastDays to seperate WeatherEntity/ Sensor
+            # Unique value include to seperate WeatherEntity/Sensor
             await self.async_set_unique_id(
-                f"ims-{city}-{language}-{forecast_mode}-{forecastPlatform}-{entityNamee}"
+                f"ims-{city}-{language}-{forecast_mode}-{forecast_platform}-{entity_name}"
             )
 
             self._abort_if_unique_id_configured()
 
+            api_status = "No API Call made"
             try:
                 api_status = await _is_ims_api_online(
                     self.hass, user_input[CONF_LANGUAGE], user_input[CONF_CITY]
                 )
 
             except:
-                _LOGGER.warning("IMS Weather Setup Error: HTTP Error: " + api_status)
+                _LOGGER.warning("IMS Weather Setup Error: HTTP Error: %s", api_status)
                 errors["base"] = "API Error: " + api_status
 
             if not errors:
                 return self.async_create_entry(
                     title=user_input[CONF_NAME], data=user_input
                 )
-            else:
-                _LOGGER.warning(errors)
+
+            _LOGGER.warning(errors)
 
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
@@ -127,7 +127,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if CONF_MODE not in config:
             config[CONF_MODE] = DEFAULT_FORECAST_MODE
         if IMS_PLATFORM not in config:
-            config[IMS_PLATFORM] = None     
+            config[IMS_PLATFORM] = None
         if CONF_LANGUAGE not in config:
             config[CONF_LANGUAGE] = DEFAULT_LANGUAGE
         if CONF_UPDATE_INTERVAL not in config:
@@ -147,7 +147,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Manage the options."""
         if user_input is not None:
-            entry = self.config_entry
+            #entry = self.config_entry
 
             # _LOGGER.warning('async_step_init_Options')
             return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
@@ -167,9 +167,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_CITY,
                         default=self.config_entry.options.get(
                             CONF_CITY,
-                            self.config_entry.data.get(
-                                CONF_CITY, 1
-                            ),
+                            self.config_entry.data.get(CONF_CITY, 1),
                         ),
                     ): int,
                     vol.Optional(
@@ -219,13 +217,10 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
 
 
 async def _is_ims_api_online(hass, language, city):
-    forecastString = "https://ims.gov.il/" + language + "/forecast_data/" + str(city)
+    forecast_url = "https://ims.gov.il/" + language + "/forecast_data/" + str(city)
 
     async with aiohttp.ClientSession(raise_for_status=False) as session:
-        async with session.get(forecastString) as resp:
-            resptext = await resp.text()
-            jsonText = json.loads(resptext)
-            headers = resp.headers
+        async with session.get(forecast_url) as resp:
             status = resp.status
 
     return status

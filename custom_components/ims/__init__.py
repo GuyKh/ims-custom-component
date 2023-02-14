@@ -28,9 +28,10 @@ from .const import (
     ENTRY_WEATHER_COORDINATOR,
     FORECAST_MODES,
     UPDATE_LISTENER,
+    PLATFORMS,
     IMS_PLATFORMS,
-    IMS_PLATFORM, 
-    IMS_PREVPLATFORM,   
+    IMS_PLATFORM,
+    IMS_PREVPLATFORM,
 )
 
 CONF_FORECAST = "forecast"
@@ -84,18 +85,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_MODE: forecast_mode,
         CONF_IMAGES_PATH: images_path,
         CONF_UPDATE_INTERVAL: ims_scan_Int,
-        IMS_PLATFORM: ims_entity_platform
+        IMS_PLATFORM: ims_entity_platform,
     }
 
     # If both platforms
-    if  (IMS_PLATFORMS[0] in ims_entity_platform) and (IMS_PLATFORMS[1] in ims_entity_platform):
-      await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    # If only sensor  
+    if (IMS_PLATFORMS[0] in ims_entity_platform) and (
+        IMS_PLATFORMS[1] in ims_entity_platform
+    ):
+        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    # If only sensor
     elif IMS_PLATFORMS[0] in ims_entity_platform:
-      await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[0])
+        await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[0])
     # If only weather
     elif IMS_PLATFORMS[1] in ims_entity_platform:
-      await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[1])
+        await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[1])
 
     await hass.config_entries.async_forward_entry_setup(entry, Platform.WEATHER)
 
@@ -113,17 +116,22 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     IMS_entity_prevplatform = hass.data[DOMAIN][entry.entry_id][IMS_PLATFORM]
 
-    
     # If both
-    if (IMS_PLATFORMS[0] in ims_entity_prevplatform) and (IMS_PLATFORMS[1] in ims_entity_prevplatform):
-      unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if (IMS_PLATFORMS[0] in ims_entity_prevplatform) and (
+        IMS_PLATFORMS[1] in ims_entity_prevplatform
+    ):
+        unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     # If only sensor
     elif IMS_PLATFORMS[0] in ims_entity_prevplatform:
-      unload_ok = await hass.config_entries.async_unload_platforms(entry, [PLATFORMS[0]])
+        unload_ok = await hass.config_entries.async_unload_platforms(
+            entry, [PLATFORMS[0]]
+        )
     # If only Weather
     elif IMS_PLATFORMS[1] in ims_entity_prevplatform:
-      unload_ok = await hass.config_entries.async_unload_platforms(entry, [PLATFORMS[1]])
-    
+        unload_ok = await hass.config_entries.async_unload_platforms(
+            entry, [PLATFORMS[1]]
+        )
+
     _LOGGER.info("Unloading IMS Weather")
 
     if unload_ok:
