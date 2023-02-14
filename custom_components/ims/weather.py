@@ -61,6 +61,7 @@ from .const import (
     CONF_UPDATE_INTERVAL,
     DOMAIN,
     ENTRY_WEATHER_COORDINATOR,
+    WEATHER_CODE_TO_CONDITION
     WIND_DIRECTIONS,
 )
 
@@ -228,9 +229,9 @@ class IMSWeather(WeatherEntity):
     @property
     def condition(self):
         """Return the weather condition."""
-        condition = self._weather_coordinator.data.current_weather.description
+        condition = WEATHER_CODE_TO_CONDITION[self._weather_coordinator.data.current_weather.json['weather_code']]
         if not condition or condition == "Nothing":
-            condition = self._weather_coordinator.data.forecast.days[0].weather
+            condition = WEATHER_CODE_TO_CONDITION[self._weather_coordinator.data.forecast.days[0].weather_code]
         return condition
 
     @property
