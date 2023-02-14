@@ -37,6 +37,7 @@ from homeassistant.const import (
 )
 
 from .const import (
+    ATTRIBUTION,
     ATTR_API_FEELS_LIKE_TEMPERATURE,
     ATTR_API_DEW_POINT,
     ATTR_API_FORECAST_TIME,
@@ -61,6 +62,7 @@ from .const import (
     CONF_IMAGES_PATH,
     CONF_UPDATE_INTERVAL,
     DOMAIN,
+    DEFAULT_UPDATE_INTERVAL,
     FORECAST_MODES,
     FORECAST_MODE_HOURLY,
     IMS_PLATFORMS,
@@ -75,15 +77,13 @@ from homeassistant.const import TEMP_CELSIUS
 
 _LOGGER = logging.getLogger(__name__)
 
-ATTRIBUTION = "Powered by IMS Weather"
-
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_CITY): cv.positive_int,
         vol.Required(CONF_LANGUAGE): cv.string,
         vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
-        vol.Optional(CONF_UPDATE_INTERVAL, default=10): cv.positive_int,
+        vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): cv.positive_int,
         vol.Optional(IMS_PLATFORM): cv.string,
         vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
     }
@@ -130,9 +130,7 @@ async def async_setup_entry(
     weather_coordinator = domain_data[ENTRY_WEATHER_COORDINATOR]
     city = domain_data[CONF_CITY]
     language = domain_data[CONF_LANGUAGE]
-    # units = domain_data[CONF_UNITS]
-    units = "si"
-    forecast_mode = domain_data[CONF_MODE]
+    forecast_mode = domain_data[CONF_FORECAST_MODE]
 
     unique_id = f"{config_entry.unique_id}"
 

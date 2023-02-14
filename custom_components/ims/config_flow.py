@@ -23,7 +23,7 @@ from .const import (
     DEFAULT_FORECAST_MODE,
     DEFAULT_LANGUAGE,
     DEFAULT_NAME,
-    DEFAULT_SCAN_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     FORECAST_MODES,
     LANGUAGES,
@@ -57,7 +57,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(
                     LANGUAGES
                 ),
-                vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
+                vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): int,
                 vol.Required(IMS_PLATFORM, default=[IMS_PLATFORMS[1]]): cv.multi_select(
                     IMS_PLATFORMS
                 ),
@@ -131,7 +131,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if CONF_LANGUAGE not in config:
             config[CONF_LANGUAGE] = DEFAULT_LANGUAGE
         if CONF_UPDATE_INTERVAL not in config:
-            config[CONF_UPDATE_INTERVAL] = DEFAULT_SCAN_INTERVAL
+            config[CONF_UPDATE_INTERVAL] = DEFAULT_UPDATE_INTERVAL
         if CONF_IMAGES_PATH not in config:
             config[CONF_IMAGES_PATH] = DEFAULT_IMAGE_PATH
         return await self.async_step_user(config)
@@ -198,7 +198,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             CONF_UPDATE_INTERVAL,
                             self.config_entry.data.get(
-                                CONF_UPDATE_INTERVAL, DEFAULT_SCAN_INTERVAL
+                                CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                             ),
                         ),
                     ): int,

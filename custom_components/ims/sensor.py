@@ -8,18 +8,48 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import TEMP_CELSIUS
 
-CONF_UPDATE_INTERVAL = "update_interval"
-CONF_CITY = "city"
-CONF_LANGUAGE = "language"
-IMAGES_PATH = "images_path"
+
+from .const import (
+    CONFIG_FLOW_VERSION,
+    DEFAULT_FORECAST_MODE,
+    DEFAULT_LANGUAGE,
+    DEFAULT_NAME,
+    DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
+    FORECAST_MODES,
+    LANGUAGE,
+    ENTRY_NAME,
+    ENTRY_WEATHER_COORDINATOR,
+    PLATFORMS,
+    UPDATE_LISTENER,       
+    CONF_CITY,
+    CONF_MODE,
+    CONF_LANGUAGE,
+    CONF_IMAGES_PATH,
+    CONF_UPDATE_INTERVAL,
+    DOMAIN,
+    FORECAST_MODES,
+    FORECAST_MODE_HOURLY,
+    FORECAST_MODE_DAILY,
+    IMS_PLATFORMS,
+    IMS_PLATFORM,
+    IMS_PREVPLATFORM,
+    ENTRY_WEATHER_COORDINATOR,
+    WEATHER_CODE_TO_CONDITION,
+    WIND_DIRECTIONS,
+)
+
+
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_CITY): cv.string,
+        vol.Required(CONF_CITY): cv.positive_int,
         vol.Required(CONF_LANGUAGE): cv.string,
-        vol.Required(IMAGES_PATH, default="/tmp"): cv.string,
-        vol.Optional(CONF_UPDATE_INTERVAL, default=10): cv.positive_int,
+        vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
+        vol.Optional(CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL): cv.positive_int,
+        vol.Optional(IMS_PLATFORM): cv.string,
+        vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
     }
 )
 
@@ -27,70 +57,74 @@ weather = None
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    # Init the API Client
-    api_client = ImsApiClient(config)
-    # Add Ims Entities
-    entities = []
-    entities.append(ImsCity(hass, config, api_client))
-    entities.append(ImsTemprature(hass, config, api_client))
-    entities.append(ImsRealFeel(hass, config, api_client))
-    entities.append(ImsHumidity(hass, config, api_client))
-    entities.append(ImsWindSpeed(hass, config, api_client))
-    entities.append(ImsRain(hass, config, api_client))
-    entities.append(ImsDateTime(hass, config, api_client))
-    async_add_entities(entities, True)
-    # Call the update method to grab data from the api
-    await entities[0].async_update()
+    _LOGGER.warning(
+        "Configuration of IMS Weather sensor in YAML is deprecated "
+        "Your existing configuration has been imported into the UI automatically "
+        "and can be safely removed from your configuration.yaml file"
+    )
 
+    # Define as a sensor platform
+    config_entry[IMS_PLATFORM] = [IMS_PLATFORMS[0]]
+
+    # Set as no rounding for compatability
+    config_entry[PW_ROUND] = "No"    
+
+    # Set as no rounding for compatability
+    config_entry[PW_ROUND] = "No"    
+    
+    hass.async_create_task(
+      hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_IMPORT}, data = config_entry
+      )
+    )
+
+async def async_setup_entry(
+    hass: HomeAssistant, 
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up IMS Weather sensor entities based on a config entry."""
+    
+    
+    domain_data = hass.data[DOMAIN][config_entry.entry_id]
+
+    name = domain_data[CONF_NAME]
+    weather_coordinator = domain_data[ENTRY_WEATHER_COORDINATOR]
+    city = domain_data[CONF_CITY]
+    language = domain_data[CONF_LANGUAGE]
+    # units = domain_data[CONF_UNITS]
+    forecast_mode = domain_data[CONF_MODE]
+
+    
+    # Add IMS Sensors
+    sensors: list[Entity] = []
+    sensors.append(ImsCity(hass, city, langauge, weather_coordinator))
+    sensors.append(ImsTemprature(hass, city, langauge, weather_coordinator))
+    sensors.append(ImsRealFeel(hass, city, langauge, weather_coordinator))
+    sensors.append(ImsHumidity(hass, city, langauge, weather_coordinator))
+    sensors.append(ImsWindSpeed(hass, city, langauge, weather_coordinator))
+    sensors.append(ImsRain(hass, city, langauge, weather_coordinator))
+    sensors.append(ImsDateTime(hass, langauge, weather_coordinator))
+   
     # Add forecast entities
-    async_add_entities(
-        [Imsforecast(hass, config, api_client, "today", api_client.forecast.days[0])],
-        True,
+    sensors.append(IMSForecast(hass, langauge, weather_coordinator, "today", weather_coordinator.data.forecast.days[0]))
+    for day_index in range(1, 4):
+        sensors.append(IMSForecast(hass, langauge, weather_coordinator, "day" + day_index, weather_coordinator.data.forecast.days[day_index])
     )
-    async_add_entities(
-        [Imsforecast(hass, config, api_client, "day1", api_client.forecast.days[1])],
-        True,
-    )
-    async_add_entities(
-        [Imsforecast(hass, config, api_client, "day2", api_client.forecast.days[2])],
-        True,
-    )
-    async_add_entities(
-        [Imsforecast(hass, config, api_client, "day3", api_client.forecast.days[3])],
-        True,
-    )
-    async_add_entities(
-        [Imsforecast(hass, config, api_client, "day4", api_client.forecast.days[4])],
-        True,
-    )
+    
+    async_add_entities(sensors, update_before_add=True]
 
-    # _LOGGER.error("Test: " + api_client.forecast.days[0].weather)
     return True
 
-
-class ImsApiClient:
-    def __init__(self, config):
-        self._config = config
-        self.weather = WeatherIL(
-            self._config.get(CONF_CITY), self._config.get(CONF_LANGUAGE)
-        )
-
-    def get_data(self):
-        self.current_weather = self.weather.get_current_analysis()
-        self.forecast = self.weather.get_forecast()
-        self.images = self.weather.get_radar_images()
-
-
 class ImsCity(Entity):
-    def __init__(self, hass, config, api_client):
+    def __init__(self, hass, city, langauge, weather_coordinator):
         self._hass = hass
         self._config = config
-        self._city = config.get(CONF_CITY)
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._city = city
+        self._language = language
         self.entity_id = f"sensor.ims_city"
-        self._api_client = api_client
-        # self._api_client.get_data()
+        self._weather_coordinator = weather_coordinator
+        # self._weather_coordinator.get_data()
 
     @property
     def name(self):
@@ -101,7 +135,7 @@ class ImsCity(Entity):
 
     @property
     def state(self):
-        return self._api_client.weather.get_location_name_by_id(self._city)
+        return self._weather_coordinator.weather.get_location_name_by_id(self._city)
 
     @property
     def icon(self):
@@ -111,18 +145,17 @@ class ImsCity(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._api_client.get_data()
-        self._state = self._api_client.weather.get_location_name_by_id(self._city)
+        self._weather_coordinator.get_data()
+        self._state = self._weather_coordinator.weather.get_location_name_by_id(self._city)
 
 
 class ImsTemprature(Entity):
-    def __init__(self, hass, config, api_client):
+    def __init__(self, hass, city, langauge, weather_coordinator):
         self._hass = hass
         self._config = config
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._language = language
         self.entity_id = f"sensor.ims_temprature"
-        self._api_client = api_client
+        self._weather_coordinator = weather_coordinator
 
     @property
     def name(self):
@@ -134,7 +167,7 @@ class ImsTemprature(Entity):
     @property
     def state(self):
         try:
-            return self._api_client.current_weather.temperature
+            return self._weather_coordinator.data.current_weather.temperature
         except:
             pass
 
@@ -154,17 +187,16 @@ class ImsTemprature(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._api_client.current_weather.temperature
+        self._state = self._weather_coordinator.data.current_weather.temperature
 
 
 class ImsRealFeel(Entity):
-    def __init__(self, hass, config, api_client):
+    def __init__(self, hass, city, langauge, weather_coordinator):
         self._hass = hass
-        self._city = config.get(CONF_CITY)
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._city = city
+        self._language = language
         self.entity_id = f"sensor.ims_realfeel"
-        self._api_client = api_client
+        self._weather_coordinator = weather_coordinator
 
     @property
     def name(self):
@@ -176,7 +208,7 @@ class ImsRealFeel(Entity):
     @property
     def state(self):
         try:
-            return self._api_client.current_weather.feels_like
+            return self._weather_coordinator.data.current_weather.feels_like
         except:
             pass
 
@@ -192,17 +224,16 @@ class ImsRealFeel(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._api_client.current_weather.feels_like
+        self._state = self._weather_coordinator.data.current_weather.feels_like
 
 
 class ImsHumidity(Entity):
-    def __init__(self, hass, config, api_client):
+    def __init__(self, hass, city, langauge, weather_coordinator):
         self._hass = hass
-        self._city = config.get(CONF_CITY)
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._city = city
+        self._language = language
         self.entity_id = f"sensor.ims_humidity"
-        self._api_client = api_client
+        self._weather_coordinator = weather_coordinator
 
     @property
     def name(self):
@@ -214,7 +245,7 @@ class ImsHumidity(Entity):
     @property
     def state(self):
         try:
-            return self._api_client.current_weather.humidity
+            return self._weather_coordinator.data.current_weather.humidity
         except:
             pass
 
@@ -230,17 +261,16 @@ class ImsHumidity(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._api_client.current_weather.humidity
+        self._state = self._weather_coordinator.data.current_weather.humidity
 
 
 class ImsRain(Entity):
-    def __init__(self, hass, config, api_client):
+    def __init__(self, hass, city, langauge, weather_coordinator):
         self._hass = hass
-        self._city = config.get(CONF_CITY)
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._city = city
+        self._language = language
         self.entity_id = f"sensor.ims_rain"
-        self._api_client = api_client
+        self._weather_coordinator = weather_coordinator
 
     @property
     def name(self):
@@ -253,12 +283,12 @@ class ImsRain(Entity):
     def state(self):
         try:
             if self._language == "he":
-                if self._api_client.current_weather.rain == None:
+                if self._weather_coordinator.data.current_weather.rain == None:
                     return "לא יורד"
                 else:
                     return "יורד"
             else:
-                if self._api_client.current_weather.rain == None:
+                if self._weather_coordinator.data.current_weather.rain == None:
                     return "Not Raining"
                 else:
                     return "Raining"
@@ -273,17 +303,16 @@ class ImsRain(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._api_client.current_weather.wind_speed
+        self._state = self._weather_coordinator.data.current_weather.wind_speed
 
 
 class ImsWindSpeed(Entity):
-    def __init__(self, hass, config, api_client):
+    def __init__(self, hass, city, langauge, weather_coordinator):
         self._hass = hass
-        self._city = config.get(CONF_CITY)
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._city = city
+        self._language = language
         self.entity_id = f"sensor.ims_windspeed"
-        self._api_client = api_client
+        self._weather_coordinator = weather_coordinator
 
     @property
     def name(self):
@@ -295,7 +324,7 @@ class ImsWindSpeed(Entity):
     @property
     def state(self):
         try:
-            return self._api_client.current_weather.wind_speed
+            return self._weather_coordinator.data.current_weather.wind_speed
         except:
             pass
 
@@ -314,16 +343,15 @@ class ImsWindSpeed(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._api_client.current_weather.wind_speed
+        self._state = self._weather_coordinator.data.current_weather.wind_speed
 
 
 class ImsDateTime(Entity):
-    def __init__(self, hass, config, api_client):
+    def __init__(self, hass, langauge, weather_coordinator):
         self._hass = hass
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._language = langauge
         self.entity_id = f"sensor.ims_forecast_time"
-        self._api_client = api_client
+        self._weather_coordinator = weather_coordinator
 
     @property
     def name(self):
@@ -335,7 +363,7 @@ class ImsDateTime(Entity):
     @property
     def state(self):
         try:
-            return self._api_client.current_weather.forecast_time
+            return self._weather_coordinator.data.current_weather.forecast_time
         except:
             pass
 
@@ -347,18 +375,17 @@ class ImsDateTime(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._api_client.current_weather.forecast_time
+        self._state = self._weather_coordinator.data.current_weather.forecast_time
 
 
-class Imsforecast(Entity):
-    def __init__(self, hass, config, api_client, sensor_name, forecast):
+class IMSForecast(Entity):
+    def __init__(self, hass, langauge, weather_coordinator, sensor_name, forecast):
         self._hass = hass
         self._forecast = forecast
-        self._language = config.get(CONF_LANGUAGE)
-        self._update_interval = config.get(CONF_UPDATE_INTERVAL)
+        self._language = langauge
         self.entity_id = f"sensor.ims_forecast_" + sensor_name
         self._name = sensor_name
-        self._api_client = api_client
+        self._weather_coordinator = weather_coordinator
         self._attributes = {}
 
     @property

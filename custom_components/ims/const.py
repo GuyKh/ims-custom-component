@@ -43,9 +43,9 @@ from homeassistant.const import (
 )
 
 DOMAIN = "ims"
-DEFAULT_NAME = "IMSWeather"
+DEFAULT_NAME = "IMS Weather"
 DEFAULT_LANGUAGE = "en"
-DEFAULT_SCAN_INTERVAL = 10
+DEFAULT_UPDATE_INTERVAL = 60
 DEFAULT_IMAGE_PATH = "/tmp"
 ATTRIBUTION = "Data provided by Israel Meteorological Service"
 MANUFACTURER = "IMS"
