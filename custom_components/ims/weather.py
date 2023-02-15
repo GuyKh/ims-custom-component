@@ -193,7 +193,7 @@ class IMSWeather(WeatherEntity):
     @property
     def attribution(self):
         """Return the attribution."""
-        return ATTRIBUTION
+        return self._weather_coordinator.data.current_weather.description
 
     @property
     def name(self):
