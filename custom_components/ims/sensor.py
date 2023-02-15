@@ -117,7 +117,7 @@ async def async_setup_entry(
             weather_coordinator.data.forecast.days[0],
         )
     )
-    for day_index in range(1, 4):
+    for day_index in range(1, 5):
         sensors.append(
             IMSForecast(
                 hass,
