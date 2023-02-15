@@ -1,0 +1,45 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Location is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "city": "City",
+                    "language": "Language",
+                    "mode": "Forecast mode for the Weather entity",
+                    "name": "Integration Name",
+                    "images_path": "Path to download the images to",
+                    "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recomended.",
+                    "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!"
+                },
+                "description": "Set up IMS Weather integration",
+                "data_description": {
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "city": "City",
+                    "language": "Language",
+                    "mode": "Forecast mode for the Weather entity",
+                    "name": "Integration Name",
+                    "units": "Units for sensors. Only used for if sensors are requested.",
+                    "images_path": "Path to download the images to",
+                    "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recomended.",
+                    "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!"
+                },
+                "description": "Set up IMS Weather integration",
+                "data_description": {
+                }
+            }
+        }
+    }
+}
