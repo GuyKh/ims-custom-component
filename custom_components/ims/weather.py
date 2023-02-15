@@ -132,7 +132,7 @@ async def async_setup_entry(
     weather_coordinator = domain_data[ENTRY_WEATHER_COORDINATOR]
     city = domain_data[CONF_CITY]
     language = domain_data[CONF_LANGUAGE]
-    forecast_mode = domain_data[CONF_FORECAST_MODE]
+    forecast_mode = domain_data[CONF_MODE]
 
     unique_id = f"{config_entry.unique_id}"
 

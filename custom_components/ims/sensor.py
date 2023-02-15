@@ -1,13 +1,17 @@
 import json
 import logging
 import asyncio
-from weatheril import *
+from weatheril import WeatherIL
 import voluptuous as vol
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
+from types import SimpleNamespace
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import TEMP_CELSIUS
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from homeassistant.const import CONF_NAME, TEMP_CELSIUS
 
 from .const import (
     CONFIG_FLOW_VERSION,
@@ -17,7 +21,6 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
     FORECAST_MODES,
-    LANGUAGE,
     ENTRY_NAME,
     ENTRY_WEATHER_COORDINATOR,
     PLATFORMS,
@@ -71,9 +74,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     # Set as no rounding for compatability
     config_entry[PW_ROUND] = "No"
 
-    # Set as no rounding for compatability
-    config_entry[PW_ROUND] = "No"
-
     hass.async_create_task(
         hass.config_entries.flow.async_init(
             DOMAIN, context={"source": SOURCE_IMPORT}, data=config_entry
@@ -99,19 +99,19 @@ async def async_setup_entry(
 
     # Add IMS Sensors
     sensors: list[Entity] = []
-    sensors.append(ImsCity(hass, city, langauge, weather_coordinator))
-    sensors.append(ImsTemprature(hass, city, langauge, weather_coordinator))
-    sensors.append(ImsRealFeel(hass, city, langauge, weather_coordinator))
-    sensors.append(ImsHumidity(hass, city, langauge, weather_coordinator))
-    sensors.append(ImsWindSpeed(hass, city, langauge, weather_coordinator))
-    sensors.append(ImsRain(hass, city, langauge, weather_coordinator))
-    sensors.append(ImsDateTime(hass, langauge, weather_coordinator))
+    sensors.append(ImsCity(hass, city, language, weather_coordinator))
+    sensors.append(ImsTemprature(hass, city, language, weather_coordinator))
+    sensors.append(ImsRealFeel(hass, city, language, weather_coordinator))
+    sensors.append(ImsHumidity(hass, city, language, weather_coordinator))
+    sensors.append(ImsWindSpeed(hass, city, language, weather_coordinator))
+    sensors.append(ImsRain(hass, city, language, weather_coordinator))
+    sensors.append(ImsDateTime(hass, language, weather_coordinator))
 
     # Add forecast entities
     sensors.append(
         IMSForecast(
             hass,
-            langauge,
+            language,
             weather_coordinator,
             "today",
             weather_coordinator.data.forecast.days[0],
@@ -121,9 +121,9 @@ async def async_setup_entry(
         sensors.append(
             IMSForecast(
                 hass,
-                langauge,
+                language,
                 weather_coordinator,
-                "day" + day_index,
+                "day" + str(day_index),
                 weather_coordinator.data.forecast.days[day_index],
             )
         )
@@ -134,14 +134,12 @@ async def async_setup_entry(
 
 
 class ImsCity(Entity):
-    def __init__(self, hass, city, langauge, weather_coordinator):
+    def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
-        self._config = config
         self._city = city
         self._language = language
         self.entity_id = f"sensor.ims_city"
         self._weather_coordinator = weather_coordinator
-        # self._weather_coordinator.get_data()
 
     @property
     def name(self):
@@ -152,7 +150,9 @@ class ImsCity(Entity):
 
     @property
     def state(self):
-        return self._weather_coordinator.weather.get_location_name_by_id(self._city)
+        return WeatherIL.get_location_name_by_id(
+            SimpleNamespace(language=self._language), self._city
+        )
 
     @property
     def icon(self):
@@ -162,16 +162,14 @@ class ImsCity(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._weather_coordinator.get_data()
-        self._state = self._weather_coordinator.weather.get_location_name_by_id(
-            self._city
+        self._state = WeatherIL.get_location_name_by_id(
+            SimpleNamespace(language=self._language), self._city
         )
 
 
 class ImsTemprature(Entity):
-    def __init__(self, hass, city, langauge, weather_coordinator):
+    def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
-        self._config = config
         self._language = language
         self.entity_id = f"sensor.ims_temprature"
         self._weather_coordinator = weather_coordinator
@@ -210,7 +208,7 @@ class ImsTemprature(Entity):
 
 
 class ImsRealFeel(Entity):
-    def __init__(self, hass, city, langauge, weather_coordinator):
+    def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
         self._city = city
         self._language = language
@@ -247,7 +245,7 @@ class ImsRealFeel(Entity):
 
 
 class ImsHumidity(Entity):
-    def __init__(self, hass, city, langauge, weather_coordinator):
+    def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
         self._city = city
         self._language = language
@@ -284,7 +282,7 @@ class ImsHumidity(Entity):
 
 
 class ImsRain(Entity):
-    def __init__(self, hass, city, langauge, weather_coordinator):
+    def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
         self._city = city
         self._language = language
@@ -326,7 +324,7 @@ class ImsRain(Entity):
 
 
 class ImsWindSpeed(Entity):
-    def __init__(self, hass, city, langauge, weather_coordinator):
+    def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
         self._city = city
         self._language = language
@@ -366,9 +364,9 @@ class ImsWindSpeed(Entity):
 
 
 class ImsDateTime(Entity):
-    def __init__(self, hass, langauge, weather_coordinator):
+    def __init__(self, hass, language, weather_coordinator):
         self._hass = hass
-        self._language = langauge
+        self._language = language
         self.entity_id = f"sensor.ims_forecast_time"
         self._weather_coordinator = weather_coordinator
 
@@ -398,10 +396,10 @@ class ImsDateTime(Entity):
 
 
 class IMSForecast(Entity):
-    def __init__(self, hass, langauge, weather_coordinator, sensor_name, forecast):
+    def __init__(self, hass, language, weather_coordinator, sensor_name, forecast):
         self._hass = hass
         self._forecast = forecast
-        self._language = langauge
+        self._language = language
         self.entity_id = f"sensor.ims_forecast_" + sensor_name
         self._name = sensor_name
         self._weather_coordinator = weather_coordinator
@@ -454,7 +452,6 @@ class IMSForecast(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        date = self._forecast.date.split("-")
         attributes = {
             "minimum_temperature": {
                 "value": self._forecast.minimum_temperature,
@@ -470,7 +467,7 @@ class IMSForecast(Entity):
                 "icon": self.get_weather_icon(self._forecast.weather_code),
             },
             "description": {"value": self._forecast.description},
-            "date": {"value": date[2] + "/" + date[1] + "/" + date[0]},
+            "date": {"value": self._forecast.date.strftime("%Y/%m/%d")},
         }
 
         for hour in self._forecast.hours:

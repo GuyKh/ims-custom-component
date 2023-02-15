@@ -100,8 +100,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     elif IMS_PLATFORMS[1] in ims_entity_platform:
         await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[1])
 
-    await hass.config_entries.async_forward_entry_setup(entry, Platform.WEATHER)
-
     update_listener = entry.add_update_listener(async_update_options)
     hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
     return True
@@ -114,7 +112,7 @@ async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    IMS_entity_prevplatform = hass.data[DOMAIN][entry.entry_id][IMS_PLATFORM]
+    ims_entity_prevplatform = hass.data[DOMAIN][entry.entry_id][IMS_PLATFORM]
 
     # If both
     if (IMS_PLATFORMS[0] in ims_entity_prevplatform) and (
