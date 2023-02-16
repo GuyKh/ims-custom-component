@@ -268,7 +268,7 @@ class IMSWeather(WeatherEntity):
                     ATTR_FORECAST_TIME: entry.date.astimezone(pytz.UTC).isoformat(),
                     ATTR_FORECAST_NATIVE_TEMP: entry.maximum_temperature,
                     ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
-                    ATTR_FORECAST_CONDITION: entry.weather,
+                    ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[entry.weather_code],
                 }
                 for entry in self._weather_coordinator.data.forecast.days
             ]
@@ -282,7 +282,7 @@ class IMSWeather(WeatherEntity):
                                 pytz.UTC
                             ).isoformat(),
                             ATTR_FORECAST_NATIVE_TEMP: hour.temperature,
-                            ATTR_FORECAST_CONDITION: hour.weather,
+                            ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[hour.weather_code],
                         }
                     )
         return data
