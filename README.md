@@ -61,14 +61,23 @@ Now click the download button on the lower left corner:
 
 **Restart** the Home Assistant instance to load ims integration before moving on
 
-Finally, add the following code to your configuration file:
+Finally, use the UI to add the integration:
 
-```yaml
-sensor:
-  - platform: ims
-    city: 21
-    language: he
-```
+Under settings, go to "Devices & Services"
+
+[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/settings-devices.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/settings-devices.png?raw=true "IMS custom component")
+
+In the lower left cornet click on "Add Integration" button
+[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add-integration.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add-integration.png?raw=true "IMS custom component")
+
+In the list of integrations, search for IMS:
+
+[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/select-brand.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/select-brand.png?raw=true "IMS custom component")
+
+Enter the relevant parameters (Location and Language) and click sthe submit button in the bottom:
+
+[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/submit-settings.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/submit-settings.png?raw=true "IMS custom component")
+
 
 The Languages can be one of two:
 * he - For hebrew
@@ -160,4 +169,4 @@ The city code must be one of the codes in the following table:
 | 80| En Gedi| 
 
 
-One last step, Restart HomeAssistant.
+
