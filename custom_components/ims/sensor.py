@@ -118,7 +118,7 @@ async def async_setup_entry(
                 hass,
                 language,
                 weather_coordinator,
-                sensor_name
+                sensor_name,
                 daily_forecast,
             )
         )
