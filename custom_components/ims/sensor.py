@@ -1,6 +1,7 @@
 import json
 import logging
 import asyncio
+from datetime import date
 from weatheril import WeatherIL
 import voluptuous as vol
 from homeassistant.helpers.entity import Entity
@@ -108,23 +109,18 @@ async def async_setup_entry(
     sensors.append(ImsDateTime(hass, language, weather_coordinator))
 
     # Add forecast entities
-    sensors.append(
-        IMSForecast(
-            hass,
-            language,
-            weather_coordinator,
-            "today",
-            weather_coordinator.data.forecast.days[0],
-        )
-    )
-    for day_index in range(1, 5):
+    for daily_forecast in weather_coordinator.data.forecast.days:
+        days_delta = (daily_forecast.date.date() - date.today()).days
+
+        sensor_name = ("day" + str(days_delta)) if days_delta > 0 else "today"
+
         sensors.append(
             IMSForecast(
                 hass,
                 language,
                 weather_coordinator,
-                "day" + str(day_index),
-                weather_coordinator.data.forecast.days[day_index],
+                sensor_name,
+                daily_forecast,
             )
         )
 
