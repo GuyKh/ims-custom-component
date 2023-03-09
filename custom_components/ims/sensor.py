@@ -1,6 +1,7 @@
 import json
 import logging
 import asyncio
+from datetime import date
 from weatheril import WeatherIL
 import voluptuous as vol
 from homeassistant.helpers.entity import Entity
