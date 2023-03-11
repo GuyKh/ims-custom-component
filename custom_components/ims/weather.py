@@ -287,7 +287,7 @@ class IMSWeather(WeatherEntity):
                             ATTR_FORECAST_NATIVE_TEMP: hour.temperature,
                             ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[hour.weather_code],
                             ATTR_FORECAST_NATIVE_PRECIPITATION: hour.rain,
-                            ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hour.wind_direction]
+                            ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hour.wind_direction],
                             ATTR_FORECAST_NATIVE_WIND_SPEED: hour.wind_speed
                             
                         }
