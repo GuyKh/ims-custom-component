@@ -1,6 +1,7 @@
+
 # ims-custom-component
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=techblog_ims-custom-component&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=techblog_ims-custom-component)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=techblog_ims-custom-component&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=techblog_ims-custom-component)
 
 
 
@@ -32,32 +33,7 @@ And also, the forecast data for today and the next four days in six hours interv
 
 
 ### Installation
-The IMS custom component can be installed manualy by downloading the files and place it under custom_components folder.
-
-The second way is by adding the repo address to HACS custom repositories.
-
-First, in HACS you need to add the repository to the lis of custom repositories by clicking the 3 dots on the upper right corner and click the "Custom repositories" button:
-
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_custom_repositories.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_custom_repositories.png.png?raw=true "IMS custom component")
-
-
-Now, add the custom repository address: https://github.com/t0mer/ims-custom-component and under category select "Integration".
-
-Click on the "Add button" to add the repository.
-
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_custom_repositories.pmg_2.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_custom_repositories.pmg_2.png?raw=true "IMS custom component")
-
-You can now see that the repository has been added to the custom repositories list:
-
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/repo_added.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/repo_added.png?raw=true "IMS custom component")
-
-Now, click the big blue button on the lower lef corner "Explor & Download repositories" and in the list enter ims. you will see a repo called "Israel Meteorological Service / Sensor", click it.
-
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_repo.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_repo.png?raw=true "IMS custom component")
-
-Now click the download button on the lower left corner:
-
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_integration.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add_the_integration.png?raw=true "IMS custom component")
+The IMS custom component can be installed from HACS default repository.
 
 **Restart** the Home Assistant instance to load ims integration before moving on
 
