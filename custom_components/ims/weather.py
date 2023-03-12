@@ -237,7 +237,7 @@ class IMSWeather(WeatherEntity):
     def wind_bearing(self):
         """Return the wind bearing."""
         return WIND_DIRECTIONS[
-            self._weather_coordinator.data.current_weather.json["wind_direction_id"]
+            int(self._weather_coordinator.data.current_weather.json["wind_direction_id"])
         ]
 
     @property
