@@ -1,5 +1,5 @@
 """Weather data coordinator for the OpenWeatherMap (OWM) service."""
-from datetime import timedelta
+from datetime import timedelta, datetime, date
 import logging
 
 import asyncio
@@ -64,7 +64,24 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         forecast = await loop.run_in_executor(None, self.weather.get_forecast)
         images = await loop.run_in_executor(None, self.weather.get_radar_images)
 
+        self._filter_future_forecast(forecast)
         return WeatherData(current_weather, forecast, images)
+
+    def _filter_future_forecast(self, forecast): 
+        """ Filter Forecast to include only future dates """
+        today_datetime = datetime.fromordinal(date.today().toordinal())
+        filtered_day_list = list(filter(lambda daily_forecast: daily_forecast.date >= today_datetime, forecast.days))
+
+        for daily_forecast in filtered_day_list:
+            filtered_hours = []
+            for hourly_forecast in daily_forecast.hours:
+                forecast_datetime = daily_forecast.date + timedelta(hours = int(hourly_forecast.hour.split(":")[0]))
+                if (datetime.now() <= forecast_datetime):
+                    filtered_hours.append(hourly_forecast)
+            daily_forecast.hours = filtered_hours
+            
+        forecast.days = filtered_day_list
+    
 
 
 class WeatherData:

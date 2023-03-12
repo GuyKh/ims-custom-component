@@ -1,6 +1,7 @@
 import json
 import logging
 import asyncio
+from datetime import date
 from weatheril import WeatherIL
 import voluptuous as vol
 from homeassistant.helpers.entity import Entity
@@ -108,23 +109,18 @@ async def async_setup_entry(
     sensors.append(ImsDateTime(hass, language, weather_coordinator))
 
     # Add forecast entities
-    sensors.append(
-        IMSForecast(
-            hass,
-            language,
-            weather_coordinator,
-            "today",
-            weather_coordinator.data.forecast.days[0],
-        )
-    )
-    for day_index in range(1, 5):
+    for daily_forecast in weather_coordinator.data.forecast.days:
+        days_delta = (daily_forecast.date.date() - date.today()).days
+
+        sensor_name = ("day" + str(days_delta)) if days_delta > 0 else "today"
+
         sensors.append(
             IMSForecast(
                 hass,
                 language,
                 weather_coordinator,
-                "day" + str(day_index),
-                weather_coordinator.data.forecast.days[day_index],
+                sensor_name,
+                daily_forecast,
             )
         )
 
@@ -150,9 +146,7 @@ class ImsCity(Entity):
 
     @property
     def state(self):
-        return WeatherIL.get_location_name_by_id(
-            SimpleNamespace(language=self._language), self._city
-        )
+        return self._weather_coordinator.data.current_weather.location
 
     @property
     def icon(self):
@@ -162,9 +156,7 @@ class ImsCity(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = WeatherIL.get_location_name_by_id(
-            SimpleNamespace(language=self._language), self._city
-        )
+        self._state = self._weather_coordinator.data.current_weather.location
 
 
 class ImsTemprature(Entity):
@@ -300,15 +292,16 @@ class ImsRain(Entity):
     def state(self):
         try:
             if self._language == "he":
-                if self._weather_coordinator.data.current_weather.rain == None:
-                    return "לא יורד"
-                else:
-                    return "יורד"
-            else:
-                if self._weather_coordinator.data.current_weather.rain == None:
+                if self._weather_coordinator.data.current_weather.rain:
                     return "Not Raining"
                 else:
+                    return "לא יורד"
+            else:
+                if self._weather_coordinator.data.current_weather.rain:
                     return "Raining"
+                else:
+                    return "Not Raining"
+
         except:
             pass
 
