@@ -146,9 +146,7 @@ class ImsCity(Entity):
 
     @property
     def state(self):
-        return WeatherIL.get_location_name_by_id(
-            SimpleNamespace(language=self._language), self._city
-        )
+        return self._weather_coordinator.data.current_weather.location
 
     @property
     def icon(self):
@@ -158,9 +156,7 @@ class ImsCity(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = WeatherIL.get_location_name_by_id(
-            SimpleNamespace(language=self._language), self._city
-        )
+        self._state = self._weather_coordinator.data.current_weather.location
 
 
 class ImsTemprature(Entity):
@@ -296,15 +292,16 @@ class ImsRain(Entity):
     def state(self):
         try:
             if self._language == "he":
-                if self._weather_coordinator.data.current_weather.rain == None:
-                    return "לא יורד"
-                else:
-                    return "יורד"
-            else:
-                if self._weather_coordinator.data.current_weather.rain == None:
+                if self._weather_coordinator.data.current_weather.rain:
                     return "Not Raining"
                 else:
+                    return "לא יורד"
+            else:
+                if self._weather_coordinator.data.current_weather.rain:
                     return "Raining"
+                else:
+                    return "Not Raining"
+
         except:
             pass
 

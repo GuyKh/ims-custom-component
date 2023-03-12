@@ -6,6 +6,6 @@
     "documentation": "https://github.com/t0mer/ims-custom-component",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/t0mer/ims-custom-component/issues",
-    "requirements": ["weatheril>=0.18.0"],
-    "version": "0.1.1"
+    "requirements": ["weatheril>=0.26.0"],
+    "version": "0.1.4"
 }

@@ -23,6 +23,9 @@ from homeassistant.components.weather import (
     ATTR_FORECAST_NATIVE_TEMP,
     ATTR_FORECAST_TIME,
     ATTR_FORECAST_NATIVE_TEMP_LOW,
+    ATTR_FORECAST_NATIVE_WIND_SPEED,
+    ATTR_FORECAST_WIND_BEARING,
+    ATTR_FORECAST_NATIVE_PRECIPITATION,
     WeatherEntity,
 )
 
@@ -234,7 +237,7 @@ class IMSWeather(WeatherEntity):
     def wind_bearing(self):
         """Return the wind bearing."""
         return WIND_DIRECTIONS[
-            self._weather_coordinator.data.current_weather.json["wind_direction_id"]
+            int(self._weather_coordinator.data.current_weather.json["wind_direction_id"])
         ]
 
     @property
@@ -283,6 +286,10 @@ class IMSWeather(WeatherEntity):
                             ).isoformat(),
                             ATTR_FORECAST_NATIVE_TEMP: hour.temperature,
                             ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[hour.weather_code],
+                            ATTR_FORECAST_NATIVE_PRECIPITATION: hour.rain,
+                            ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hour.wind_direction_id],
+                            ATTR_FORECAST_NATIVE_WIND_SPEED: hour.wind_speed
+                            
                         }
                     )
         return data
