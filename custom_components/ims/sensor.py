@@ -292,15 +292,16 @@ class ImsRain(Entity):
     def state(self):
         try:
             if self._language == "he":
-                if self._weather_coordinator.data.current_weather.rain == None:
-                    return "לא יורד"
-                else:
-                    return "יורד"
-            else:
-                if self._weather_coordinator.data.current_weather.rain == None:
+                if self._weather_coordinator.data.current_weather.rain:
                     return "Not Raining"
                 else:
+                    return "לא יורד"
+            else:
+                if self._weather_coordinator.data.current_weather.rain:
                     return "Raining"
+                else:
+                    return "Not Raining"
+
         except:
             pass
 
