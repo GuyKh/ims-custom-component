@@ -293,7 +293,7 @@ class ImsRain(Entity):
         try:
             if self._language == "he":
                 if self._weather_coordinator.data.current_weather.rain:
-                    return "Not Raining"
+                    return "יורד"
                 else:
                     return "לא יורד"
             else:
