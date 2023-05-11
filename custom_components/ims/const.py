@@ -91,6 +91,7 @@ LANGUAGES = ["en", "he"]
 
 # Based on https://ims.gov.il/en/wind_directions
 WIND_DIRECTIONS = {
+    0: None,
     1: float(180),
     2: float(203),
     3: float(225),
@@ -113,6 +114,7 @@ WIND_DIRECTIONS = {
 # Based on https://ims.gov.il/en/weather_codes
 WEATHER_CODE_TO_CONDITION = {
     None: None,
+    "0": None,
     "1020": ATTR_CONDITION_LIGHTNING_RAINY,
     "1060": ATTR_CONDITION_SNOWY,
     "1070": ATTR_CONDITION_SNOWY,
