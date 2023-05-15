@@ -290,7 +290,7 @@ class IMSWeather(WeatherEntity):
                             ).isoformat(),
                             ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.temperature,
                             ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
-                            ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[str(last_weather_code)],
+                            ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[last_weather_code],
                             ATTR_FORECAST_NATIVE_PRECIPITATION: hourly_forecast.rain,
                             ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
                             ATTR_FORECAST_PRECIPITATION_PROBABILITY: hourly_forecast.rain_chance,
