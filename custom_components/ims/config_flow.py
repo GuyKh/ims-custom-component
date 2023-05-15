@@ -4,6 +4,7 @@ from datetime import timedelta
 
 import aiohttp
 import voluptuous as vol
+import socket
 
 from homeassistant import config_entries
 from homeassistant.const import (
@@ -221,7 +222,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
 async def _is_ims_api_online(hass, language, city):
     forecast_url = "https://ims.gov.il/" + language + "/forecast_data/" + str(city)
 
-    async with aiohttp.ClientSession(raise_for_status=False) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(family=socket.AF_INET), raise_for_status=False) as session:
         async with session.get(forecast_url) as resp:
             status = resp.status
 
