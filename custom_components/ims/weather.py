@@ -26,6 +26,7 @@ from homeassistant.components.weather import (
     ATTR_FORECAST_NATIVE_WIND_SPEED,
     ATTR_FORECAST_WIND_BEARING,
     ATTR_FORECAST_NATIVE_PRECIPITATION,
+    ATTR_FORECAST_PRECIPITATION_PROBABILITY,
     WeatherEntity,
 )
 
@@ -244,7 +245,7 @@ class IMSWeather(WeatherEntity):
     def condition(self):
         """Return the weather condition."""
         condition = WEATHER_CODE_TO_CONDITION[
-            self._weather_coordinator.data.current_weather.json["weather_code"]
+            self._weather_coordinator.data.current_weather.weather_code
         ]
         if not condition or condition == "Nothing":
             condition = WEATHER_CODE_TO_CONDITION[
@@ -277,19 +278,24 @@ class IMSWeather(WeatherEntity):
             ]
         else:
             data = []
+            last_weather_code = None
             for entry in self._weather_coordinator.data.forecast.days:
-                for hour in entry.hours:
+                for hourly_forecast in entry.hours:
+                    if hourly_forecast.weather_code:
+                        last_weather_code = hourly_forecast.weather_code
+                    delta_days = (entry.date.date() - datetime.date.today()).days
                     data.append(
                         {
-                            ATTR_FORECAST_TIME: hour.forecast_time.astimezone(
+                            ATTR_FORECAST_TIME: hourly_forecast.forecast_time.astimezone(
                                 pytz.UTC
                             ).isoformat(),
-                            ATTR_FORECAST_NATIVE_TEMP: hour.temperature,
-                            ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[hour.weather_code],
-                            ATTR_FORECAST_NATIVE_PRECIPITATION: hour.rain,
-                            ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hour.wind_direction_id],
-                            ATTR_FORECAST_NATIVE_WIND_SPEED: hour.wind_speed
-                            
+                            ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.temperature,
+                            ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
+                            ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[last_weather_code],
+                            ATTR_FORECAST_NATIVE_PRECIPITATION: hourly_forecast.rain,
+                            ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
+                            ATTR_FORECAST_PRECIPITATION_PROBABILITY: hourly_forecast.rain_chance,
+                            ATTR_FORECAST_NATIVE_WIND_SPEED: hourly_forecast.wind_speed
                         }
                     )
         return data

@@ -3,8 +3,8 @@ import logging
 from datetime import timedelta
 
 import aiohttp
-import voluptuous as vol
 import socket
+import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import (
@@ -104,9 +104,10 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass, user_input[CONF_LANGUAGE], user_input[CONF_CITY]
                 )
 
-            except:
+            except Exception as error:
                 _LOGGER.warning("IMS Weather Setup Error: HTTP Error: %s", api_status)
-                errors["base"] = "API Error: " + api_status
+                _LOGGER.warning("Exception: %s", str(error))
+                errors["base"] = "IMS API Error: " + api_status + ", exception: " + str(error)
 
             if not errors:
                 return self.async_create_entry(
@@ -222,7 +223,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
 async def _is_ims_api_online(hass, language, city):
     forecast_url = "https://ims.gov.il/" + language + "/forecast_data/" + str(city)
 
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(family=socket.AF_INET), raise_for_status=False) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(family=socket.AF_INET),raise_for_status=False) as session:
         async with session.get(forecast_url) as resp:
             status = resp.status
 
