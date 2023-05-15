@@ -245,11 +245,11 @@ class IMSWeather(WeatherEntity):
     def condition(self):
         """Return the weather condition."""
         condition = WEATHER_CODE_TO_CONDITION[
-            str(self._weather_coordinator.data.current_weather.weather_code)
+            self._weather_coordinator.data.current_weather.weather_code
         ]
         if not condition or condition == "Nothing":
             condition = WEATHER_CODE_TO_CONDITION[
-                str(self._weather_coordinator.data.forecast.days[0].weather_code)
+                self._weather_coordinator.data.forecast.days[0].weather_code
             ]
         return condition
 
