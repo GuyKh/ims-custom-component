@@ -283,7 +283,6 @@ class IMSWeather(WeatherEntity):
                 for hourly_forecast in entry.hours:
                     if hourly_forecast.weather_code:
                         last_weather_code = hourly_forecast.weather_code
-                    delta_days = (entry.date.date() - datetime.date.today()).days
                     data.append(
                         {
                             ATTR_FORECAST_TIME: hourly_forecast.forecast_time.astimezone(
