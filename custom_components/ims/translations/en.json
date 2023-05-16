@@ -41,5 +41,63 @@
                 }
             }
         }
+    },
+    "entity": {
+        "weather": {
+          "ims_weather": {
+            "name": "IMS Weather"
+          }
+        },
+        "sensor": {
+            "ims_city": {
+                "name": "City"
+            },
+            "ims_temperature": {
+                "name": "Temperature"
+            },
+            "ims_realfeel": {
+                "name": "Real Feel"
+            }, 
+            "ims_humidity": {
+                "name": "Humidity"
+            },
+            "ims_rain": {
+                "name": "Rain",
+                "state": {
+                    "raining": "Raining",
+                    "not_raining": "Not Raining"
+                }
+            }, 
+            "ims_windspeed": {
+                "name": "Wind Speed"
+            },
+            "ims_forecast_time": {
+                "name": "Date"
+            },
+            "ims_forecast_today": {
+                "name": "Today"
+            },
+            "ims_forecast_day1": {
+                "name": "Day 1"
+            },
+            "ims_forecast_day2": {
+                "name": "Day 2"
+            },
+            "ims_forecast_day3": {
+                "name": "Day 3"
+            },
+            "ims_forecast_day4": {
+                "name": "Day 4"
+            },
+            "ims_forecast_day5": {
+                "name": "Day 5"
+            },
+            "ims_forecast_day6": {
+                "name": "Day 6"
+            },
+            "ims_forecast_day7": {
+                "name": "Day 7"
+            },
+        }
     }
 }

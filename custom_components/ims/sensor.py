@@ -9,6 +9,7 @@ import homeassistant.helpers.config_validation as cv
 from types import SimpleNamespace
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.core import HomeAssistant
+from homeassistant.const import UnitOfSpeed
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -137,6 +138,9 @@ class ImsCity(Entity):
         self.entity_id = f"sensor.ims_city"
         self._weather_coordinator = weather_coordinator
 
+        self._attr_unique_id = f"ims_city_{city}_{language}"
+        self._attr_translation_key = "ims_city"
+
     @property
     def name(self):
         if self._language == "he":
@@ -163,15 +167,18 @@ class ImsTemprature(Entity):
     def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
         self._language = language
-        self.entity_id = f"sensor.ims_temprature"
+        self.entity_id = f"sensor.ims_temperature"
         self._weather_coordinator = weather_coordinator
+
+        self._attr_unique_id = f"ims_temperature_{city}_{language}"
+        self._attr_translation_key = "ims_temperature"
 
     @property
     def name(self):
         if self._language == "he":
             return "טמפרטורה"
         else:
-            return "Temprature"
+            return "Temperature"
 
     @property
     def state(self):
@@ -206,6 +213,9 @@ class ImsRealFeel(Entity):
         self._language = language
         self.entity_id = f"sensor.ims_realfeel"
         self._weather_coordinator = weather_coordinator
+
+        self._attr_unique_id = f"ims_realfeel_{city}_{language}"
+        self._attr_translation_key = "ims_realfeel"
 
     @property
     def name(self):
@@ -244,6 +254,9 @@ class ImsHumidity(Entity):
         self.entity_id = f"sensor.ims_humidity"
         self._weather_coordinator = weather_coordinator
 
+        self._attr_unique_id = f"ims_humidity_{city}_{language}"
+        self._attr_translation_key = "ims_humidity"
+
     @property
     def name(self):
         if self._language == "he":
@@ -281,6 +294,12 @@ class ImsRain(Entity):
         self.entity_id = f"sensor.ims_rain"
         self._weather_coordinator = weather_coordinator
 
+        self._attr_unique_id = f"ims_rain_{city}_{language}"
+        self._attr_translation_key = "ims_rain"
+        self._attr_options = ["raining", "not_raining"]
+        self._attr_unit_of_measurement = UnitOfSpeed.KILOMETERS_PER_HOUR
+        
+
     @property
     def name(self):
         if self._language == "he":
@@ -317,12 +336,17 @@ class ImsRain(Entity):
 
 
 class ImsWindSpeed(Entity):
+    _attr_unit_of_measurement = UnitOfSpeed.KILOMETERS_PER_HOUR
+
     def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
         self._city = city
         self._language = language
         self.entity_id = f"sensor.ims_windspeed"
         self._weather_coordinator = weather_coordinator
+
+        self._attr_unique_id = f"ims_windspeed_{city}_{language}"
+        self._attr_translation_key = "ims_windspeed"
 
     @property
     def name(self):
@@ -337,13 +361,6 @@ class ImsWindSpeed(Entity):
             return self._weather_coordinator.data.current_weather.wind_speed
         except:
             pass
-
-    @property
-    def unit_of_measurement(self):
-        if self._language == "he":
-            return 'קמ"ש'
-        else:
-            return "kph"
 
     @property
     def icon(self):
@@ -362,6 +379,8 @@ class ImsDateTime(Entity):
         self._language = language
         self.entity_id = f"sensor.ims_forecast_time"
         self._weather_coordinator = weather_coordinator
+        self._attr_unique_id = f"ims_forecast_time_{language}"
+        self._attr_translation_key = "ims_forecast_time"
 
     @property
     def name(self):
@@ -397,6 +416,9 @@ class IMSForecast(Entity):
         self._name = sensor_name
         self._weather_coordinator = weather_coordinator
         self._attributes = {}
+
+        self._attr_unique_id = f"ims_forecast_{sensor_name}_{language}"
+        self._attr_translation_key = f"ims_forecast_{sensor_name}"
 
     @property
     def name(self):

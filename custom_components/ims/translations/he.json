@@ -40,5 +40,63 @@
                 }
             }
         }
+    },
+    "entity": {
+        "weather": {
+          "ims_weather": {
+            "name": "תחזית השירות המטאורולוגי"
+          }
+        },
+        "sensor": {
+            "ims_city": {
+                "name": "עיר"
+            },
+            "ims_temperature": {
+                "name": "טמפרטורה"
+            },
+            "ims_realfeel": {
+                "name": "מרגיש כמו"
+            }, 
+            "ims_humidity": {
+                "name": "לחות"
+            },
+            "ims_rain": {
+                "name": "גשם",
+                "state": {
+                    "raining": "יורד",
+                    "not_raining": "לא יורד"
+                }
+            }, 
+            "ims_windspeed": {
+                "name": "מהירות רוח"
+            },
+            "ims_forecast_time": {
+                "name": "תאריך"
+            },
+            "ims_forecast_today": {
+                "name": "היום"
+            },
+            "ims_forecast_day1": {
+                "name": "יום 1"
+            },
+            "ims_forecast_day2": {
+                "name": "יום 2"
+            },
+            "ims_forecast_day3": {
+                "name": "יום 3"
+            },
+            "ims_forecast_day4": {
+                "name": "יום 4"
+            },
+            "ims_forecast_day5": {
+                "name": "יום 5"
+            },
+            "ims_forecast_day6": {
+                "name": "יום 6"
+            },
+            "ims_forecast_day7": {
+                "name": "יום 7"
+            },
+        }
     }
 }

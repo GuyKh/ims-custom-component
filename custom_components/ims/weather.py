@@ -184,6 +184,8 @@ class IMSWeather(WeatherEntity):
         self.outputRound = outputRound
         self._ds_data = self._weather_coordinator.data
 
+        self._attr_translation_key = f"ims_weather"
+
     @property
     def unique_id(self):
         """Return a unique_id for this entity."""
