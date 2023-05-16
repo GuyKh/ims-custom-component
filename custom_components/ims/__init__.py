@@ -3,18 +3,20 @@ from typing import Any
 
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity_registry import EntityRegistry
 
 from datetime import timedelta
-
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.helpers.entity import EntityDescription
+from homeassistant.helpers.entity_registry import EntityRegistry
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
 
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
     Platform,
 )
-from homeassistant.core import HomeAssistant
 
 from .const import (
     CONF_CITY,
@@ -90,7 +92,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # If both platforms
     if (IMS_PLATFORMS[0] in ims_entity_platform) and (
-        IMS_PLATFORMS[1] in ims_entity_platform
+            IMS_PLATFORMS[1] in ims_entity_platform
     ):
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     # If only sensor
@@ -116,7 +118,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # If both
     if (IMS_PLATFORMS[0] in ims_entity_prevplatform) and (
-        IMS_PLATFORMS[1] in ims_entity_prevplatform
+            IMS_PLATFORMS[1] in ims_entity_prevplatform
     ):
         unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     # If only sensor
@@ -149,3 +151,37 @@ def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
 
 def _filter_domain_configs(elements, domain):
     return list(filter(lambda elem: elem["platform"] == domain, elements))
+
+
+class ImsEntity(CoordinatorEntity):
+    """Define a generic Ims entity."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+            self, coordinator: WeatherUpdateCoordinator, description: EntityDescription
+    ) -> None:
+        """Initialize."""
+        super().__init__(coordinator)
+
+        self._attr_extra_state_attributes = {}
+        self._attr_unique_id = (
+            f"{coordinator.city}_{coordinator.language}_{description.key}"
+        )
+        self.entity_description = description
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Respond to a DataUpdateCoordinator update."""
+        self._update_from_latest_data()
+        self.async_write_ha_state()
+
+    @callback
+    def _update_from_latest_data(self) -> None:
+        """Update the entity from the latest data."""
+        raise NotImplementedError
+
+    async def async_added_to_hass(self) -> None:
+        """Handle entity which will be added."""
+        await super().async_added_to_hass()
+        self._update_from_latest_data()
