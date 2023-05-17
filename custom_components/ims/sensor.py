@@ -311,7 +311,7 @@ class ImsSensor(ImsEntity, SensorEntity):
                 self._attr_native_value = data.current_weather.humidity
 
             case sensor_keys.TYPE_RAIN:
-                self._attr_native_value = "Raining" if (data.current_weather.rain and data.current_weather.rain > 0.0) else "Not Raining"
+                self._attr_native_value = "raining" if (data.current_weather.rain and data.current_weather.rain > 0.0) else "not_raining"
 
             case sensor_keys.TYPE_FORECAST_TIME:
                 self._attr_native_value = data.current_weather.forecast_time.astimezone(timezone('Asia/Jerusalem'))

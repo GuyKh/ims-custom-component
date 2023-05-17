@@ -62,10 +62,18 @@
           "name": "Wind Speed"
         },
         "ims_rain_he": {
-          "name": "גשם"
+          "name": "גשם",
+          "state": {
+            "raining": "יורד",
+            "not_raining": "לא יורד"
+          }
         },
         "ims_rain_en": {
-          "name": "Rain"
+          "name": "Rain",
+          "state": {
+            "raining": "Raining",
+            "not_raining": "Not Raining"
+          }
         },
         "ims_temperature_he": {
           "name": "טמפרטורה"
