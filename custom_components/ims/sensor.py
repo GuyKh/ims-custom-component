@@ -80,19 +80,19 @@ weather = None
 
 SENSOR_DESCRIPTIONS = (
     SensorEntityDescription(
-        key=TYPE_CURRENT_UV_INDEX,
+        key="ims_" + TYPE_CURRENT_UV_INDEX,
         name="Current UV index",
         icon="mdi:weather-sunny",
         native_unit_of_measurement=UV_INDEX,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
-        key=TYPE_CURRENT_UV_LEVEL,
+        key="ims_" + TYPE_CURRENT_UV_LEVEL,
         name="Current UV level",
         icon="mdi:weather-sunny",
     ),
     SensorEntityDescription(
-        key=TYPE_MAX_UV_INDEX,
+        key="ims_" + TYPE_MAX_UV_INDEX,
         name="Max UV index",
         icon="mdi:weather-sunny",
         native_unit_of_measurement=UV_INDEX,
@@ -164,7 +164,7 @@ async def async_setup_entry(
         )
 
     for description in SENSOR_DESCRIPTIONS:
-        ImsSensor(weather_coordinator, description)
+        sensors.append(ImsSensor(weather_coordinator, description))
 
     async_add_entities(sensors, update_before_add=True)
 
