@@ -192,12 +192,12 @@ class IMSWeather(WeatherEntity):
     @property
     def available(self):
         """Return if weather data is available from IMSWeather."""
-        return self._weather_coordinator.data is not None
+        return self._weather_coordinator.data is not None and self._weather_coordinator.data.current_weather is not None and self._weather_coordinator.data.forecast is not None
 
     @property
     def attribution(self):
         """Return the attribution."""
-        return self._weather_coordinator.data.current_weather.description if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
+        return self._weather_coordinator.data.current_weather.description
 
     @property
     def name(self):
@@ -207,7 +207,7 @@ class IMSWeather(WeatherEntity):
     @property
     def native_temperature(self):
         """Return the temperature."""
-        temperature = float(self._weather_coordinator.data.current_weather.temperature  if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else 0)
+        temperature = float(self._weather_coordinator.data.current_weather.temperature)
 
         if self.outputRound == "Yes":
             return round(temperature, 0) + 0
@@ -217,7 +217,7 @@ class IMSWeather(WeatherEntity):
     @property
     def humidity(self):
         """Return the humidity."""
-        humidity = float(self._weather_coordinator.data.current_weather.humidity if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else 0)
+        humidity = float(self._weather_coordinator.data.current_weather.humidity)
 
         if self.outputRound == "Yes":
             return round(humidity, 0) + 0
@@ -227,7 +227,7 @@ class IMSWeather(WeatherEntity):
     @property
     def native_wind_speed(self):
         """Return the wind speed."""
-        windspeed = float(self._weather_coordinator.data.current_weather.wind_speed if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else 0)
+        windspeed = float(self._weather_coordinator.data.current_weather.wind_speed)
 
         if self.outputRound == "Yes":
             return round(windspeed, 0) + 0
@@ -238,27 +238,27 @@ class IMSWeather(WeatherEntity):
     def wind_bearing(self):
         """Return the wind bearing."""
         return WIND_DIRECTIONS[
-            int(self._weather_coordinator.data.current_weather.json["wind_direction_id"]  if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else 0)
+            int(self._weather_coordinator.data.current_weather.json["wind_direction_id"])
         ]
 
     @property
     def condition(self):
         """Return the weather condition."""
         condition = WEATHER_CODE_TO_CONDITION[
-            self._weather_coordinator.data.current_weather.weather_code if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
+            self._weather_coordinator.data.current_weather.weather_code
         ]
         if not condition or condition == "Nothing":
             condition = WEATHER_CODE_TO_CONDITION[
-                self._weather_coordinator.data.forecast.days[0].weather_code  if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.forecast else None
+                self._weather_coordinator.data.forecast.days[0].weather_code
             ]
         return condition
 
     @property
     def description(self):
         """Return the weather description."""
-        description = self._weather_coordinator.data.current_weather.description  if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
+        description = self._weather_coordinator.data.current_weather.description
         if not description or description == "Nothing":
-            description = self._weather_coordinator.data.forecast.days[0].weather if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.forecast else None
+            description = self._weather_coordinator.data.forecast.days[0].weather
         return description
 
     @property
@@ -267,37 +267,35 @@ class IMSWeather(WeatherEntity):
         data = []
 
         if self._mode == "daily":
-            if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.forecast:
-                data = [
-                    {
-                        ATTR_FORECAST_TIME: entry.date.astimezone(pytz.UTC).isoformat(),
-                        ATTR_FORECAST_NATIVE_TEMP: entry.maximum_temperature,
-                        ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
-                        ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[entry.weather_code],
-                    }
-                    for entry in self._weather_coordinator.data.forecast.days
-                ]
+            data = [
+                {
+                    ATTR_FORECAST_TIME: entry.date.astimezone(pytz.UTC).isoformat(),
+                    ATTR_FORECAST_NATIVE_TEMP: entry.maximum_temperature,
+                    ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
+                    ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[entry.weather_code],
+                }
+                for entry in self._weather_coordinator.data.forecast.days
+            ]
         else:
             last_weather_code = None
-            if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.forecast:
-                for entry in self._weather_coordinator.data.forecast.days:
-                    for hourly_forecast in entry.hours:
-                        if hourly_forecast.weather_code and hourly_forecast.weather_code != "0":
-                            last_weather_code = hourly_forecast.weather_code
-                        data.append(
-                            {
-                                ATTR_FORECAST_TIME: hourly_forecast.forecast_time.astimezone(
-                                    pytz.UTC
-                                ).isoformat(),
-                                ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.temperature,
-                                ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
-                                ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[last_weather_code],
-                                ATTR_FORECAST_NATIVE_PRECIPITATION: hourly_forecast.rain,
-                                ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
-                                ATTR_FORECAST_PRECIPITATION_PROBABILITY: hourly_forecast.rain_chance,
-                                ATTR_FORECAST_NATIVE_WIND_SPEED: hourly_forecast.wind_speed
-                            }
-                        )
+            for entry in self._weather_coordinator.data.forecast.days:
+                for hourly_forecast in entry.hours:
+                    if hourly_forecast.weather_code and hourly_forecast.weather_code != "0":
+                        last_weather_code = hourly_forecast.weather_code
+                    data.append(
+                        {
+                            ATTR_FORECAST_TIME: hourly_forecast.forecast_time.astimezone(
+                                pytz.UTC
+                            ).isoformat(),
+                            ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.temperature,
+                            ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
+                            ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[last_weather_code],
+                            ATTR_FORECAST_NATIVE_PRECIPITATION: hourly_forecast.rain,
+                            ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
+                            ATTR_FORECAST_PRECIPITATION_PROBABILITY: hourly_forecast.rain_chance,
+                            ATTR_FORECAST_NATIVE_WIND_SPEED: hourly_forecast.wind_speed
+                        }
+                    )
                     
         return data
 

@@ -87,6 +87,10 @@ FORECAST_MODE_DAILY = "daily"
 DEFAULT_FORECAST_MODE = FORECAST_MODE_DAILY
 FORECAST_MODES = [FORECAST_MODE_HOURLY, FORECAST_MODE_DAILY]
 
+TYPE_CURRENT_UV_INDEX = "current_uv_index"
+TYPE_CURRENT_UV_LEVEL = "current_uv_level"
+TYPE_MAX_UV_INDEX = "max_uv_index"
+
 LANGUAGES = ["en", "he"]
 
 # Based on https://ims.gov.il/en/wind_directions

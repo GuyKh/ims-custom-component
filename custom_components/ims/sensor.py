@@ -1,19 +1,28 @@
+import asyncio
 import json
 import logging
-import asyncio
+import types
+
 from datetime import date
-from weatheril import WeatherIL
 import voluptuous as vol
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
 from types import SimpleNamespace
-from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.core import HomeAssistant
+from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
+
+from homeassistant.const import UV_INDEX, UnitOfTime
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from homeassistant.const import CONF_NAME, TEMP_CELSIUS
 
+from . import ImsEntity
 from .const import (
     CONFIG_FLOW_VERSION,
     DEFAULT_FORECAST_MODE,
@@ -41,10 +50,25 @@ from .const import (
     ENTRY_WEATHER_COORDINATOR,
     WEATHER_CODE_TO_CONDITION,
     WIND_DIRECTIONS,
+    TYPE_CURRENT_UV_INDEX,
+    TYPE_CURRENT_UV_LEVEL,
+    TYPE_MAX_UV_INDEX,
 )
 
+IMS_SENSOR_KEY_PREFIX = "ims_"
+
+sensor_keys = types.SimpleNamespace()
+sensor_keys.TYPE_CURRENT_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX
+sensor_keys.TYPE_CURRENT_UV_LEVEL = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL
+sensor_keys.TYPE_MAX_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX
 
 _LOGGER = logging.getLogger(__name__)
+
+UV_LEVEL_EXTREME = "Extreme"
+UV_LEVEL_VHIGH = "Very High"
+UV_LEVEL_HIGH = "High"
+UV_LEVEL_MODERATE = "Moderate"
+UV_LEVEL_LOW = "Low"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -60,6 +84,28 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 weather = None
+
+SENSOR_DESCRIPTIONS = (
+    SensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX,
+        name="IMS Current UV Index",
+        icon="mdi:weather-sunny",
+        native_unit_of_measurement=UV_INDEX,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+    SensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL,
+        name="IMS Current UV Level",
+        icon="mdi:weather-sunny",
+    ),
+    SensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX,
+        name="IMS Max UV Index",
+        icon="mdi:weather-sunny",
+        native_unit_of_measurement=UV_INDEX,
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
+)
 
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
@@ -83,9 +129,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up IMS Weather sensor entities based on a config entry."""
 
@@ -101,7 +147,7 @@ async def async_setup_entry(
     # Add IMS Sensors
     sensors: list[Entity] = []
     sensors.append(ImsCity(hass, city, language, weather_coordinator))
-    sensors.append(ImsTemprature(hass, city, language, weather_coordinator))
+    sensors.append(ImsTemperature(hass, city, language, weather_coordinator))
     sensors.append(ImsRealFeel(hass, city, language, weather_coordinator))
     sensors.append(ImsHumidity(hass, city, language, weather_coordinator))
     sensors.append(ImsWindSpeed(hass, city, language, weather_coordinator))
@@ -124,9 +170,45 @@ async def async_setup_entry(
             )
         )
 
+    for description in SENSOR_DESCRIPTIONS:
+        sensors.append(ImsSensor(weather_coordinator, description))
+
     async_add_entities(sensors, update_before_add=True)
 
     return True
+
+
+class ImsSensor(ImsEntity, SensorEntity):
+    """Representation of an IMS sensor."""
+
+    @callback
+    def _update_from_latest_data(self) -> None:
+        """Update the state."""
+        data = self.coordinator.data
+
+        match self.entity_description.key:
+            case sensor_keys.TYPE_CURRENT_UV_LEVEL:
+                match data.current_weather.u_v_level:
+                    case "E":
+                        self._attr_native_value = UV_LEVEL_EXTREME
+                    case "V":
+                        self._attr_native_value = UV_LEVEL_VHIGH
+                    case "H":
+                        self._attr_native_value = UV_LEVEL_HIGH
+                    case "M":
+                        self._attr_native_value = UV_LEVEL_MODERATE
+                    case _:
+                        self._attr_native_value = UV_LEVEL_LOW
+
+            case sensor_keys.TYPE_CURRENT_UV_INDEX:
+                self._attr_native_value = data.current_weather.u_v_index
+
+            case sensor_keys.TYPE_MAX_UV_INDEX:
+                self._attr_native_value = data.current_weather.u_v_i_max
+
+            case _:
+                self._attr_native_value = None
+
 
 
 class ImsCity(Entity):
@@ -159,11 +241,11 @@ class ImsCity(Entity):
         self._state = self._weather_coordinator.data.current_weather.location if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
 
-class ImsTemprature(Entity):
+class ImsTemperature(Entity):
     def __init__(self, hass, city, language, weather_coordinator):
         self._hass = hass
         self._language = language
-        self.entity_id = f"sensor.ims_temprature"
+        self.entity_id = f"sensor.ims_temperature"
         self._weather_coordinator = weather_coordinator
 
     @property
@@ -171,7 +253,7 @@ class ImsTemprature(Entity):
         if self._language == "he":
             return "טמפרטורה"
         else:
-            return "Temprature"
+            return "Temperature"
 
     @property
     def state(self):
