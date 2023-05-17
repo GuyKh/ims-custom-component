@@ -221,7 +221,7 @@ class ImsCity(Entity):
 
     @property
     def state(self):
-        return self._weather_coordinator.data.current_weather.location
+        return self._weather_coordinator.data.current_weather.location if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
     @property
     def icon(self):
@@ -231,7 +231,7 @@ class ImsCity(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._weather_coordinator.data.current_weather.location
+        self._state = self._weather_coordinator.data.current_weather.location if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
 
 class ImsTemperature(Entity):
@@ -251,7 +251,7 @@ class ImsTemperature(Entity):
     @property
     def state(self):
         try:
-            return self._weather_coordinator.data.current_weather.temperature
+            return self._weather_coordinator.data.current_weather.temperature if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
         except:
             pass
 
@@ -271,7 +271,7 @@ class ImsTemperature(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._weather_coordinator.data.current_weather.temperature
+        self._state = self._weather_coordinator.data.current_weather.temperature if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
 
 class ImsRealFeel(Entity):
@@ -292,7 +292,7 @@ class ImsRealFeel(Entity):
     @property
     def state(self):
         try:
-            return self._weather_coordinator.data.current_weather.feels_like
+            return self._weather_coordinator.data.current_weather.feels_like if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
         except:
             pass
 
@@ -308,8 +308,8 @@ class ImsRealFeel(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._weather_coordinator.data.current_weather.feels_like
-
+        self._state = self._weather_coordinator.data.current_weather.feels_like if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
+ 
 
 class ImsHumidity(Entity):
     def __init__(self, hass, city, language, weather_coordinator):
@@ -329,7 +329,7 @@ class ImsHumidity(Entity):
     @property
     def state(self):
         try:
-            return self._weather_coordinator.data.current_weather.humidity
+            return self._weather_coordinator.data.current_weather.humidity if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
         except:
             pass
 
@@ -345,7 +345,7 @@ class ImsHumidity(Entity):
         await self._hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._weather_coordinator.data.current_weather.humidity
+        self._state = self._weather_coordinator.data.current_weather.humidity if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
 
 class ImsRain(Entity):
@@ -365,6 +365,8 @@ class ImsRain(Entity):
 
     @property
     def state(self):
+        if not (self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather):
+            return None
         try:
             if self._language == "he":
                 if self._weather_coordinator.data.current_weather.rain:
@@ -388,7 +390,7 @@ class ImsRain(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._weather_coordinator.data.current_weather.wind_speed
+        self._state = self._weather_coordinator.data.current_weather.wind_speed if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
 
 class ImsWindSpeed(Entity):
@@ -409,7 +411,7 @@ class ImsWindSpeed(Entity):
     @property
     def state(self):
         try:
-            return self._weather_coordinator.data.current_weather.wind_speed
+            return self._weather_coordinator.data.current_weather.wind_speed if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
         except:
             pass
 
@@ -428,7 +430,7 @@ class ImsWindSpeed(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._weather_coordinator.data.current_weather.wind_speed
+        self._state = self._weather_coordinator.data.current_weather.wind_speed if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
 
 class ImsDateTime(Entity):
@@ -448,7 +450,7 @@ class ImsDateTime(Entity):
     @property
     def state(self):
         try:
-            return self._weather_coordinator.data.current_weather.forecast_time
+            return self._weather_coordinator.data.current_weather.forecast_time if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
         except:
             pass
 
@@ -460,7 +462,7 @@ class ImsDateTime(Entity):
         await self.hass.async_add_executor_job(self.update)
 
     def update(self):
-        self._state = self._weather_coordinator.data.current_weather.forecast_time
+        self._state = self._weather_coordinator.data.current_weather.forecast_time if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
 
 
 class IMSForecast(Entity):
