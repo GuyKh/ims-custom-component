@@ -2,8 +2,11 @@ import asyncio
 import json
 import logging
 import types
+import pytz
+from dataclasses import field, dataclass
+from pytz import timezone
 
-from datetime import date
+from datetime import date, datetime
 import voluptuous as vol
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
@@ -13,14 +16,13 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
+    SensorDeviceClass
 )
 
-from homeassistant.const import UV_INDEX, UnitOfTime
+from homeassistant.const import UV_INDEX, UnitOfTime, CONF_NAME, TEMP_CELSIUS, PERCENTAGE, SPEED_KILOMETERS_PER_HOUR
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
-from homeassistant.const import CONF_NAME, TEMP_CELSIUS
 
 from . import ImsEntity
 from .const import (
@@ -52,7 +54,10 @@ from .const import (
     WIND_DIRECTIONS,
     TYPE_CURRENT_UV_INDEX,
     TYPE_CURRENT_UV_LEVEL,
-    TYPE_MAX_UV_INDEX,
+    TYPE_MAX_UV_INDEX, FIELD_NAME_UV_INDEX, FIELD_NAME_UV_LEVEL, FIELD_NAME_UV_INDEX_MAX, TYPE_HUMIDITY,
+    FIELD_NAME_HUMIDITY, FIELD_NAME_TEMPERATURE, FIELD_NAME_LOCATION, TYPE_FEELS_LIKE, FIELD_NAME_FEELS_LIKE,
+    FIELD_NAME_RAIN, TYPE_WIND_SPEED, TYPE_FORECAST_TIME, FIELD_NAME_FORECAST_TIME, TYPE_CITY, TYPE_TEMPERATURE,
+    TYPE_RAIN, FIELD_NAME_WIND_SPEED,
 )
 
 IMS_SENSOR_KEY_PREFIX = "ims_"
@@ -61,6 +66,13 @@ sensor_keys = types.SimpleNamespace()
 sensor_keys.TYPE_CURRENT_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX
 sensor_keys.TYPE_CURRENT_UV_LEVEL = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL
 sensor_keys.TYPE_MAX_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX
+sensor_keys.TYPE_CITY = IMS_SENSOR_KEY_PREFIX + TYPE_CITY
+sensor_keys.TYPE_TEMPERATURE = IMS_SENSOR_KEY_PREFIX + TYPE_TEMPERATURE
+sensor_keys.TYPE_HUMIDITY = IMS_SENSOR_KEY_PREFIX + TYPE_HUMIDITY
+sensor_keys.TYPE_FORECAST_TIME = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_TIME
+sensor_keys.TYPE_FEELS_LIKE = IMS_SENSOR_KEY_PREFIX + TYPE_FEELS_LIKE
+sensor_keys.TYPE_RAIN = IMS_SENSOR_KEY_PREFIX + TYPE_RAIN
+sensor_keys.TYPE_WIND_SPEED = IMS_SENSOR_KEY_PREFIX + TYPE_WIND_SPEED
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -85,25 +97,105 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 weather = None
 
+forecast_mode = types.SimpleNamespace()
+forecast_mode.CURRENT = "current"
+forecast_mode.DAILY = "daily"
+forecast_mode.HOURLY = "hourly"
+
+@dataclass
+class ImsSensorEntityDescription(SensorEntityDescription):
+    """Describes Pirate Weather sensor entity."""
+    field_name: str | None = None
+    forecast_mode: str | None = None
+
+
 SENSOR_DESCRIPTIONS = (
-    SensorEntityDescription(
+    ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX,
         name="IMS Current UV Index",
         icon="mdi:weather-sunny",
         native_unit_of_measurement=UV_INDEX,
         state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_UV_INDEX,
     ),
-    SensorEntityDescription(
+    ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL,
         name="IMS Current UV Level",
         icon="mdi:weather-sunny",
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_UV_LEVEL,
     ),
-    SensorEntityDescription(
+    ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX,
         name="IMS Max UV Index",
         icon="mdi:weather-sunny",
         native_unit_of_measurement=UV_INDEX,
         state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_UV_INDEX_MAX,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_CITY,
+        name="IMS Humidity",
+        icon="mdi:city",
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_LOCATION,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_TEMPERATURE,
+        name="IMS Temperature",
+        icon="mdi:thermometer",
+        native_unit_of_measurement=TEMP_CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_TEMPERATURE,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_FEELS_LIKE,
+        name="IMS RealFeel",
+        icon="mdi:water-percent",
+        native_unit_of_measurement=TEMP_CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_FEELS_LIKE,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_HUMIDITY,
+        name="IMS Humidity",
+        icon="mdi:weather-sunny",
+        native_unit_of_measurement=PERCENTAGE,
+        device_class=SensorDeviceClass.HUMIDITY,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_HUMIDITY,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_RAIN,
+        name="IMS Rain",
+        icon="mdi:weather-rainy",
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_RAIN,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_WIND_SPEED,
+        name="IMS Wind Speed",
+        icon="mdi:weather-windy",
+        native_unit_of_measurement=SPEED_KILOMETERS_PER_HOUR,
+        device_class=SensorDeviceClass.SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_WIND_SPEED,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_TIME,
+        name="IMS Forecast Time",
+        icon="mdi:weather-windy",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_FORECAST_TIME,
     ),
 )
 
@@ -146,13 +238,13 @@ async def async_setup_entry(
 
     # Add IMS Sensors
     sensors: list[Entity] = []
-    sensors.append(ImsCity(hass, city, language, weather_coordinator))
-    sensors.append(ImsTemperature(hass, city, language, weather_coordinator))
-    sensors.append(ImsRealFeel(hass, city, language, weather_coordinator))
-    sensors.append(ImsHumidity(hass, city, language, weather_coordinator))
-    sensors.append(ImsWindSpeed(hass, city, language, weather_coordinator))
-    sensors.append(ImsRain(hass, city, language, weather_coordinator))
-    sensors.append(ImsDateTime(hass, language, weather_coordinator))
+    # sensors.append(ImsCity(hass, city, language, weather_coordinator))
+    # sensors.append(ImsTemperature(hass, city, language, weather_coordinator))
+    # sensors.append(ImsRealFeel(hass, city, language, weather_coordinator))
+    # sensors.append(ImsHumidity(hass, city, language, weather_coordinator))
+    # sensors.append(ImsWindSpeed(hass, city, language, weather_coordinator))
+    # sensors.append(ImsRain(hass, city, language, weather_coordinator))
+    # sensors.append(ImsDateTime(hass, language, weather_coordinator))
 
     # Add forecast entities
     for daily_forecast in weather_coordinator.data.forecast.days:
@@ -206,271 +298,29 @@ class ImsSensor(ImsEntity, SensorEntity):
             case sensor_keys.TYPE_MAX_UV_INDEX:
                 self._attr_native_value = data.current_weather.u_v_i_max
 
+            case sensor_keys.TYPE_CITY:
+                self._attr_native_value = data.current_weather.location
+
+            case sensor_keys.TYPE_TEMPERATURE:
+                self._attr_native_value = data.current_weather.temperature
+
+            case sensor_keys.TYPE_FEELS_LIKE:
+                self._attr_native_value = data.current_weather.feels_like
+
+            case sensor_keys.TYPE_HUMIDITY:
+                self._attr_native_value = data.current_weather.humidity
+
+            case sensor_keys.TYPE_RAIN:
+                self._attr_native_value = "Raining" if (data.current_weather.rain and data.current_weather.rain > 0.0) else "Not Raining"
+
+            case sensor_keys.TYPE_FORECAST_TIME:
+                self._attr_native_value = data.current_weather.forecast_time.astimezone(timezone('Asia/Jerusalem'))
+
+            case sensor_keys.TYPE_WIND_SPEED:
+                self._attr_native_value = data.current_weather.wind_speed
+
             case _:
                 self._attr_native_value = None
-
-
-
-class ImsCity(Entity):
-    def __init__(self, hass, city, language, weather_coordinator):
-        self._hass = hass
-        self._city = city
-        self._language = language
-        self.entity_id = f"sensor.ims_city"
-        self._weather_coordinator = weather_coordinator
-
-    @property
-    def name(self):
-        if self._language == "he":
-            return "ישוב"
-        else:
-            return "City"
-
-    @property
-    def state(self):
-        return self._weather_coordinator.data.current_weather.location if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-
-    @property
-    def icon(self):
-        return "mdi:city"
-
-    async def async_update(self):
-        await self._hass.async_add_executor_job(self.update)
-
-    def update(self):
-        self._state = self._weather_coordinator.data.current_weather.location if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-
-
-class ImsTemperature(Entity):
-    def __init__(self, hass, city, language, weather_coordinator):
-        self._hass = hass
-        self._language = language
-        self.entity_id = f"sensor.ims_temperature"
-        self._weather_coordinator = weather_coordinator
-
-    @property
-    def name(self):
-        if self._language == "he":
-            return "טמפרטורה"
-        else:
-            return "Temperature"
-
-    @property
-    def state(self):
-        try:
-            return self._weather_coordinator.data.current_weather.temperature if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-        except:
-            pass
-
-    @property
-    def unit_of_measurement(self):
-        return TEMP_CELSIUS
-
-    @property
-    def device_state_attributes(self):
-        return self._attributes
-
-    @property
-    def icon(self):
-        return "mdi:thermometer"
-
-    async def async_update(self):
-        await self.hass.async_add_executor_job(self.update)
-
-    def update(self):
-        self._state = self._weather_coordinator.data.current_weather.temperature if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-
-
-class ImsRealFeel(Entity):
-    def __init__(self, hass, city, language, weather_coordinator):
-        self._hass = hass
-        self._city = city
-        self._language = language
-        self.entity_id = f"sensor.ims_realfeel"
-        self._weather_coordinator = weather_coordinator
-
-    @property
-    def name(self):
-        if self._language == "he":
-            return "מרגיש כמו"
-        else:
-            return "Real Feel"
-
-    @property
-    def state(self):
-        try:
-            return self._weather_coordinator.data.current_weather.feels_like if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-        except:
-            pass
-
-    @property
-    def unit_of_measurement(self):
-        return TEMP_CELSIUS
-
-    @property
-    def icon(self):
-        return "mdi:thermometer"
-
-    async def async_update(self):
-        await self._hass.async_add_executor_job(self.update)
-
-    def update(self):
-        self._state = self._weather_coordinator.data.current_weather.feels_like if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
- 
-
-class ImsHumidity(Entity):
-    def __init__(self, hass, city, language, weather_coordinator):
-        self._hass = hass
-        self._city = city
-        self._language = language
-        self.entity_id = f"sensor.ims_humidity"
-        self._weather_coordinator = weather_coordinator
-
-    @property
-    def name(self):
-        if self._language == "he":
-            return "לחות"
-        else:
-            return "Humidity"
-
-    @property
-    def state(self):
-        try:
-            return self._weather_coordinator.data.current_weather.humidity if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-        except:
-            pass
-
-    @property
-    def unit_of_measurement(self):
-        return "%"
-
-    @property
-    def icon(self):
-        return "mdi:water-percent"
-
-    async def async_update(self):
-        await self._hass.async_add_executor_job(self.update)
-
-    def update(self):
-        self._state = self._weather_coordinator.data.current_weather.humidity if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-
-
-class ImsRain(Entity):
-    def __init__(self, hass, city, language, weather_coordinator):
-        self._hass = hass
-        self._city = city
-        self._language = language
-        self.entity_id = f"sensor.ims_rain"
-        self._weather_coordinator = weather_coordinator
-
-    @property
-    def name(self):
-        if self._language == "he":
-            return "גשם"
-        else:
-            return "Rain"
-
-    @property
-    def state(self):
-        if not (self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather):
-            return None
-        try:
-            if self._language == "he":
-                if self._weather_coordinator.data.current_weather.rain:
-                    return "יורד"
-                else:
-                    return "לא יורד"
-            else:
-                if self._weather_coordinator.data.current_weather.rain:
-                    return "Raining"
-                else:
-                    return "Not Raining"
-
-        except:
-            pass
-
-    @property
-    def icon(self):
-        return "mdi:weather-rainy"
-
-    async def async_update(self):
-        await self.hass.async_add_executor_job(self.update)
-
-    def update(self):
-        self._state = self._weather_coordinator.data.current_weather.wind_speed if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-
-
-class ImsWindSpeed(Entity):
-    def __init__(self, hass, city, language, weather_coordinator):
-        self._hass = hass
-        self._city = city
-        self._language = language
-        self.entity_id = f"sensor.ims_windspeed"
-        self._weather_coordinator = weather_coordinator
-
-    @property
-    def name(self):
-        if self._language == "he":
-            return "מהירות רוח"
-        else:
-            return "Wind Speed"
-
-    @property
-    def state(self):
-        try:
-            return self._weather_coordinator.data.current_weather.wind_speed if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-        except:
-            pass
-
-    @property
-    def unit_of_measurement(self):
-        if self._language == "he":
-            return 'קמ"ש'
-        else:
-            return "kph"
-
-    @property
-    def icon(self):
-        return "mdi:weather-windy"
-
-    async def async_update(self):
-        await self.hass.async_add_executor_job(self.update)
-
-    def update(self):
-        self._state = self._weather_coordinator.data.current_weather.wind_speed if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-
-
-class ImsDateTime(Entity):
-    def __init__(self, hass, language, weather_coordinator):
-        self._hass = hass
-        self._language = language
-        self.entity_id = f"sensor.ims_forecast_time"
-        self._weather_coordinator = weather_coordinator
-
-    @property
-    def name(self):
-        if self._language == "he":
-            return "תאריך"
-        else:
-            return "Date"
-
-    @property
-    def state(self):
-        try:
-            return self._weather_coordinator.data.current_weather.forecast_time if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-        except:
-            pass
-
-    @property
-    def icon(self):
-        return "mdi:calendar"
-
-    async def async_update(self):
-        await self.hass.async_add_executor_job(self.update)
-
-    def update(self):
-        self._state = self._weather_coordinator.data.current_weather.forecast_time if self._weather_coordinator and self._weather_coordinator.data and self._weather_coordinator.data.current_weather else None
-
 
 class IMSForecast(Entity):
     def __init__(self, hass, language, weather_coordinator, sensor_name, forecast):
