@@ -166,8 +166,9 @@ class ImsEntity(CoordinatorEntity):
 
         self._attr_extra_state_attributes = {}
         self._attr_unique_id = (
-            f"{coordinator.city}_{coordinator.language}_{description.key}"
+            f"{description.key}_{coordinator.city}_{coordinator.language}"
         )
+        self._attr_translation_key = f"{description.key}_{coordinator.city}"
         self.entity_description = description
 
     @callback

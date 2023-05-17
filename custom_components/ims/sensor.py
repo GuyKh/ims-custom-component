@@ -1,6 +1,8 @@
+import asyncio
 import json
 import logging
-import asyncio
+import types
+
 from datetime import date
 import voluptuous as vol
 from homeassistant.helpers.entity import Entity
@@ -53,6 +55,12 @@ from .const import (
     TYPE_MAX_UV_INDEX,
 )
 
+IMS_SENSOR_KEY_PREFIX = "ims_"
+
+sensor_keys = types.SimpleNamespace()
+sensor_keys.TYPE_CURRENT_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX
+sensor_keys.TYPE_CURRENT_UV_LEVEL = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL
+sensor_keys.TYPE_MAX_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,7 +69,6 @@ UV_LEVEL_VHIGH = "Very High"
 UV_LEVEL_HIGH = "High"
 UV_LEVEL_MODERATE = "Moderate"
 UV_LEVEL_LOW = "Low"
-
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -80,20 +87,20 @@ weather = None
 
 SENSOR_DESCRIPTIONS = (
     SensorEntityDescription(
-        key="ims_" + TYPE_CURRENT_UV_INDEX,
-        name="Current UV index",
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX,
+        name="IMS Current UV Index",
         icon="mdi:weather-sunny",
         native_unit_of_measurement=UV_INDEX,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
-        key="ims_" + TYPE_CURRENT_UV_LEVEL,
-        name="Current UV level",
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL,
+        name="IMS Current UV Level",
         icon="mdi:weather-sunny",
     ),
     SensorEntityDescription(
-        key="ims_" + TYPE_MAX_UV_INDEX,
-        name="Max UV index",
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX,
+        name="IMS Max UV Index",
         icon="mdi:weather-sunny",
         native_unit_of_measurement=UV_INDEX,
         state_class=SensorStateClass.MEASUREMENT,
@@ -180,7 +187,7 @@ class ImsSensor(ImsEntity, SensorEntity):
         data = self.coordinator.data
 
         match self.entity_description.key:
-            case TYPE_CURRENT_UV_LEVEL.lower():
+            case sensor_keys.TYPE_CURRENT_UV_LEVEL:
                 match data.current_weather.u_v_level:
                     case "E":
                         self._attr_native_value = UV_LEVEL_EXTREME
@@ -193,10 +200,10 @@ class ImsSensor(ImsEntity, SensorEntity):
                     case _:
                         self._attr_native_value = UV_LEVEL_LOW
 
-            case TYPE_CURRENT_UV_INDEX.lower():
+            case sensor_keys.TYPE_CURRENT_UV_INDEX:
                 self._attr_native_value = data.current_weather.u_v_index
 
-            case TYPE_MAX_UV_INDEX.lower():
+            case sensor_keys.TYPE_MAX_UV_INDEX:
                 self._attr_native_value = data.current_weather.u_v_i_max
 
             case _:
