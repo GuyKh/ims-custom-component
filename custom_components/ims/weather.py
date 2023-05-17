@@ -207,7 +207,7 @@ class IMSWeather(WeatherEntity):
     @property
     def native_temperature(self):
         """Return the temperature."""
-        temperature = float(self._weather_coordinator.data.current_weather.temperature
+        temperature = float(self._weather_coordinator.data.current_weather.temperature)
 
         if self.outputRound == "Yes":
             return round(temperature, 0) + 0
