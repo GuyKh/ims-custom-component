@@ -217,7 +217,7 @@ class IMSWeather(WeatherEntity):
     @property
     def humidity(self):
         """Return the humidity."""
-        humidity = float(self._weather_coordinator.data.current_weather.humidity
+        humidity = float(self._weather_coordinator.data.current_weather.humidity)
 
         if self.outputRound == "Yes":
             return round(humidity, 0) + 0
@@ -227,7 +227,7 @@ class IMSWeather(WeatherEntity):
     @property
     def native_wind_speed(self):
         """Return the wind speed."""
-        windspeed = float(self._weather_coordinator.data.current_weather.wind_speed
+        windspeed = float(self._weather_coordinator.data.current_weather.wind_speed)
 
         if self.outputRound == "Yes":
             return round(windspeed, 0) + 0
