@@ -107,6 +107,15 @@ TYPE_WIND_CHILL = "wind_chill"
 TYPE_WEATHER_CODE = "weather_code"
 TYPE_CITY = "city"
 TYPE_FORECAST_TIME = "forecast_time"
+TYPE_FORECAST_PREFIX = "forecast_"
+TYPE_FORECAST_TODAY = "today"
+TYPE_FORECAST_DAY1 = "day1"
+TYPE_FORECAST_DAY2 = "day2"
+TYPE_FORECAST_DAY3 = "day3"
+TYPE_FORECAST_DAY4 = "day4"
+TYPE_FORECAST_DAY5 = "day5"
+TYPE_FORECAST_DAY6 = "day6"
+TYPE_FORECAST_DAY7 = "day7"
 
 FIELD_NAME_FORECAST_TIME = "forecast_time"
 FIELD_NAME_HEAT_STRESS = "heat_stress"
@@ -114,6 +123,7 @@ FIELD_NAME_HEAT_STRESS_LEVEL = "heat_stress_level"
 FIELD_NAME_HUMIDITY = "relative_humidity"
 FIELD_NAME_DEW_POINT_TEMP = "due_point_Temp"
 FIELD_NAME_RAIN = "rain"
+FIELD_NAME_DAY: str = "day"
 FIELD_NAME_RAIN_CHANCE = "rain_chance"
 FIELD_NAME_TEMPERATURE = "temperature"
 FIELD_NAME_FEELS_LIKE = "feels_like"
@@ -180,6 +190,32 @@ WEATHER_CODE_TO_CONDITION = {
     "1570": ATTR_CONDITION_WINDY_VARIANT,
     "1580": ATTR_CONDITION_EXCEPTIONAL,
     "1590": ATTR_CONDITION_EXCEPTIONAL,
+}
+
+WEATHER_CODE_TO_ICON = {
+    "1250": "mdi:weather-sunny",
+    "1220": "mdi:weather-partly-cloudy",
+    "1230": "mdi:weather-cloudy",
+    "1570": "mdi:weather-dust",
+    "1010": "mdi:weather-dust",
+    "1160": "mdi:weather-fog",
+    "1310": "mdi:weather-sunny-alert",
+    "1580": "mdi:weather-sunny-alert",
+    "1270": "mdi:weather-fog",
+    "1320": "mdi:snowflake-alert",
+    "1590": "mdi:snowflake-alert",
+    "1300": "mdi:snowflake-melt",
+    "1530": "mdi:weather-partly-rainy",
+    "1540": "mdi:weather-partly-rainy",
+    "1560": "mdi:weather-partly-rainy",
+    "1140": "mdi:weather-pourin",
+    "1020": "mdi:weather-lightning-rainy",
+    "1510": "mdi:weather-lightning",
+    "1260": "mdi:weather-windy",
+    "1080": "mdi:weather-snowy-rainy",
+    "1070": "mdi:weather-snowy-rainy",
+    "1060": "mdi:weather-snowy",
+    "1520": "mdi:weather-snowy-heavy",
 }
 
 WEATHER_SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (

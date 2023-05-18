@@ -1,99 +1,98 @@
 {
-    "config": {
-      "abort": {
-        "already_configured": "מוגדר חיישן עבור ישוב זה"
-      },
-      "error": {
-        "cannot_connect": "שגיאה בהתחברות"
-      },
-      "step": {
-        "user": {
-          "data": {
-            "city": "יישוב",
-            "language": "שפה",
-            "mode": "מצב תחזית עבור חיישן התחזית",
-            "name": "שם האינטגרציה",
-            "images_path": "הנתיב אליו יורדו התמונות",
-            "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
-            "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!"
-          },
-          "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
-          "data_description": {
-          }
-        }
-      }
+  "config": {
+    "abort": {
+      "already_configured": "מוגדר חיישן עבור ישוב זה"
     },
-    "options": {
-      "step": {
-        "init": {
-          "data": {
-            "city": "יישוב",
-            "language": "שפה",
-            "mode": "מצב תחזית עבור חיישן התחזית",
-            "name": "שם האינטגרציה",
-            "images_path": "הנתיב אליו יורדו התמונות",
-            "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
-            "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!"
-          },
-          "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
-          "data_description": {
-          }
-        }
-      }
+    "error": {
+      "cannot_connect": "שגיאה בהתחברות"
     },
-    "entity": {
-      "sensor": {
-        "ims_city_he": {
-          "name": "ישוב"
+    "step": {
+      "user": {
+        "data": {
+          "city": "יישוב",
+          "language": "שפה",
+          "mode": "מצב תחזית עבור חיישן התחזית",
+          "name": "שם האינטגרציה",
+          "images_path": "הנתיב אליו יורדו התמונות",
+          "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
+          "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!"
         },
-        "ims_city_en": {
-          "name": "City"
-        },
-        "ims_forecast_time_he": {
-          "name": "תאריך"
-        },
-        "ims_forecast_time_en": {
-          "name": "Date"
-        },
-        "ims_wind_speed_he": {
-          "name": "מהירות רוח"
-        },
-        "ims_wind_speed_en": {
-          "name": "Wind Speed"
-        },
-        "ims_rain_he": {
-          "name": "גשם",
-          "state": {
-            "raining": "יורד",
-            "not_raining": "לא יורד"
-          }
-        },
-        "ims_rain_en": {
-          "name": "Rain",
-          "state": {
-            "raining": "Raining",
-            "not_raining": "Not Raining"
-          }
-        },
-        "ims_temperature_he": {
-          "name": "טמפרטורה"
-        },
-        "ims_temperature_en": {
-          "name": "Temperature"
-        },
-        "ims_humidity_he": {
-          "name": "לחות"
-        },
-        "ims_humidity_en": {
-          "name": "Humidity"
-        },
-        "ims_feels_like_he": {
-          "name": "מרגיש כמו"
-        },
-        "ims_feels_like_en": {
-          "name": "Real Feel"
+        "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
+        "data_description": {
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "city": "יישוב",
+          "language": "שפה",
+          "mode": "מצב תחזית עבור חיישן התחזית",
+          "name": "שם האינטגרציה",
+          "images_path": "הנתיב אליו יורדו התמונות",
+          "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
+          "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!"
+        },
+        "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
+        "data_description": {
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "ims_city_he": {
+        "name": "ישוב"
+      },
+      "ims_city_en": {
+        "name": "City"
+      },
+      "ims_forecast_time_he": {
+        "name": "תאריך"
+      },
+      "ims_forecast_time_en": {
+        "name": "Date"
+      },
+      "ims_wind_speed_he": {
+        "name": "מהירות רוח"
+      },
+      "ims_wind_speed_en": {
+        "name": "Wind Speed"
+      },
+      "ims_rain_he": {
+        "name": "גשם",
+        "state": {
+          "raining": "יורד",
+          "not_raining": "לא יורד"
+        }
+      },
+      "ims_rain_en": {
+        "name": "Rain",
+        "state": {
+          "raining": "יורד",
+          "not_raining": "לא יורד"
+        }
+      },
+      "ims_temperature_he": {
+        "name": "טמפרטורה"
+      },
+      "ims_temperature_en": {
+        "name": "Temperature"
+      },
+      "ims_humidity_he": {
+        "name": "לחות"
+      },
+      "ims_humidity_en": {
+        "name": "Humidity"
+      },
+      "ims_feels_like_he": {
+        "name": "מרגיש כמו"
+      },
+      "ims_feels_like_en": {
+        "name": "Real Feel"
+      }
+    }
   }
-  
+}

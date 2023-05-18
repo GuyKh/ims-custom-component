@@ -1,100 +1,99 @@
 {
-    "config": {
-      "abort": {
-        "already_configured": "Location is already configured"
-      },
-      "error": {
-        "cannot_connect": "Failed to connect"
-      },
-      "step": {
-        "user": {
-          "data": {
-            "city": "City",
-            "language": "Language",
-            "mode": "Forecast mode for the Weather entity",
-            "name": "Integration Name",
-            "images_path": "Path to download the images to",
-            "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recomended.",
-            "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!"
-          },
-          "description": "Set up IMS Weather integration",
-          "data_description": {
-          }
-        }
-      }
+  "config": {
+    "abort": {
+      "already_configured": "Location is already configured"
     },
-    "options": {
-      "step": {
-        "init": {
-          "data": {
-            "city": "City",
-            "language": "Language",
-            "mode": "Forecast mode for the Weather entity",
-            "name": "Integration Name",
-            "units": "Units for sensors. Only used for if sensors are requested.",
-            "images_path": "Path to download the images to",
-            "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recomended.",
-            "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!"
-          },
-          "description": "Set up IMS Weather integration",
-          "data_description": {
-          }
-        }
-      }
+    "error": {
+      "cannot_connect": "Failed to connect"
     },
-    "entity": {
-      "sensor": {
-        "ims_city_he": {
-          "name": "ישוב"
+    "step": {
+      "user": {
+        "data": {
+          "city": "City",
+          "language": "Language",
+          "mode": "Forecast mode for the Weather entity",
+          "name": "Integration Name",
+          "images_path": "Path to download the images to",
+          "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recommended.",
+          "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!"
         },
-        "ims_city_en": {
-          "name": "City"
-        },
-        "ims_forecast_time_he": {
-          "name": "תאריך"
-        },
-        "ims_forecast_time_en": {
-          "name": "Date"
-        },
-        "ims_wind_speed_he": {
-          "name": "מהירות רוח"
-        },
-        "ims_wind_speed_en": {
-          "name": "Wind Speed"
-        },
-        "ims_rain_he": {
-          "name": "גשם",
-          "state": {
-            "raining": "יורד",
-            "not_raining": "לא יורד"
-          }
-        },
-        "ims_rain_en": {
-          "name": "Rain",
-          "state": {
-            "raining": "Raining",
-            "not_raining": "Not Raining"
-          }
-        },
-        "ims_temperature_he": {
-          "name": "טמפרטורה"
-        },
-        "ims_temperature_en": {
-          "name": "Temperature"
-        },
-        "ims_humidity_he": {
-          "name": "לחות"
-        },
-        "ims_humidity_en": {
-          "name": "Humidity"
-        },
-        "ims_feels_like_he": {
-          "name": "מרגיש כמו"
-        },
-        "ims_feels_like_en": {
-          "name": "Real Feel"
+        "description": "Set up IMS Weather integration",
+        "data_description": {
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "city": "City",
+          "language": "Language",
+          "mode": "Forecast mode for the Weather entity",
+          "name": "Integration Name",
+          "units": "Units for sensors. Only used for if sensors are requested.",
+          "images_path": "Path to download the images to",
+          "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recommended.",
+          "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!"
+        },
+        "description": "Set up IMS Weather integration",
+        "data_description": {
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "ims_city_he": {
+        "name": "ישוב"
+      },
+      "ims_city_en": {
+        "name": "City"
+      },
+      "ims_forecast_time_he": {
+        "name": "תאריך"
+      },
+      "ims_forecast_time_en": {
+        "name": "Date"
+      },
+      "ims_wind_speed_he": {
+        "name": "מהירות רוח"
+      },
+      "ims_wind_speed_en": {
+        "name": "Wind Speed"
+      },
+      "ims_rain_he": {
+        "name": "גשם",
+        "state": {
+          "raining": "יורד",
+          "not_raining": "לא יורד"
+        }
+      },
+      "ims_rain_en": {
+        "name": "Rain",
+        "state": {
+          "raining": "Raining",
+          "not_raining": "Not Raining"
+        }
+      },
+      "ims_temperature_he": {
+        "name": "טמפרטורה"
+      },
+      "ims_temperature_en": {
+        "name": "Temperature"
+      },
+      "ims_humidity_he": {
+        "name": "לחות"
+      },
+      "ims_humidity_en": {
+        "name": "Humidity"
+      },
+      "ims_feels_like_he": {
+        "name": "מרגיש כמו"
+      },
+      "ims_feels_like_en": {
+        "name": "Real Feel"
+      }
+    }
   }
-  
+}
