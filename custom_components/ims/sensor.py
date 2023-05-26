@@ -539,7 +539,7 @@ class IMSForecast(Entity):
                 "unit": TEMP_CELSIUS,
             },
             "uvi": {"value": self._forecast.maximum_uvi, "unit": "uv"},
-            "weather ": {
+            "weather": {
                 "value": self._forecast.weather,
                 "icon": self.get_weather_icon(self._forecast.weather_code),
             },
