@@ -41,5 +41,59 @@
                 }
             }
         }
+    },
+  "entity": {
+    "sensor": {
+      "ims_city_he": {
+        "name": "ישוב"
+      },
+      "ims_city_en": {
+        "name": "City"
+      },
+      "ims_forecast_time_he": {
+        "name": "תאריך"
+      },
+      "ims_forecast_time_en": {
+        "name": "Date"
+      },
+      "ims_wind_speed_he": {
+        "name": "מהירות רוח"
+      },
+      "ims_wind_speed_en": {
+        "name": "Wind Speed"
+      },
+      "ims_rain_he": {
+        "name": "גשם",
+        "state": {
+          "raining": "יורד",
+          "not_raining": "לא יורד"
+        }
+      },
+      "ims_rain_en": {
+        "name": "Rain",
+        "state": {
+          "raining": "Raining",
+          "not_raining": "Not Raining"
+        }
+      },
+      "ims_temperature_he": {
+        "name": "טמפרטורה"
+      },
+      "ims_temperature_en": {
+        "name": "Temperature"
+      },
+      "ims_humidity_he": {
+        "name": "לחות"
+      },
+      "ims_humidity_en": {
+        "name": "Humidity"
+      },
+      "ims_feels_like_he": {
+        "name": "מרגיש כמו"
+      },
+      "ims_feels_like_en": {
+        "name": "Real Feel"
+      }
     }
+  }
 }

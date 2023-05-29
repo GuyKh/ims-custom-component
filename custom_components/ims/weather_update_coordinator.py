@@ -64,10 +64,12 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         forecast = await loop.run_in_executor(None, self.weather.get_forecast)
         images = await loop.run_in_executor(None, self.weather.get_radar_images)
 
+        _LOGGER.debug("Data fetched from IMS of %s", current_weather.forecast_time.strftime("%m/%d/%Y, %H:%M:%S"))
+
         self._filter_future_forecast(forecast)
         return WeatherData(current_weather, forecast, images)
 
-    def _filter_future_forecast(self, forecast): 
+    def _filter_future_forecast(self, forecast):
         """ Filter Forecast to include only future dates """
         today_datetime = datetime.fromordinal(date.today().toordinal())
         filtered_day_list = list(filter(lambda daily_forecast: daily_forecast.date >= today_datetime, forecast.days))
@@ -79,9 +81,9 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
                 if (datetime.now() <= forecast_datetime):
                     filtered_hours.append(hourly_forecast)
             daily_forecast.hours = filtered_hours
-            
+
         forecast.days = filtered_day_list
-    
+
 
 
 class WeatherData:

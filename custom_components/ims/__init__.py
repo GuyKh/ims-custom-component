@@ -1,6 +1,7 @@
 import logging
 from typing import Any
 
+from dataclasses import field, dataclass
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 
@@ -11,6 +12,9 @@ from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_registry import EntityRegistry
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from homeassistant.components.sensor import (
+    SensorEntityDescription,
+)
 
 from homeassistant.const import (
     CONF_MODE,
@@ -152,6 +156,11 @@ def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
 def _filter_domain_configs(elements, domain):
     return list(filter(lambda elem: elem["platform"] == domain, elements))
 
+@dataclass
+class ImsSensorEntityDescription(SensorEntityDescription):
+    """Describes Pirate Weather sensor entity."""
+    field_name: str | None = None
+    forecast_mode: str | None = None
 
 class ImsEntity(CoordinatorEntity):
     """Define a generic Ims entity."""
@@ -159,7 +168,7 @@ class ImsEntity(CoordinatorEntity):
     _attr_has_entity_name = True
 
     def __init__(
-            self, coordinator: WeatherUpdateCoordinator, description: EntityDescription
+            self, coordinator: WeatherUpdateCoordinator, description: ImsSensorEntityDescription
     ) -> None:
         """Initialize."""
         super().__init__(coordinator)
@@ -168,7 +177,9 @@ class ImsEntity(CoordinatorEntity):
         self._attr_unique_id = (
             f"{description.key}_{coordinator.city}_{coordinator.language}"
         )
-        self._attr_translation_key = f"{description.key}_{coordinator.city}"
+
+        self.entity_id = "sensor."+description.key
+        self._attr_translation_key = f"{description.key}_{coordinator.language}"
         self.entity_description = description
 
     @callback

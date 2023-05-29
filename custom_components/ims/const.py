@@ -90,6 +90,54 @@ FORECAST_MODES = [FORECAST_MODE_HOURLY, FORECAST_MODE_DAILY]
 TYPE_CURRENT_UV_INDEX = "current_uv_index"
 TYPE_CURRENT_UV_LEVEL = "current_uv_level"
 TYPE_MAX_UV_INDEX = "max_uv_index"
+TYPE_HEAT_STRESS = "heat_stress"
+TYPE_HEAT_STRESS_LEVEL = "heat_stress_level"
+TYPE_HUMIDITY = "humidity"
+TYPE_DEW_POINT_TEMP = "dew_point_temp"
+TYPE_RAIN = "rain"
+TYPE_RAIN_CHANCE = "rain_chance"
+TYPE_TEMPERATURE = "temperature"
+TYPE_FEELS_LIKE = "feels_like"
+TYPE_MIN_TEMP = "min_temp"
+TYPE_MAX_TEMP = "max_temp"
+TYPE_WAVE_HEIGHT = "wave_height"
+TYPE_WIND_DIRECTION = "wind_direction"
+TYPE_WIND_SPEED = "wind_speed"
+TYPE_WIND_CHILL = "wind_chill"
+TYPE_WEATHER_CODE = "weather_code"
+TYPE_CITY = "city"
+TYPE_FORECAST_TIME = "forecast_time"
+TYPE_FORECAST_PREFIX = "forecast_"
+TYPE_FORECAST_TODAY = "today"
+TYPE_FORECAST_DAY1 = "day1"
+TYPE_FORECAST_DAY2 = "day2"
+TYPE_FORECAST_DAY3 = "day3"
+TYPE_FORECAST_DAY4 = "day4"
+TYPE_FORECAST_DAY5 = "day5"
+TYPE_FORECAST_DAY6 = "day6"
+TYPE_FORECAST_DAY7 = "day7"
+
+FIELD_NAME_FORECAST_TIME = "forecast_time"
+FIELD_NAME_HEAT_STRESS = "heat_stress"
+FIELD_NAME_HEAT_STRESS_LEVEL = "heat_stress_level"
+FIELD_NAME_HUMIDITY = "relative_humidity"
+FIELD_NAME_DEW_POINT_TEMP = "due_point_Temp"
+FIELD_NAME_RAIN = "rain"
+FIELD_NAME_RAIN_CHANCE = "rain_chance"
+FIELD_NAME_TEMPERATURE = "temperature"
+FIELD_NAME_FEELS_LIKE = "feels_like"
+FIELD_NAME_MIN_TEMP = "min_temp"
+FIELD_NAME_MAX_TEMP = "max_temp"
+FIELD_NAME_WAVE_HEIGHT = "wave_height"
+FIELD_NAME_WIND_DIRECTION_ID = "wind_direction_id"
+FIELD_NAME_WIND_SPEED = "wind_speed"
+FIELD_NAME_WIND_CHILL = "wind_chill"
+FIELD_NAME_WEATHER_CODE = "weather_code"
+FIELD_NAME_UV_LEVEL = "u_v_level"
+FIELD_NAME_UV_INDEX = "u_v_index"
+FIELD_NAME_UV_INDEX_MAX = "u_v_i_max"
+FIELD_NAME_LOCATION = "location"
+FIELD_NAME_UV_INDEX_FACTOR = "u_v_i_factor"
 
 LANGUAGES = ["en", "he"]
 
@@ -143,128 +191,29 @@ WEATHER_CODE_TO_CONDITION = {
     "1590": ATTR_CONDITION_EXCEPTIONAL,
 }
 
-WEATHER_SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
-    SensorEntityDescription(
-        key=ATTR_API_DEW_POINT,
-        name="Dew Point Temperature",
-        native_unit_of_measurement=TEMP_CELSIUS,
-        device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_TEMPERATURE,
-        name="Temperature",
-        native_unit_of_measurement=TEMP_CELSIUS,
-        device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_RELATIVE_HUMIDITY,
-        name="Relative humidity",
-        native_unit_of_measurement=PERCENTAGE,
-        device_class=SensorDeviceClass.HUMIDITY,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_FEELS_LIKE_TEMPERATURE,
-        name="Feels like temperature",
-        native_unit_of_measurement=TEMP_CELSIUS,
-        device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_WIND_SPEED,
-        name="Wind speed",
-        native_unit_of_measurement=SPEED_METERS_PER_SECOND,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_WIND_BEARING,
-        name="Wind bearing",
-        native_unit_of_measurement=DEGREE,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_WIND_CHILL,
-        name="Wind chill",
-        native_unit_of_measurement=DEGREE,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_RAIN,
-        name="Rain",
-        native_unit_of_measurement=LENGTH_MILLIMETERS,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_UV_INDEX,
-        name="UV Index",
-        native_unit_of_measurement=UV_INDEX,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_UV_LEVEL,
-        name="UV level",
-        native_unit_of_measurement=UV_INDEX,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_WEATHER_CODE,
-        name="Weather Code",
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_HEAT_STRESS,
-        name="Heat Stress",
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_HEAT_STRESS_LEVEL,
-        name="Heat Stress Level",
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-)
-FORECAST_HOURLY_SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
-    SensorEntityDescription(
-        key=ATTR_FORECAST_TEMP,
-        name="Temperature",
-        native_unit_of_measurement=TEMP_CELSIUS,
-        device_class=SensorDeviceClass.TEMPERATURE,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_WEATHER_CODE,
-        name="Weather Code",
-    ),
-    SensorEntityDescription(
-        key=ATTR_FORECAST_TIME,
-        name="Forecast Time",
-        device_class=SensorDeviceClass.TIMESTAMP,
-    ),
-)
-FORECAST_DAILY_SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
-    SensorEntityDescription(
-        key=ATTR_API_MAXIMUM_TEMPERATURE,
-        name="Maximum temperature",
-        native_unit_of_measurement=TEMP_CELSIUS,
-        device_class=SensorDeviceClass.TEMPERATURE,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_MINIMUM_TEMPERATURE,
-        name="Minimum temperature",
-        native_unit_of_measurement=TEMP_CELSIUS,
-        device_class=SensorDeviceClass.TEMPERATURE,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_MAXIMUM_UV_INDEX,
-        name="Miximum UV index",
-        native_unit_of_measurement=UV_INDEX,
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_WEATHER_CODE,
-        name="Weather Code",
-    ),
-    SensorEntityDescription(
-        key=ATTR_API_FORECAST_DATE,
-        name="Forecast date",
-        device_class=SensorDeviceClass.TIMESTAMP,
-    ),
-)
+
+WEATHER_CODE_TO_ICON = {
+    "1250": "mdi:weather-sunny",
+    "1220": "mdi:weather-partly-cloudy",
+    "1230": "mdi:weather-cloudy",
+    "1570": "mdi:weather-dust",
+    "1010": "mdi:weather-dust",
+    "1160": "mdi:weather-fog",
+    "1310": "mdi:weather-sunny-alert",
+    "1580": "mdi:weather-sunny-alert",
+    "1270": "mdi:weather-fog",
+    "1320": "mdi:snowflake-alert",
+    "1590": "mdi:snowflake-alert",
+    "1300": "mdi:snowflake-melt",
+    "1530": "mdi:weather-partly-rainy",
+    "1540": "mdi:weather-partly-rainy",
+    "1560": "mdi:weather-partly-rainy",
+    "1140": "mdi:weather-pourin",
+    "1020": "mdi:weather-lightning-rainy",
+    "1510": "mdi:weather-lightning",
+    "1260": "mdi:weather-windy",
+    "1080": "mdi:weather-snowy-rainy",
+    "1070": "mdi:weather-snowy-rainy",
+    "1060": "mdi:weather-snowy",
+    "1520": "mdi:weather-snowy-heavy",
+}
