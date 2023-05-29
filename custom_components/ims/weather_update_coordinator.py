@@ -37,7 +37,6 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         self.data = None
         self._connect_error = False
 
-        _LOGGER.debug("Interval: %s", str(update_interval))
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
 
     async def _async_update_data(self):
