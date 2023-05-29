@@ -302,7 +302,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
             "unit": TEMP_CELSIUS,
         },
         "uvi": {"value": daily_forecast.maximum_uvi, "unit": "uv"},
-        "weather ": {
+        "weather": {
             "value": daily_forecast.weather,
             "icon": WEATHER_CODE_TO_ICON.get(daily_forecast.weather_code, "mdi:weather-sunny"),
         },
