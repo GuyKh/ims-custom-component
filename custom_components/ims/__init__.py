@@ -1,7 +1,7 @@
 import logging
-from dataclasses import dataclass
 from typing import Any
 
+from dataclasses import field, dataclass
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 
@@ -156,7 +156,6 @@ def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
 def _filter_domain_configs(elements, domain):
     return list(filter(lambda elem: elem["platform"] == domain, elements))
 
-
 @dataclass
 class ImsSensorEntityDescription(SensorEntityDescription):
     """Describes Pirate Weather sensor entity."""
@@ -178,8 +177,8 @@ class ImsEntity(CoordinatorEntity):
         self._attr_unique_id = (
             f"{description.key}_{coordinator.city}_{coordinator.language}"
         )
-        self._attr_entity_id = description.key
-        self.entity_id = description.key
+
+        self.entity_id = "sensor."+description.key
         self._attr_translation_key = f"{description.key}_{coordinator.language}"
         self.entity_description = description
 

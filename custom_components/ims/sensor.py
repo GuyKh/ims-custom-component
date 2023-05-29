@@ -1,32 +1,42 @@
+import asyncio
+import json
 import logging
 import types
-
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
-from homeassistant.components.sensor import (
-    PLATFORM_SCHEMA,
-    SensorEntity
-)
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.const import CONF_NAME, TEMP_CELSIUS, PERCENTAGE, SPEED_KILOMETERS_PER_HOUR, UV_INDEX
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import DiscoveryInfoType
-
-
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+import pytz
+from dataclasses import field, dataclass
 from pytz import timezone
 
+from datetime import date, datetime
+import voluptuous as vol
+from homeassistant.helpers.entity import Entity
+import homeassistant.helpers.config_validation as cv
+from types import SimpleNamespace
 from homeassistant.components.sensor import (
-    SensorDeviceClass,
+    PLATFORM_SCHEMA,
+    SensorEntity,
     SensorEntityDescription,
     SensorStateClass,
+    SensorDeviceClass
 )
+
+from homeassistant.const import UV_INDEX, UnitOfTime, CONF_NAME, TEMP_CELSIUS, PERCENTAGE, SPEED_KILOMETERS_PER_HOUR
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
+    CONFIG_FLOW_VERSION,
+    DEFAULT_FORECAST_MODE,
+    DEFAULT_LANGUAGE,
+    DEFAULT_NAME,
     DEFAULT_UPDATE_INTERVAL,
+    DOMAIN,
+    FORECAST_MODES,
+    ENTRY_NAME,
+    ENTRY_WEATHER_COORDINATOR,
+    PLATFORMS,
+    UPDATE_LISTENER,
     CONF_CITY,
     CONF_MODE,
     CONF_LANGUAGE,
@@ -35,18 +45,22 @@ from .const import (
     DOMAIN,
     FORECAST_MODES,
     FORECAST_MODE_HOURLY,
+    FORECAST_MODE_DAILY,
     IMS_PLATFORMS,
     IMS_PLATFORM,
+    IMS_PREVPLATFORM,
     ENTRY_WEATHER_COORDINATOR,
+    WEATHER_CODE_TO_CONDITION,
+    WIND_DIRECTIONS,
     TYPE_CURRENT_UV_INDEX,
     TYPE_CURRENT_UV_LEVEL,
-    TYPE_MAX_UV_INDEX, TYPE_HUMIDITY,
-    TYPE_FEELS_LIKE, TYPE_WIND_SPEED, TYPE_FORECAST_TIME, TYPE_CITY, TYPE_TEMPERATURE,
-    TYPE_RAIN, TYPE_FORECAST_PREFIX, TYPE_FORECAST_TODAY, TYPE_FORECAST_DAY1, TYPE_FORECAST_DAY2,
+    TYPE_MAX_UV_INDEX, FIELD_NAME_UV_INDEX, FIELD_NAME_UV_LEVEL, FIELD_NAME_UV_INDEX_MAX, TYPE_HUMIDITY,
+    FIELD_NAME_HUMIDITY, FIELD_NAME_TEMPERATURE, FIELD_NAME_LOCATION, TYPE_FEELS_LIKE, FIELD_NAME_FEELS_LIKE,
+    FIELD_NAME_RAIN, TYPE_WIND_SPEED, TYPE_FORECAST_TIME, FIELD_NAME_FORECAST_TIME, TYPE_CITY, TYPE_TEMPERATURE,
+    TYPE_RAIN, FIELD_NAME_WIND_SPEED, TYPE_FORECAST_PREFIX, TYPE_FORECAST_TODAY, TYPE_FORECAST_DAY1, TYPE_FORECAST_DAY2,
     TYPE_FORECAST_DAY3, TYPE_FORECAST_DAY4, TYPE_FORECAST_DAY5, TYPE_FORECAST_DAY6, TYPE_FORECAST_DAY7,
-    WEATHER_CODE_TO_ICON, FIELD_NAME_RAIN, FIELD_NAME_UV_INDEX, FIELD_NAME_UV_LEVEL, FIELD_NAME_UV_INDEX_MAX,
-    FIELD_NAME_LOCATION, FIELD_NAME_TEMPERATURE, FIELD_NAME_FEELS_LIKE, FIELD_NAME_HUMIDITY, FIELD_NAME_WIND_SPEED,
-    FIELD_NAME_FORECAST_TIME, FIELD_NAME_DAY, )
+    WEATHER_CODE_TO_ICON,
+)
 
 IMS_SENSOR_KEY_PREFIX = "ims_"
 
@@ -90,6 +104,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
     }
 )
+
+weather = None
 
 forecast_mode = types.SimpleNamespace()
 forecast_mode.CURRENT = "current"
@@ -164,7 +180,6 @@ SENSOR_DESCRIPTIONS = (
         key=IMS_SENSOR_KEY_PREFIX + TYPE_RAIN,
         name="IMS Rain",
         icon="mdi:weather-rainy",
-        options=["raining", "not raining"],
         forecast_mode=forecast_mode.CURRENT,
         field_name=FIELD_NAME_RAIN,
     ),
@@ -173,7 +188,7 @@ SENSOR_DESCRIPTIONS = (
         name="IMS Wind Speed",
         icon="mdi:weather-windy",
         native_unit_of_measurement=SPEED_KILOMETERS_PER_HOUR,
-        device_class=SensorDeviceClass.WIND_SPEED,
+        device_class=SensorDeviceClass.SPEED,
         state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=forecast_mode.CURRENT,
         field_name=FIELD_NAME_WIND_SPEED,
@@ -190,62 +205,46 @@ SENSOR_DESCRIPTIONS = (
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_TODAY,
         name="IMS Forecast Today",
         icon="mdi:weather-sunny",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY1,
         name="IMS Forecast Day1",
         icon="mdi:weather-sunny",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY2,
         name="IMS Forecast Day2",
         icon="mdi:weather-windy",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY3,
         name="IMS Forecast Day3",
         icon="mdi:weather-sunny",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY4,
         name="IMS Forecast Day4",
         icon="mdi:weather-sunny",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY5,
         name="IMS Forecast Day5",
         icon="mdi:weather-sunny",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY6,
         name="IMS Forecast Day6",
         icon="mdi:weather-sunny",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY7,
         name="IMS Forecast Day7",
         icon="mdi:weather-sunny",
-        forecast_mode=forecast_mode.DAILY,
-        field_name=FIELD_NAME_DAY,
     ),
 )
 
 
-async def async_setup_platform(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback, discovery_info: DiscoveryInfoType | None = None) -> None:
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     _LOGGER.warning(
         "Configuration of IMS Weather sensor in YAML is deprecated "
         "Your existing configuration has been imported into the UI automatically "
@@ -254,6 +253,9 @@ async def async_setup_platform(hass: HomeAssistant, config_entry: ConfigEntry, a
 
     # Define as a sensor platform
     config_entry[IMS_PLATFORM] = [IMS_PLATFORMS[0]]
+
+    # Set as no rounding for compatability
+    config_entry[PW_ROUND] = "No"
 
     hass.async_create_task(
         hass.config_entries.flow.async_init(
@@ -312,7 +314,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
         attributes[hour.hour] = {
             "weather": {
                 "value": hour.weather,
-                "icon": WEATHER_CODE_TO_ICON.get(hour.weather_code),
+                "icon": WEATHER_CODE_TO_ICON.get(hour.weather_code)
             },
             "temperature": {"value": hour.temperature, "unit": TEMP_CELSIUS},
         }
@@ -320,7 +322,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
     return attributes
 
 
-class ImsSensor(ImsEntity, SensorEntity):
+class ImsSensor(ImsEntity, SensorEntity, ImsSensorEntityDescription):
     """Representation of an IMS sensor."""
 
     @callback
@@ -328,12 +330,15 @@ class ImsSensor(ImsEntity, SensorEntity):
         """Update the state."""
         data = self.coordinator.data
 
-        _LOGGER.debug("Updating %s sensor.\nData: %s", self.name, data)
-        if self.forecast_mode == forecast_mode.DAILY or self.forecast_mode == forecast_mode.HOURLY:
+        if self.entity_description.forecast_mode == forecast_mode.DAILY or self.entity_description.forecast_mode == forecast_mode.HOURLY:
             if not data or not data.forecast:
+                _LOGGER.warn("For %s - no data.forecast", self.entity_description.key)
+                self._attr_native_value = None
                 return
-        elif self.forecast_mode == forecast_mode.CURRENT:
+        elif self.entity_description.forecast_mode == forecast_mode.CURRENT:
             if not data or not data.current_weather:
+                _LOGGER.warn("For %s - no data.current_weather", self.entity_description.key)
+                self._attr_native_value = None
                 return
 
         match self.entity_description.key:
@@ -357,6 +362,7 @@ class ImsSensor(ImsEntity, SensorEntity):
                 self._attr_native_value = data.current_weather.u_v_i_max
 
             case sensor_keys.TYPE_CITY:
+                _LOGGER.info("Location: %s, entity: %s", data.current_weather.location, self.entity_description.key)
                 self._attr_native_value = data.current_weather.location
 
             case sensor_keys.TYPE_TEMPERATURE:

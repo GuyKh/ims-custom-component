@@ -123,7 +123,6 @@ FIELD_NAME_HEAT_STRESS_LEVEL = "heat_stress_level"
 FIELD_NAME_HUMIDITY = "relative_humidity"
 FIELD_NAME_DEW_POINT_TEMP = "due_point_Temp"
 FIELD_NAME_RAIN = "rain"
-FIELD_NAME_DAY: str = "day"
 FIELD_NAME_RAIN_CHANCE = "rain_chance"
 FIELD_NAME_TEMPERATURE = "temperature"
 FIELD_NAME_FEELS_LIKE = "feels_like"
@@ -191,6 +190,7 @@ WEATHER_CODE_TO_CONDITION = {
     "1580": ATTR_CONDITION_EXCEPTIONAL,
     "1590": ATTR_CONDITION_EXCEPTIONAL,
 }
+
 
 WEATHER_CODE_TO_ICON = {
     "1250": "mdi:weather-sunny",
