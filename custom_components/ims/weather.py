@@ -269,26 +269,28 @@ class IMSWeather(WeatherEntity):
         if self._mode == "daily":
             data = [
                 {
-                    ATTR_FORECAST_TIME: entry.date.astimezone(pytz.UTC).isoformat(),
-                    ATTR_FORECAST_NATIVE_TEMP: entry.maximum_temperature,
-                    ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
-                    ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[entry.weather_code],
+                    ATTR_FORECAST_TIME: daily_forecast.date.astimezone(pytz.UTC).isoformat(),
+                    ATTR_FORECAST_NATIVE_TEMP: daily_forecast.maximum_temperature,
+                    ATTR_FORECAST_NATIVE_TEMP_LOW: daily_forecast.minimum_temperature,
+                    ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code],
                 }
-                for entry in self._weather_coordinator.data.forecast.days
+                for daily_forecast in self._weather_coordinator.data.forecast.days
             ]
         else:
             last_weather_code = None
-            for entry in self._weather_coordinator.data.forecast.days:
-                for hourly_forecast in entry.hours:
+            for daily_forecast in self._weather_coordinator.data.forecast.days:
+                for hourly_forecast in daily_forecast.hours:
                     if hourly_forecast.weather_code and hourly_forecast.weather_code != "0":
                         last_weather_code = hourly_forecast.weather_code
+                    elif not last_weather_code:
+                        last_weather_code = daily_forecast.weather_code
                     data.append(
                         {
                             ATTR_FORECAST_TIME: hourly_forecast.forecast_time.astimezone(
                                 pytz.UTC
                             ).isoformat(),
                             ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.temperature,
-                            ATTR_FORECAST_NATIVE_TEMP_LOW: entry.minimum_temperature,
+                            ATTR_FORECAST_NATIVE_TEMP_LOW: daily_forecast.minimum_temperature,
                             ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[last_weather_code],
                             ATTR_FORECAST_NATIVE_PRECIPITATION: hourly_forecast.rain,
                             ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
