@@ -289,7 +289,7 @@ class IMSWeather(WeatherEntity):
                             ATTR_FORECAST_TIME: hourly_forecast.forecast_time.astimezone(
                                 pytz.UTC
                             ).isoformat(),
-                            ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.temperature,
+                            ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.precise_temperature,
                             ATTR_FORECAST_NATIVE_TEMP_LOW: daily_forecast.minimum_temperature,
                             ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[last_weather_code],
                             ATTR_FORECAST_NATIVE_PRECIPITATION: hourly_forecast.rain,
