@@ -151,8 +151,11 @@ async def async_setup_entry(
     return True
 
 
-# asda sd asd
-
+def round_if_needed(value: int | float, outputRound: bool):
+        if outputRound == "Yes":
+            return round(value, 0) + 0
+        else:
+            return round(value, 2)
 
 class IMSWeather(WeatherEntity):
     """Implementation of an IMSWeather sensor."""
@@ -209,30 +212,36 @@ class IMSWeather(WeatherEntity):
         """Return the temperature."""
         temperature = float(self._weather_coordinator.data.current_weather.temperature)
 
-        if self.outputRound == "Yes":
-            return round(temperature, 0) + 0
-        else:
-            return round(temperature, 2)
+        return round_if_needed(temperature, self.outputRound)
+
+    @property
+    def native_apparent_temperature(self):
+        """Return the native apparent temperature (feel-like)."""
+        feels_like_temperature = float(self._weather_coordinator.data.current_weather.feels_like)
+
+        return round_if_needed(feels_like_temperature, self.outputRound)
 
     @property
     def humidity(self):
         """Return the humidity."""
         humidity = float(self._weather_coordinator.data.current_weather.humidity)
 
-        if self.outputRound == "Yes":
-            return round(humidity, 0) + 0
-        else:
-            return round(humidity, 2)
+        return round_if_needed(humidity, self.outputRound)
+        
 
     @property
     def native_wind_speed(self):
         """Return the wind speed."""
         windspeed = float(self._weather_coordinator.data.current_weather.wind_speed)
 
-        if self.outputRound == "Yes":
-            return round(windspeed, 0) + 0
-        else:
-            return round(windspeed, 2)
+        return round_if_needed(windspeed, self.outputRound)
+
+    @property
+    def native_dew_point(self):
+        """Return the native dew point."""
+        dew_point = float(self._weather_coordinator.data.current_weather.due_point_temp)
+
+        return round_if_needed(dew_point, self.outputRound)
 
     @property
     def wind_bearing(self):
