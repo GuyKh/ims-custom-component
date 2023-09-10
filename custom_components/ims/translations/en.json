@@ -93,6 +93,38 @@
       },
       "ims_feels_like_en": {
         "name": "Real Feel"
+      },
+      "ims_current_uv_index_he": {
+        "name": "אינדקס קרינה נוכחי"
+      },
+      "ims_current_uv_index_en": {
+        "name": "Current UV Index"
+      },
+      "ims_max_uv_index_he": {
+        "name": "אינדקס קרינה מירבי"
+      },
+      "ims_max_uv_index_en": {
+        "name": "Current UV Index"
+      },
+      "ims_current_uv_level_he": {
+        "name": "רמת קרינה נוכחית",
+        "state": {
+          "extreme": "קיצוני",
+          "very_high": "גבוה מאוד",
+          "high": "גבוה",
+          "moderate": "בינוני",
+          "low": "נמוך"
+        }
+      },
+      "ims_current_uv_level_en": {
+        "name": "Current UV Level",
+        "state": {
+          "extreme": "Extreme",
+          "very_high": "Very High",
+          "high": "High",
+          "moderate": "Moderate",
+          "low": "Low"
+        }
       }
     }
   }

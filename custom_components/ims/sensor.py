@@ -86,11 +86,11 @@ sensor_keys.TYPE_FORECAST_DAY7 = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + 
 
 _LOGGER = logging.getLogger(__name__)
 
-UV_LEVEL_EXTREME = "Extreme"
-UV_LEVEL_VHIGH = "Very High"
-UV_LEVEL_HIGH = "High"
-UV_LEVEL_MODERATE = "Moderate"
-UV_LEVEL_LOW = "Low"
+UV_LEVEL_EXTREME = "extreme"
+UV_LEVEL_VHIGH = "very_high"
+UV_LEVEL_HIGH = "high"
+UV_LEVEL_MODERATE = "moderate"
+UV_LEVEL_LOW = "low"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
