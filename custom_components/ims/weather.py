@@ -4,6 +4,7 @@ import pytz
 import asyncio
 from datetime import datetime
 from requests.exceptions import ConnectionError as ConnectError, HTTPError, Timeout
+from typing import cast
 from weatheril import *
 import voluptuous as vol
 
@@ -15,7 +16,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 
 from homeassistant.components.weather import (
     PLATFORM_SCHEMA,
@@ -27,7 +28,9 @@ from homeassistant.components.weather import (
     ATTR_FORECAST_WIND_BEARING,
     ATTR_FORECAST_NATIVE_PRECIPITATION,
     ATTR_FORECAST_PRECIPITATION_PROBABILITY,
+    Forecast,
     WeatherEntity,
+    WeatherEntityFeature
 )
 
 from homeassistant.const import (
@@ -167,6 +170,9 @@ class IMSWeather(WeatherEntity):
     _attr_native_temperature_unit = TEMP_CELSIUS
     _attr_native_visibility_unit = LENGTH_KILOMETERS
     _attr_native_wind_speed_unit = SPEED_KILOMETERS_PER_HOUR
+    _attr_supported_features = (
+        WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
+    )
 
     def __init__(
         self,
@@ -186,6 +192,15 @@ class IMSWeather(WeatherEntity):
         self._city = city
         self.outputRound = outputRound
         self._ds_data = self._weather_coordinator.data
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        super()._handle_coordinator_update()
+        assert self.platform.config_entry
+        self.platform.config_entry.async_create_task(
+            self.hass, self.async_update_listeners(("daily", "hourly"))
+        )
 
     @property
     def unique_id(self):
@@ -270,20 +285,18 @@ class IMSWeather(WeatherEntity):
             description = self._weather_coordinator.data.forecast.days[0].weather
         return description
 
-    @property
-    def forecast(self):
+    def _forecast(self, hourly: bool) -> list[Forecast]:
         """Return the forecast array."""
-        data = []
+        data: list[Forecast] = []
 
-        if self._mode == "daily":
+        if not hourly :
             data = [
-                {
-                    ATTR_FORECAST_TIME: daily_forecast.date.astimezone(pytz.UTC).isoformat(),
-                    ATTR_FORECAST_NATIVE_TEMP: daily_forecast.maximum_temperature,
-                    ATTR_FORECAST_NATIVE_TEMP_LOW: daily_forecast.minimum_temperature,
-                    ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code],
-                }
-                for daily_forecast in self._weather_coordinator.data.forecast.days
+                Forecast(
+                    condition = WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code], 
+                    datetime = daily_forecast.date.astimezone(pytz.UTC).isoformat(), 
+                    native_temperature = daily_forecast.maximum_temperature,
+                    native_templow = daily_forecast.minimum_temperature
+                ) for daily_forecast in self._weather_coordinator.data.forecast.days 
             ]
         else:
             last_weather_code = None
@@ -294,21 +307,33 @@ class IMSWeather(WeatherEntity):
                     elif not last_weather_code:
                         last_weather_code = daily_forecast.weather_code
                     data.append(
-                        {
-                            ATTR_FORECAST_TIME: hourly_forecast.forecast_time.astimezone(
-                                pytz.UTC
-                            ).isoformat(),
-                            ATTR_FORECAST_NATIVE_TEMP: hourly_forecast.precise_temperature,
-                            ATTR_FORECAST_NATIVE_TEMP_LOW: daily_forecast.minimum_temperature,
-                            ATTR_FORECAST_CONDITION: WEATHER_CODE_TO_CONDITION[last_weather_code],
-                            ATTR_FORECAST_NATIVE_PRECIPITATION: hourly_forecast.rain,
-                            ATTR_FORECAST_WIND_BEARING: WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
-                            ATTR_FORECAST_PRECIPITATION_PROBABILITY: hourly_forecast.rain_chance,
-                            ATTR_FORECAST_NATIVE_WIND_SPEED: hourly_forecast.wind_speed
-                        }
+                        Forecast(
+                            condition = WEATHER_CODE_TO_CONDITION[last_weather_code],
+                            datetime = hourly_forecast.forecast_time.astimezone(pytz.UTC).isoformat(),
+                            native_temperature = hourly_forecast.precise_temperature,
+                            native_templow = daily_forecast.minimum_temperature,
+                            native_precipitation = hourly_forecast.rain,
+                            wind_bearing = WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
+                            precipitation_probability = hourly_forecast.rain_chance,
+                            native_wind_speed = hourly_forecast.wind_speed,
+                            uv_index = hourly_forecast.u_v_index
+                        )
                     )
                     
         return data
+
+    @property
+    def forecast(self) -> list[Forecast]:
+        """Return the forecast array."""
+        return self._forecast(hourly = (self._mode == FORECAST_MODE_HOURLY))
+
+    async def async_forecast_daily(self) -> list[Forecast]:
+        """Return the daily forecast in native units."""
+        return self._forecast(False)
+
+    async def async_forecast_hourly(self) -> list[Forecast]:
+        """Return the hourly forecast in native units."""
+        return self._forecast(True)
 
     async def async_added_to_hass(self) -> None:
         """Connect to dispatcher listening for entity data notifications."""
