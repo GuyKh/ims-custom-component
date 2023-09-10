@@ -285,7 +285,6 @@ class IMSWeather(WeatherEntity):
             description = self._weather_coordinator.data.forecast.days[0].weather
         return description
 
-    @property
     def _forecast(self, hourly: bool) -> list[Forecast]:
         """Return the forecast array."""
         data: list[Forecast] = []
@@ -326,7 +325,7 @@ class IMSWeather(WeatherEntity):
     @property
     def forecast(self) -> list[Forecast]:
         """Return the forecast array."""
-        return self._forecast(hourly = self._mode == FORECAST_MODE_HOURLY)
+        return self._forecast(hourly = (self._mode == FORECAST_MODE_HOURLY))
 
     async def async_forecast_daily(self) -> list[Forecast]:
         """Return the daily forecast in native units."""
