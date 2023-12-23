@@ -206,7 +206,7 @@ WEATHER_CODE_TO_ICON = {
     "1530": "mdi:weather-partly-rainy",
     "1540": "mdi:weather-partly-rainy",
     "1560": "mdi:weather-partly-rainy",
-    "1140": "mdi:weather-pourin",
+    "1140": "mdi:weather-pouring",
     "1020": "mdi:weather-lightning-rainy",
     "1510": "mdi:weather-lightning",
     "1260": "mdi:weather-windy",
