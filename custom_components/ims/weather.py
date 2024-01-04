@@ -166,7 +166,7 @@ class IMSWeather(WeatherEntity):
     _attr_should_poll = False
     _attr_native_precipitation_unit = UnitOfLength.MILLIMETERS
     _attr_native_pressure_unit = UnitOfPressure.MBAR
-    _attr_native_temperature_unit = UnitOfTemperature.TEMP_CELSIUS
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_native_visibility_unit = UnitOfLength.KILOMETERS
     _attr_native_wind_speed_unit = UnitOfSpeed.KILOMETERS_PER_HOUR
     _attr_supported_features = (
