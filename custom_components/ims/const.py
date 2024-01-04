@@ -35,7 +35,7 @@ from homeassistant.const import (
     PERCENTAGE,
     PRESSURE_HPA,
     SPEED_METERS_PER_SECOND,
-    TEMP_CELSIUS,
+    UnitOfTemperature,
     UV_INDEX,
     Platform,
 )
