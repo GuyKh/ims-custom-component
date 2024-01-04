@@ -36,11 +36,10 @@ from homeassistant.components.weather import (
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
-    PRESSURE_MBAR,
-    SPEED_KILOMETERS_PER_HOUR,
-    LENGTH_KILOMETERS,
-    LENGTH_MILLIMETERS,
-    TEMP_CELSIUS,
+    UnitOfTemperature,
+    UnitOfSpeed,
+    UnitOfPressure,
+    UnitOfLength
 )
 
 from .const import (
@@ -80,7 +79,7 @@ from .const import (
     WIND_DIRECTIONS,
 )
 
-from homeassistant.const import TEMP_CELSIUS
+from homeassistant.const import UnitOfTemperature
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -165,11 +164,11 @@ class IMSWeather(WeatherEntity):
 
     _attr_attribution = ATTRIBUTION
     _attr_should_poll = False
-    _attr_native_precipitation_unit = LENGTH_MILLIMETERS
-    _attr_native_pressure_unit = PRESSURE_MBAR
-    _attr_native_temperature_unit = TEMP_CELSIUS
-    _attr_native_visibility_unit = LENGTH_KILOMETERS
-    _attr_native_wind_speed_unit = SPEED_KILOMETERS_PER_HOUR
+    _attr_native_precipitation_unit = UnitOfLength.MILLIMETERS
+    _attr_native_pressure_unit = UnitOfPressure.MBAR
+    _attr_native_temperature_unit = UnitOfTemperature.TEMP_CELSIUS
+    _attr_native_visibility_unit = UnitOfLength.KILOMETERS
+    _attr_native_wind_speed_unit = UnitOfSpeed.KILOMETERS_PER_HOUR
     _attr_supported_features = (
         WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
     )
