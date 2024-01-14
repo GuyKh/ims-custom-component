@@ -1,22 +1,18 @@
 import logging
-from typing import Any
-
-from dataclasses import field, dataclass
-
+from dataclasses import dataclass
 from datetime import timedelta
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
-
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
-    Platform,
 )
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     CONF_CITY,
@@ -35,9 +31,7 @@ from .const import (
     IMS_PLATFORM,
     IMS_PREVPLATFORM,
 )
-
 from .weather_update_coordinator import WeatherUpdateCoordinator
-
 
 CONF_FORECAST = "forecast"
 CONF_HOURLY_FORECAST = "hourly_forecast"

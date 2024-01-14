@@ -1,19 +1,11 @@
 """Weather data coordinator for the OpenWeatherMap (OWM) service."""
-from datetime import timedelta, datetime, date
-import logging
-
 import asyncio
+import logging
+from datetime import timedelta, datetime, date
+
 import async_timeout
-
-import json
-
-import voluptuous as vol
-
-from homeassistant.helpers import sun
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.util import dt
 from weatheril import *
-
 
 from .const import (
     DOMAIN,

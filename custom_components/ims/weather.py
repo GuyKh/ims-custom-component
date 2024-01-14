@@ -1,67 +1,32 @@
 from __future__ import annotations
+
 import logging
-import pytz
-import asyncio
-from datetime import datetime
-from requests.exceptions import ConnectionError as ConnectError, HTTPError, Timeout
-from typing import cast
-from weatheril import *
-import voluptuous as vol
 
-from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
-from homeassistant.util import Throttle
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.device_registry import DeviceEntryType
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-
+import pytz
+import voluptuous as vol
 from homeassistant.components.weather import (
     PLATFORM_SCHEMA,
-    ATTR_FORECAST_CONDITION,
-    ATTR_FORECAST_NATIVE_TEMP,
-    ATTR_FORECAST_TIME,
-    ATTR_FORECAST_NATIVE_TEMP_LOW,
-    ATTR_FORECAST_NATIVE_WIND_SPEED,
-    ATTR_FORECAST_WIND_BEARING,
-    ATTR_FORECAST_NATIVE_PRECIPITATION,
-    ATTR_FORECAST_PRECIPITATION_PROBABILITY,
     Forecast,
     WeatherEntity,
     WeatherEntityFeature
 )
-
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
-    UnitOfTemperature,
     UnitOfSpeed,
     UnitOfPressure,
     UnitOfLength
 )
+from homeassistant.const import UnitOfTemperature
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import DiscoveryInfoType
+from weatheril import *
 
 from .const import (
     ATTRIBUTION,
-    ATTR_API_FEELS_LIKE_TEMPERATURE,
-    ATTR_API_DEW_POINT,
-    ATTR_API_FORECAST_TIME,
-    ATTR_API_FORECAST_DATE,
-    ATTR_API_HEAT_STRESS,
-    ATTR_API_HEAT_STRESS_LEVEL,
-    ATTR_API_MAXIMUM_TEMPERATURE,
-    ATTR_API_MAXIMUM_UV_INDEX,
-    ATTR_API_MINIMUM_TEMPERATURE,
-    ATTR_API_RAIN,
-    ATTR_API_RELATIVE_HUMIDITY,
-    ATTR_API_TEMPERATURE,
-    ATTR_API_UV_INDEX,
-    ATTR_API_UV_LEVEL,
-    ATTR_API_WEATHER_CODE,
-    ATTR_API_WIND_BEARING,
-    ATTR_API_WIND_CHILL,
-    ATTR_API_WIND_SPEED,
     CONF_CITY,
     CONF_MODE,
     CONF_LANGUAGE,
@@ -73,13 +38,10 @@ from .const import (
     FORECAST_MODE_HOURLY,
     IMS_PLATFORMS,
     IMS_PLATFORM,
-    IMS_PREVPLATFORM,
     ENTRY_WEATHER_COORDINATOR,
     WEATHER_CODE_TO_CONDITION,
     WIND_DIRECTIONS,
 )
-
-from homeassistant.const import UnitOfTemperature
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -180,7 +142,7 @@ class IMSWeather(WeatherEntity):
         forecast_mode: str,
         weather_coordinator: WeatherUpdateCoordinator,
         city: str,
-        outputRound: str,
+        output_round: str,
     ) -> None:
         """Initialize the sensor."""
         self._attr_name = name
@@ -189,7 +151,7 @@ class IMSWeather(WeatherEntity):
         self._mode = forecast_mode
         self._unique_id = unique_id
         self._city = city
-        self.outputRound = outputRound
+        self.output_round = output_round == "True"
         self._ds_data = self._weather_coordinator.data
 
     @callback
@@ -226,21 +188,21 @@ class IMSWeather(WeatherEntity):
         """Return the temperature."""
         temperature = float(self._weather_coordinator.data.current_weather.temperature)
 
-        return round_if_needed(temperature, self.outputRound)
+        return round_if_needed(temperature, self.output_round)
 
     @property
     def native_apparent_temperature(self):
         """Return the native apparent temperature (feel-like)."""
         feels_like_temperature = float(self._weather_coordinator.data.current_weather.feels_like)
 
-        return round_if_needed(feels_like_temperature, self.outputRound)
+        return round_if_needed(feels_like_temperature, self.output_round)
 
     @property
     def humidity(self):
         """Return the humidity."""
         humidity = float(self._weather_coordinator.data.current_weather.humidity)
 
-        return round_if_needed(humidity, self.outputRound)
+        return round_if_needed(humidity, self.output_round)
         
 
     @property
@@ -248,14 +210,14 @@ class IMSWeather(WeatherEntity):
         """Return the wind speed."""
         windspeed = float(self._weather_coordinator.data.current_weather.wind_speed)
 
-        return round_if_needed(windspeed, self.outputRound)
+        return round_if_needed(windspeed, self.output_round)
 
     @property
     def native_dew_point(self):
         """Return the native dew point."""
         dew_point = float(self._weather_coordinator.data.current_weather.due_point_temp)
 
-        return round_if_needed(dew_point, self.outputRound)
+        return round_if_needed(dew_point, self.output_round)
 
     @property
     def wind_bearing(self):
