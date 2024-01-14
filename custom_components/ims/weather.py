@@ -265,17 +265,17 @@ class IMSWeather(WeatherEntity):
                     elif not last_weather_code:
                         last_weather_code = daily_forecast.weather_code
                     data.append(
-                        Forecast({
-                            "condition": WEATHER_CODE_TO_CONDITION[last_weather_code],
-                            "datetime": hourly_forecast.forecast_time.astimezone(pytz.UTC).isoformat(),
-                            "native_temperature": hourly_forecast.precise_temperature,
-                            "native_templow": daily_forecast.minimum_temperature,
-                            "native_precipitation": hourly_forecast.rain,
-                            "wind_bearing": WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
-                            "precipitation_probability": hourly_forecast.rain_chance,
-                            "native_wind_speed": hourly_forecast.wind_speed,
-                            "uv_index": hourly_forecast.u_v_index
-                        })
+                        Forecast(
+                            condition=WEATHER_CODE_TO_CONDITION[last_weather_code],
+                            datetime=hourly_forecast.forecast_time.astimezone(pytz.UTC).isoformat(),
+                            native_temperature=hourly_forecast.precise_temperature,
+                            native_templow=daily_forecast.minimum_temperature,
+                            native_precipitation=hourly_forecast.rain,
+                            wind_bearing=WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
+                            precipitation_probability=hourly_forecast.rain_chance,
+                            native_wind_speed=hourly_forecast.wind_speed,
+                            uv_index=hourly_forecast.u_v_index
+                        )
                     )
 
         return data
