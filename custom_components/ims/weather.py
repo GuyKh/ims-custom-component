@@ -45,7 +45,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_CITY): cv.positive_int,
@@ -59,18 +58,16 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-
 weather = None
-
 
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
 
 async def async_setup_platform(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
+        discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Import the platform into a config entry."""
     _LOGGER.warning(
@@ -90,9 +87,9 @@ async def async_setup_platform(
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up IMS Weather entity based on a config entry."""
     domain_data = hass.data[DOMAIN][config_entry.entry_id]
@@ -116,10 +113,11 @@ async def async_setup_entry(
 
 
 def round_if_needed(value: int | float, outputRound: bool):
-        if outputRound == "Yes":
-            return round(value, 0) + 0
-        else:
-            return round(value, 2)
+    if outputRound == "Yes":
+        return round(value, 0) + 0
+    else:
+        return round(value, 2)
+
 
 class IMSWeather(WeatherEntity):
     """Implementation of an IMSWeather sensor."""
@@ -132,17 +130,17 @@ class IMSWeather(WeatherEntity):
     _attr_native_visibility_unit = UnitOfLength.KILOMETERS
     _attr_native_wind_speed_unit = UnitOfSpeed.KILOMETERS_PER_HOUR
     _attr_supported_features = (
-        WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
+            WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
     )
 
     def __init__(
-        self,
-        name: str,
-        unique_id,
-        forecast_mode: str,
-        weather_coordinator: WeatherUpdateCoordinator,
-        city: str,
-        output_round: str,
+            self,
+            name: str,
+            unique_id,
+            forecast_mode: str,
+            weather_coordinator: WeatherUpdateCoordinator,
+            city: str,
+            output_round: str,
     ) -> None:
         """Initialize the sensor."""
         self._attr_name = name
@@ -203,7 +201,6 @@ class IMSWeather(WeatherEntity):
         humidity = float(self._weather_coordinator.data.current_weather.humidity)
 
         return round_if_needed(humidity, self.output_round)
-        
 
     @property
     def native_wind_speed(self):
@@ -250,14 +247,14 @@ class IMSWeather(WeatherEntity):
         """Return the forecast array."""
         data: list[Forecast] = []
 
-        if not hourly :
+        if not hourly:
             data = [
                 Forecast(
-                    condition = WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code], 
-                    datetime = daily_forecast.date.astimezone(pytz.UTC).isoformat(), 
-                    native_temperature = daily_forecast.maximum_temperature,
-                    native_templow = daily_forecast.minimum_temperature
-                ) for daily_forecast in self._weather_coordinator.data.forecast.days 
+                    condition=WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code],
+                    datetime=daily_forecast.date.astimezone(pytz.UTC).isoformat(),
+                    native_temperature=daily_forecast.maximum_temperature,
+                    native_templow=daily_forecast.minimum_temperature
+                ) for daily_forecast in self._weather_coordinator.data.forecast.days
             ]
         else:
             last_weather_code = None
@@ -268,7 +265,7 @@ class IMSWeather(WeatherEntity):
                     elif not last_weather_code:
                         last_weather_code = daily_forecast.weather_code
                     data.append(
-                        Forecast( {
+                        Forecast({
                             "condition": WEATHER_CODE_TO_CONDITION[last_weather_code],
                             "datetime": hourly_forecast.forecast_time.astimezone(pytz.UTC).isoformat(),
                             "native_temperature": hourly_forecast.precise_temperature,
@@ -278,16 +275,15 @@ class IMSWeather(WeatherEntity):
                             "precipitation_probability": hourly_forecast.rain_chance,
                             "native_wind_speed": hourly_forecast.wind_speed,
                             "uv_index": hourly_forecast.u_v_index
-                            }
-                        )
+                        })
                     )
-                    
+
         return data
 
     @property
     def forecast(self) -> list[Forecast]:
         """Return the forecast array."""
-        return self._forecast(hourly = (self._mode == FORECAST_MODE_HOURLY))
+        return self._forecast(hourly=(self._mode == FORECAST_MODE_HOURLY))
 
     async def async_forecast_daily(self) -> list[Forecast]:
         """Return the daily forecast in native units."""
