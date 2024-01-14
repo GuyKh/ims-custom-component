@@ -1,11 +1,11 @@
 {
     "domain": "ims",
     "name": "The Israel Meteorological Service integration",
-    "codeowners": ["@t0mer"],
+    "codeowners": ["@t0mer", "@GuyKh"],
     "config_flow": true,
     "documentation": "https://github.com/t0mer/ims-custom-component",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/t0mer/ims-custom-component/issues",
     "requirements": ["weatheril>=0.32.0"],
-    "version": "0.1.19"
+    "version": "0.1.20"
 }
