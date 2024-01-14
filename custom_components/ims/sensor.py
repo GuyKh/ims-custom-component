@@ -296,11 +296,8 @@ def generate_forecast_extra_state_attributes(daily_forecast):
     return attributes
 
 
-class ImsSensor(ImsEntity, SensorEntity, ImsSensorEntityDescription):
+class ImsSensor(ImsEntity, SensorEntity, ImsSensorEntityDescription, metaclass=type(Entity)):
     """Representation of an IMS sensor."""
-
-    def __init__(self, coordinator: WeatherUpdateCoordinator, description: ImsSensorEntityDescription) -> None:
-        super().__init__(coordinator, description)
 
     @callback
     def _update_from_latest_data(self) -> None:
