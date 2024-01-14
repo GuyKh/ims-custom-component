@@ -1,42 +1,24 @@
-import asyncio
-import json
 import logging
 import types
-import pytz
-from dataclasses import field, dataclass
-from pytz import timezone
 
-from datetime import date, datetime
-import voluptuous as vol
-from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
-from types import SimpleNamespace
+import voluptuous as vol
 from homeassistant.components.sensor import (
     PLATFORM_SCHEMA,
     SensorEntity,
-    SensorEntityDescription,
     SensorStateClass,
     SensorDeviceClass
 )
-
-from homeassistant.const import UV_INDEX, UnitOfTime,  CONF_NAME, UnitOfTemperature, PERCENTAGE, UnitOfSpeed
-from homeassistant.core import HomeAssistant, callback
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.const import UV_INDEX, CONF_NAME, UnitOfTemperature, PERCENTAGE, UnitOfSpeed
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from pytz import timezone
 
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
-    CONFIG_FLOW_VERSION,
-    DEFAULT_FORECAST_MODE,
-    DEFAULT_LANGUAGE,
-    DEFAULT_NAME,
     DEFAULT_UPDATE_INTERVAL,
-    DOMAIN,
-    FORECAST_MODES,
-    ENTRY_NAME,
-    ENTRY_WEATHER_COORDINATOR,
-    PLATFORMS,
-    UPDATE_LISTENER,
     CONF_CITY,
     CONF_MODE,
     CONF_LANGUAGE,
@@ -45,13 +27,9 @@ from .const import (
     DOMAIN,
     FORECAST_MODES,
     FORECAST_MODE_HOURLY,
-    FORECAST_MODE_DAILY,
     IMS_PLATFORMS,
     IMS_PLATFORM,
-    IMS_PREVPLATFORM,
     ENTRY_WEATHER_COORDINATOR,
-    WEATHER_CODE_TO_CONDITION,
-    WIND_DIRECTIONS,
     TYPE_CURRENT_UV_INDEX,
     TYPE_CURRENT_UV_LEVEL,
     TYPE_MAX_UV_INDEX, FIELD_NAME_UV_INDEX, FIELD_NAME_UV_LEVEL, FIELD_NAME_UV_INDEX_MAX, TYPE_HUMIDITY,
@@ -244,7 +222,7 @@ SENSOR_DESCRIPTIONS = (
 )
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(hass, config_entry, async_add_entities, discovery_info=None):
     _LOGGER.warning(
         "Configuration of IMS Weather sensor in YAML is deprecated "
         "Your existing configuration has been imported into the UI automatically "
@@ -253,9 +231,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     # Define as a sensor platform
     config_entry[IMS_PLATFORM] = [IMS_PLATFORMS[0]]
-
-    # Set as no rounding for compatability
-    config_entry[PW_ROUND] = "No"
 
     hass.async_create_task(
         hass.config_entries.flow.async_init(
@@ -287,9 +262,6 @@ async def async_setup_entry(
         sensors.append(ImsSensor(weather_coordinator, description))
 
     async_add_entities(sensors, update_before_add=True)
-
-    return True
-
 
 def generate_forecast_extra_state_attributes(daily_forecast):
     attributes = {
@@ -332,12 +304,12 @@ class ImsSensor(ImsEntity, SensorEntity):
 
         if self.entity_description.forecast_mode == forecast_mode.DAILY or self.entity_description.forecast_mode == forecast_mode.HOURLY:
             if not data or not data.forecast:
-                _LOGGER.warn("For %s - no data.forecast", self.entity_description.key)
+                _LOGGER.warning("For %s - no data.forecast", self.entity_description.key)
                 self._attr_native_value = None
                 return
         elif self.entity_description.forecast_mode == forecast_mode.CURRENT:
             if not data or not data.current_weather:
-                _LOGGER.warn("For %s - no data.current_weather", self.entity_description.key)
+                _LOGGER.warning("For %s - no data.current_weather", self.entity_description.key)
                 self._attr_native_value = None
                 return
 
