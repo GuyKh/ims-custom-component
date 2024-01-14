@@ -156,7 +156,7 @@ def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
 def _filter_domain_configs(elements, domain):
     return list(filter(lambda elem: elem["platform"] == domain, elements))
 
-@dataclass(kw_only=True, frozen=True)
+@dataclass
 class ImsSensorEntityDescription(SensorEntityDescription):
     """Describes Pirate Weather sensor entity."""
     field_name: str | None = None
