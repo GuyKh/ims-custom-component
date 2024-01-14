@@ -90,7 +90,6 @@ forecast_mode.CURRENT = "current"
 forecast_mode.DAILY = "daily"
 forecast_mode.HOURLY = "hourly"
 
-
 SENSOR_DESCRIPTIONS = (
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX,
@@ -232,9 +231,6 @@ async def async_setup_platform(hass, config_entry, async_add_entities, discovery
     # Define as a sensor platform
     config_entry[IMS_PLATFORM] = [IMS_PLATFORMS[0]]
 
-    # Set as no rounding for compatibility
-    config_entry[PW_ROUND] = "No"
-
     hass.async_create_task(
         hass.config_entries.flow.async_init(
             DOMAIN, context={"source": SOURCE_IMPORT}, data=config_entry
@@ -354,7 +350,7 @@ class ImsSensor(ImsEntity, SensorEntity, ImsSensorEntityDescription):
 
             case sensor_keys.TYPE_RAIN:
                 self._attr_native_value = "raining" if (
-                            data.current_weather.rain and data.current_weather.rain > 0.0) else "not_raining"
+                        data.current_weather.rain and data.current_weather.rain > 0.0) else "not_raining"
 
             case sensor_keys.TYPE_FORECAST_TIME:
                 self._attr_native_value = data.current_weather.forecast_time.astimezone(timezone('Asia/Jerusalem'))
