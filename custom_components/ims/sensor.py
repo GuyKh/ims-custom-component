@@ -150,7 +150,7 @@ SENSOR_DESCRIPTIONS = (
         key=IMS_SENSOR_KEY_PREFIX + TYPE_TEMPERATURE,
         name="IMS Temperature",
         icon="mdi:thermometer",
-        native_unit_of_measurement=UnitOfTemperature.TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=forecast_mode.CURRENT,
@@ -160,7 +160,7 @@ SENSOR_DESCRIPTIONS = (
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FEELS_LIKE,
         name="IMS Feels Like",
         icon="mdi:water-percent",
-        native_unit_of_measurement=UnitOfTemperature.TEMP_CELSIUS,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=forecast_mode.CURRENT,
@@ -295,11 +295,11 @@ def generate_forecast_extra_state_attributes(daily_forecast):
     attributes = {
         "minimum_temperature": {
             "value": daily_forecast.minimum_temperature,
-            "unit": UnitOfTemperature.TEMP_CELSIUS,
+            "unit": UnitOfTemperature.CELSIUS,
         },
         "maximum_temperature": {
             "value": daily_forecast.maximum_temperature,
-            "unit": UnitOfTemperature.TEMP_CELSIUS,
+            "unit": UnitOfTemperature.CELSIUS,
         },
         "maximum_uvi": {"value": daily_forecast.maximum_uvi, "unit": UV_INDEX},
         "weather": {
@@ -316,7 +316,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
                 "value": hour.weather,
                 "icon": WEATHER_CODE_TO_ICON.get(hour.weather_code)
             },
-            "temperature": {"value": hour.temperature, "unit": UnitOfTemperature.TEMP_CELSIUS},
+            "temperature": {"value": hour.temperature, "unit": UnitOfTemperature.CELSIUS},
         }
 
     return attributes
