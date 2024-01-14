@@ -12,7 +12,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import UV_INDEX, CONF_NAME, UnitOfTemperature, PERCENTAGE, UnitOfSpeed
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity import Entity, EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pytz import timezone
 
@@ -296,7 +296,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
     return attributes
 
 
-class ImsSensor(ImsEntity, SensorEntity, ImsSensorEntityDescription, metaclass=type(Entity)):
+class ImsSensor(ImsEntity, SensorEntity):
     """Representation of an IMS sensor."""
 
     @callback
