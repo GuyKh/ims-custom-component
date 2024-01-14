@@ -322,7 +322,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
     return attributes
 
 
-class ImsSensor(ImsEntity, SensorEntity, ImsSensorEntityDescription):
+class ImsSensor(ImsEntity, SensorEntity):
     """Representation of an IMS sensor."""
 
     @callback
