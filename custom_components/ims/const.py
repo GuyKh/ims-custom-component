@@ -31,10 +31,7 @@ from homeassistant.components.weather import (
 )
 from homeassistant.const import (
     DEGREE,
-    LENGTH_MILLIMETERS,
     PERCENTAGE,
-    PRESSURE_HPA,
-    SPEED_METERS_PER_SECOND,
     UnitOfTemperature,
     UV_INDEX,
     Platform,
