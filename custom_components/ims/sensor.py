@@ -16,7 +16,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pytz import timezone
 
-from . import ImsEntity, ImsSensorEntityDescription
+from . import ImsEntity, ImsSensorEntityDescription, WeatherUpdateCoordinator
 from .const import (
     DEFAULT_UPDATE_INTERVAL,
     CONF_CITY,
@@ -298,6 +298,9 @@ def generate_forecast_extra_state_attributes(daily_forecast):
 
 class ImsSensor(ImsEntity, SensorEntity, ImsSensorEntityDescription):
     """Representation of an IMS sensor."""
+
+    def __init__(self, coordinator: WeatherUpdateCoordinator, description: ImsSensorEntityDescription) -> None:
+        super().__init__(coordinator, description)
 
     @callback
     def _update_from_latest_data(self) -> None:
