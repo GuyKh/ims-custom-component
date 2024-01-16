@@ -5,6 +5,7 @@
 - [BREAKING CHANGE]: Rename `sensor.ims_rain` sensor to `sensor.ims_is_raining`
 - Add Precipitation and Precipitation Chance sensors
 - Fix _deprecated constant_ usage and log warning
+- Code styling according to standards
 
 ## v0.1.20
 

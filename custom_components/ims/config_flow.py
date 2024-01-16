@@ -91,7 +91,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_UPDATE_INTERVAL
                 ].total_minutes()
 
-            # Unique value include to seperate WeatherEntity/Sensor
+            # Unique value include to separate WeatherEntity/Sensor
             await self.async_set_unique_id(
                 f"ims-{city}-{language}-{forecast_mode}-{forecast_platform}-{entity_name}"
             )
