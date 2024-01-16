@@ -319,7 +319,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
                 "value": last_weather_status,
                 "icon": WEATHER_CODE_TO_ICON.get(last_weather_code)
             },
-            "temperature": {"value": hour.temperature, "unit": UnitOfTemperature.CELSIUS},
+            "temperature": {"value": hour.precise_temperature or hour.temperature, "unit": UnitOfTemperature.CELSIUS},
         }
 
     return attributes
