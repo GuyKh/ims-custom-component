@@ -1,26 +1,18 @@
 import logging
-from typing import Any
-
-from dataclasses import field, dataclass
-import voluptuous as vol
-import homeassistant.helpers.config_validation as cv
-
+from dataclasses import dataclass
 from datetime import timedelta
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.helpers.entity import EntityDescription
-from homeassistant.helpers.entity_registry import EntityRegistry
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
-
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
-    Platform,
 )
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     CONF_CITY,
@@ -40,11 +32,10 @@ from .const import (
     IMS_PREVPLATFORM,
 )
 
+from .weather_update_coordinator import WeatherUpdateCoordinator
+
 CONF_FORECAST = "forecast"
 CONF_HOURLY_FORECAST = "hourly_forecast"
-
-# from .weather_update_coordinator import WeatherUpdateCoordinator, DarkSkyData
-from .weather_update_coordinator import WeatherUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 ATTRIBUTION = "Powered by IMS Weather"
@@ -58,7 +49,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     images_path = _get_config_value(entry, CONF_IMAGES_PATH)
     language = _get_config_value(entry, CONF_LANGUAGE)
     ims_entity_platform = _get_config_value(entry, IMS_PLATFORM)
-    ims_scan_Int = entry.data[CONF_UPDATE_INTERVAL]
+    ims_scan_int = entry.data[CONF_UPDATE_INTERVAL]
 
     # Extract list of int from forecast days/ hours string if present
     # _LOGGER.warning('forecast_days_type: ' + str(type(forecast_days)))
@@ -75,7 +66,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     else:
         weather_coordinator = WeatherUpdateCoordinator(
-            city, language, timedelta(minutes=ims_scan_Int), hass
+            city, language, timedelta(minutes=ims_scan_int), hass
         )
         hass.data[DOMAIN][unique_location] = weather_coordinator
         # _LOGGER.warning('New Coordinator')
@@ -90,7 +81,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_LANGUAGE: language,
         CONF_MODE: forecast_mode,
         CONF_IMAGES_PATH: images_path,
-        CONF_UPDATE_INTERVAL: ims_scan_Int,
+        CONF_UPDATE_INTERVAL: ims_scan_int,
         IMS_PLATFORM: ims_entity_platform,
     }
 
@@ -120,6 +111,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     ims_entity_prevplatform = hass.data[DOMAIN][entry.entry_id][IMS_PLATFORM]
 
+    unload_ok = False
     # If both
     if (IMS_PLATFORMS[0] in ims_entity_prevplatform) and (
             IMS_PLATFORMS[1] in ims_entity_prevplatform
@@ -144,7 +136,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    return unload_ok
+    return True
 
 
 def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
@@ -156,11 +148,13 @@ def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
 def _filter_domain_configs(elements, domain):
     return list(filter(lambda elem: elem["platform"] == domain, elements))
 
+
 @dataclass(kw_only=True, frozen=True)
 class ImsSensorEntityDescription(SensorEntityDescription):
     """Describes Pirate Weather sensor entity."""
     field_name: str | None = None
     forecast_mode: str | None = None
+
 
 class ImsEntity(CoordinatorEntity):
     """Define a generic Ims entity."""
@@ -178,7 +172,7 @@ class ImsEntity(CoordinatorEntity):
             f"{description.key}_{coordinator.city}_{coordinator.language}"
         )
 
-        self.entity_id = "sensor."+description.key
+        self.entity_id = "sensor." + description.key
         self._attr_translation_key = f"{description.key}_{coordinator.language}"
         self.entity_description = description
 
