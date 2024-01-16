@@ -304,7 +304,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
     last_weather_code = None
     last_weather_status = None
     for hour in daily_forecast.hours:
-        if hour.weather:
+        if hour.weather and hour.weather != "Nothing":
             last_weather_status = hour.weather
         elif not last_weather_status:
             last_weather_status = daily_forecast.weather
