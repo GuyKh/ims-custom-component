@@ -68,7 +68,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
                     FORECAST_MODES
                 ),
-                vol.Optional(CONF_MONITORED_CONDITIONS, default=[]): cv.multi_select(
+                vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_DESCRIPTIONS_KEYS): cv.multi_select(
                     SENSOR_DESCRIPTIONS_KEYS
                 ),
                 vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
@@ -142,7 +142,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if CONF_IMAGES_PATH not in config:
             config[CONF_IMAGES_PATH] = DEFAULT_IMAGE_PATH
         if CONF_MONITORED_CONDITIONS not in config:
-            config[CONF_MONITORED_CONDITIONS] = []
+            config[CONF_MONITORED_CONDITIONS] = SENSOR_DESCRIPTIONS_KEYS
         return await self.async_step_user(config)
 
 
@@ -215,7 +215,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_MONITORED_CONDITIONS,
                         default=self.config_entry.options.get(
                             CONF_MONITORED_CONDITIONS,
-                            self.config_entry.data.get(CONF_MONITORED_CONDITIONS, []),
+                            self.config_entry.data.get(CONF_MONITORED_CONDITIONS, SENSOR_DESCRIPTIONS_KEYS),
                         ),
                     ): cv.multi_select(SENSOR_DESCRIPTIONS_KEYS),
                     vol.Optional(

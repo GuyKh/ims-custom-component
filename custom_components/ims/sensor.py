@@ -241,8 +241,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         ): cv.positive_int,
         vol.Optional(IMS_PLATFORM): cv.string,
         vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
-        vol.Optional(CONF_MONITORED_CONDITIONS, default=None): cv.multi_select(
-            SENSOR_DESCRIPTIONS_DICT
+        vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_DESCRIPTIONS_KEYS): cv.multi_select(
+            SENSOR_DESCRIPTIONS_KEYS
         ),
     }
 )
