@@ -6,6 +6,7 @@
 - Add Precipitation and Precipitation Chance sensors
 - Fix _deprecated constant_ usage and log warning
 - Code styling according to standards
+- Fix gaps in hourly missing data in daily sensors
 
 ## v0.1.20
 
