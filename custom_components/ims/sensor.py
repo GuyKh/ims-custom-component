@@ -219,7 +219,6 @@ SENSOR_DESCRIPTIONS = (
         name="IMS Precipitation Probability",
         icon="mdi:cloud-percent",
         native_unit_of_measurement=PERCENTAGE,
-        device_class=SensorDeviceClass.PRECIPITATION,
         state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=forecast_mode.CURRENT,
         field_name=FIELD_NAME_RAIN_CHANCE,
