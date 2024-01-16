@@ -281,7 +281,7 @@ async def async_setup_entry(
     sensors: list[ImsSensor] = []
 
     for condition in conditions:
-        description = SENSOR_DESCRIPTIONS[condition]
+        description = SENSOR_DESCRIPTIONS_DICT[condition]
         sensors.append(ImsSensor(weather_coordinator, description))
 
     async_add_entities(sensors, update_before_add=True)
