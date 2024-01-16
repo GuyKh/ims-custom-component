@@ -1,20 +1,12 @@
 from __future__ import annotations
 import logging
 import pytz
-import asyncio
-from datetime import datetime
-from requests.exceptions import ConnectionError as ConnectError, HTTPError, Timeout
-from typing import cast
 from weatheril import *
 import voluptuous as vol
 
-from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
-from homeassistant.util import Throttle
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.device_registry import DeviceEntryType
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.typing import DiscoveryInfoType
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 
