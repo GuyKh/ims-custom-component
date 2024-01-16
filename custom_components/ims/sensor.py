@@ -301,11 +301,23 @@ def generate_forecast_extra_state_attributes(daily_forecast):
         "date": {"value": daily_forecast.date.strftime("%Y/%m/%d")},
     }
 
+    last_weather_code = None
+    last_weather_status = None
     for hour in daily_forecast.hours:
+        if hour.weather:
+            last_weather_status = hour.weather
+        elif not last_weather_status:
+            last_weather_status = daily_forecast.weather
+
+        if hour.weather_code and hour.weather_code != "0":
+            last_weather_code = hour.weather_code
+        elif not last_weather_code:
+            last_weather_code = daily_forecast.weather_code
+
         attributes[hour.hour] = {
             "weather": {
-                "value": hour.weather,
-                "icon": WEATHER_CODE_TO_ICON.get(hour.weather_code)
+                "value": last_weather_status,
+                "icon": WEATHER_CODE_TO_ICON.get(last_weather_code)
             },
             "temperature": {"value": hour.temperature, "unit": UnitOfTemperature.CELSIUS},
         }
