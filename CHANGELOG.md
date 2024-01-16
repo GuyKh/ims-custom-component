@@ -7,6 +7,7 @@
 - Fix _deprecated constant_ usage and log warning
 - Code styling according to standards
 - Fix gaps in hourly missing data in daily sensors
+- In ConfigFlow - select which sensors to create
 
 ## v0.1.20
 

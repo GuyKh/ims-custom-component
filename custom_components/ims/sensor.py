@@ -11,9 +11,8 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import UV_INDEX, UnitOfTemperature, PERCENTAGE, UnitOfSpeed, \
-    UnitOfPrecipitationDepth
+    UnitOfPrecipitationDepth, CONF_MONITORED_CONDITIONS
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pytz import timezone
 
@@ -68,34 +67,19 @@ sensor_keys.TYPE_FORECAST_DAY7 = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + 
 
 _LOGGER = logging.getLogger(__name__)
 
-UV_LEVEL_EXTREME = "extreme"
-UV_LEVEL_VHIGH = "very_high"
-UV_LEVEL_HIGH = "high"
-UV_LEVEL_MODERATE = "moderate"
-UV_LEVEL_LOW = "low"
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_CITY): cv.positive_int,
-        vol.Required(CONF_LANGUAGE): cv.string,
-        vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
-        vol.Optional(
-            CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
-        ): cv.positive_int,
-        vol.Optional(IMS_PLATFORM): cv.string,
-        vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
-    }
-)
-
-weather = None
-
 forecast_mode = types.SimpleNamespace()
 forecast_mode.CURRENT = "current"
 forecast_mode.DAILY = "daily"
 forecast_mode.HOURLY = "hourly"
 
 
-SENSOR_DESCRIPTIONS = (
+UV_LEVEL_EXTREME = "extreme"
+UV_LEVEL_VHIGH = "very_high"
+UV_LEVEL_HIGH = "high"
+UV_LEVEL_MODERATE = "moderate"
+UV_LEVEL_LOW = "low"
+
+SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX,
         name="IMS Current UV Index",
@@ -242,8 +226,28 @@ SENSOR_DESCRIPTIONS = (
         name="IMS Forecast Day7",
         icon="mdi:weather-sunny",
     ),
+]
+
+SENSOR_DESCRIPTIONS_DICT = {desc.key: desc for desc in SENSOR_DESCRIPTIONS}
+SENSOR_DESCRIPTIONS_KEYS = [desc.key for desc in SENSOR_DESCRIPTIONS]
+
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+    {
+        vol.Required(CONF_CITY): cv.positive_int,
+        vol.Required(CONF_LANGUAGE): cv.string,
+        vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
+        vol.Optional(
+            CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
+        ): cv.positive_int,
+        vol.Optional(IMS_PLATFORM): cv.string,
+        vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
+        vol.Optional(CONF_MONITORED_CONDITIONS, default=None): cv.multi_select(
+            SENSOR_DESCRIPTIONS_DICT
+        ),
+    }
 )
 
+weather = None
 
 async def async_setup_platform(hass, config_entry, async_add_entities, discovery_info=None):
     _LOGGER.warning(
@@ -270,13 +274,14 @@ async def async_setup_entry(
     """Set up IMS Weather sensor entities based on a config entry."""
 
     domain_data = hass.data[DOMAIN][config_entry.entry_id]
-
+    conditions = domain_data[CONF_MONITORED_CONDITIONS]
     weather_coordinator = domain_data[ENTRY_WEATHER_COORDINATOR]
 
     # Add IMS Sensors
-    sensors: list[Entity] = []
-    # Add forecast entities
-    for description in SENSOR_DESCRIPTIONS:
+    sensors: list[ImsSensor] = []
+
+    for condition in conditions:
+        description = SENSOR_DESCRIPTIONS_DICT[condition]
         sensors.append(ImsSensor(weather_coordinator, description))
 
     async_add_entities(sensors, update_before_add=True)
@@ -379,11 +384,11 @@ class ImsSensor(ImsEntity, SensorEntity):
 
             case sensor_keys.TYPE_IS_RAINING:
                 self._attr_native_value = "raining" if (
-                            data.current_weather.rain and data.current_weather.rain > 0.0) else "not_raining"
+                        data.current_weather.rain and data.current_weather.rain > 0.0) else "not_raining"
 
             case sensor_keys.TYPE_PRECIPITATION:
                 self._attr_native_value = data.current_weather.rain if (
-                            data.current_weather.rain and data.current_weather.rain > 0.0) else 0.0
+                        data.current_weather.rain and data.current_weather.rain > 0.0) else 0.0
 
             case sensor_keys.TYPE_PRECIPITATION_PROBABILITY:
                 self._attr_native_value = data.current_weather.rain_chance

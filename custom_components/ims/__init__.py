@@ -9,7 +9,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
-    CONF_NAME,
+    CONF_NAME, CONF_MONITORED_CONDITIONS,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -50,6 +50,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     language = _get_config_value(entry, CONF_LANGUAGE)
     ims_entity_platform = _get_config_value(entry, IMS_PLATFORM)
     ims_scan_int = entry.data[CONF_UPDATE_INTERVAL]
+    conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS)
+
 
     # Extract list of int from forecast days/ hours string if present
     # _LOGGER.warning('forecast_days_type: ' + str(type(forecast_days)))
@@ -83,6 +85,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_IMAGES_PATH: images_path,
         CONF_UPDATE_INTERVAL: ims_scan_int,
         IMS_PLATFORM: ims_entity_platform,
+        CONF_MONITORED_CONDITIONS: conditions,
     }
 
     # If both platforms
@@ -151,7 +154,7 @@ def _filter_domain_configs(elements, domain):
 
 @dataclass(kw_only=True, frozen=True)
 class ImsSensorEntityDescription(SensorEntityDescription):
-    """Describes Pirate Weather sensor entity."""
+    """Describes IMS Weather sensor entity."""
     field_name: str | None = None
     forecast_mode: str | None = None
 
