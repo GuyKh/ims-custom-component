@@ -154,7 +154,7 @@ def _filter_domain_configs(elements, domain):
 
 @dataclass(kw_only=True, frozen=True)
 class ImsSensorEntityDescription(SensorEntityDescription):
-    """Describes Pirate Weather sensor entity."""
+    """Describes IMS Weather sensor entity."""
     field_name: str | None = None
     forecast_mode: str | None = None
 

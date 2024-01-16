@@ -13,7 +13,6 @@ from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import UV_INDEX, UnitOfTemperature, PERCENTAGE, UnitOfSpeed, \
     UnitOfPrecipitationDepth, CONF_MONITORED_CONDITIONS
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pytz import timezone
 
@@ -67,6 +66,12 @@ sensor_keys.TYPE_FORECAST_DAY6 = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + 
 sensor_keys.TYPE_FORECAST_DAY7 = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY7
 
 _LOGGER = logging.getLogger(__name__)
+
+forecast_mode = types.SimpleNamespace()
+forecast_mode.CURRENT = "current"
+forecast_mode.DAILY = "daily"
+forecast_mode.HOURLY = "hourly"
+
 
 UV_LEVEL_EXTREME = "extreme"
 UV_LEVEL_VHIGH = "very_high"
@@ -243,12 +248,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 weather = None
-
-forecast_mode = types.SimpleNamespace()
-forecast_mode.CURRENT = "current"
-forecast_mode.DAILY = "daily"
-forecast_mode.HOURLY = "hourly"
-
 
 async def async_setup_platform(hass, config_entry, async_add_entities, discovery_info=None):
     _LOGGER.warning(
