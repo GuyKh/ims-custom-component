@@ -62,19 +62,31 @@
       "ims_wind_speed_en": {
         "name": "Wind Speed"
       },
-      "ims_rain_he": {
+      "ims_is_raining_he": {
         "name": "גשם",
         "state": {
           "raining": "יורד",
           "not_raining": "לא יורד"
         }
       },
-      "ims_rain_en": {
+      "ims_is_raining_en": {
         "name": "Rain",
         "state": {
           "raining": "Raining",
           "not_raining": "Not Raining"
         }
+      },
+      "ims_precipitation_he": {
+        "name": "משקעים"
+      },
+      "ims_precipitation_en": {
+        "name": "Precipitation"
+      },
+      "ims_precipitation_probability_he": {
+        "name": "סיכוי לגשם"
+      },
+      "ims_precipitation_probability_en": {
+        "name": "Chance of Rain"
       },
       "ims_temperature_he": {
         "name": "טמפרטורה"
