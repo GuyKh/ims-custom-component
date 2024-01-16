@@ -144,8 +144,19 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
     if config_entry.options:
-        return config_entry.options[key]
-    return config_entry.data[key]
+        val = config_entry.options.get(key)
+        if val:
+            return val
+        else:
+            _LOGGER.warning("Key %s is missing from config_entry.options", key)
+            return None
+    val = config_entry.data.get(key)
+    if val:
+        return val
+    else:
+        _LOGGER.warning("Key %s is missing from config_entry.data", key)
+        return None
+
 
 
 def _filter_domain_configs(elements, domain):
