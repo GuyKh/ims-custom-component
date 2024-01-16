@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.22
+
+* Fix Monitored Condition backward compatibility
+
+
 ## v0.1.21
 
 - [BREAKING CHANGE]: Rename `sensor.ims_rain` sensor to `sensor.ims_is_raining`
