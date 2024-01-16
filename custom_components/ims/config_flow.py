@@ -9,7 +9,7 @@ import socket
 from homeassistant import config_entries
 from homeassistant.const import (
     CONF_MODE,
-    CONF_NAME,
+    CONF_NAME, CONF_MONITORED_CONDITIONS,
 )
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
@@ -31,6 +31,7 @@ from .const import (
     IMS_PLATFORMS,
     IMS_PLATFORM,
 )
+from .sensor import SENSOR_DESCRIPTIONS_KEYS
 
 ATTRIBUTION = "Powered by IMS Weather"
 _LOGGER = logging.getLogger(__name__)
@@ -66,6 +67,9 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
                 vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
                     FORECAST_MODES
+                ),
+                vol.Optional(CONF_MONITORED_CONDITIONS, default=[]): cv.multi_select(
+                    SENSOR_DESCRIPTIONS_KEYS
                 ),
                 vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
             }
@@ -137,6 +141,8 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             config[CONF_UPDATE_INTERVAL] = DEFAULT_UPDATE_INTERVAL
         if CONF_IMAGES_PATH not in config:
             config[CONF_IMAGES_PATH] = DEFAULT_IMAGE_PATH
+        if CONF_MONITORED_CONDITIONS not in config:
+            config[CONF_MONITORED_CONDITIONS] = []
         return await self.async_step_user(config)
 
 
@@ -205,6 +211,13 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                             ),
                         ),
                     ): int,
+                    vol.Optional(
+                        CONF_MONITORED_CONDITIONS,
+                        default=self.config_entry.options.get(
+                            CONF_MONITORED_CONDITIONS,
+                            self.config_entry.data.get(CONF_MONITORED_CONDITIONS, []),
+                        ),
+                    ): cv.multi_select(SENSOR_DESCRIPTIONS_KEYS),
                     vol.Optional(
                         CONF_IMAGES_PATH,
                         default=self.config_entry.options.get(
