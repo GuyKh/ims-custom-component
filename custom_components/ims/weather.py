@@ -1,67 +1,32 @@
 from __future__ import annotations
+
 import logging
-import pytz
-import asyncio
-from datetime import datetime
-from requests.exceptions import ConnectionError as ConnectError, HTTPError, Timeout
-from typing import cast
-from weatheril import *
-import voluptuous as vol
 
-from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
-from homeassistant.util import Throttle
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.device_registry import DeviceEntryType
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-
+import pytz
+import voluptuous as vol
 from homeassistant.components.weather import (
     PLATFORM_SCHEMA,
-    ATTR_FORECAST_CONDITION,
-    ATTR_FORECAST_NATIVE_TEMP,
-    ATTR_FORECAST_TIME,
-    ATTR_FORECAST_NATIVE_TEMP_LOW,
-    ATTR_FORECAST_NATIVE_WIND_SPEED,
-    ATTR_FORECAST_WIND_BEARING,
-    ATTR_FORECAST_NATIVE_PRECIPITATION,
-    ATTR_FORECAST_PRECIPITATION_PROBABILITY,
     Forecast,
     WeatherEntity,
     WeatherEntityFeature
 )
-
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
     CONF_NAME,
-    UnitOfTemperature,
     UnitOfSpeed,
     UnitOfPressure,
     UnitOfLength
 )
+from homeassistant.const import UnitOfTemperature
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import DiscoveryInfoType
+from weatheril import *
 
 from .const import (
     ATTRIBUTION,
-    ATTR_API_FEELS_LIKE_TEMPERATURE,
-    ATTR_API_DEW_POINT,
-    ATTR_API_FORECAST_TIME,
-    ATTR_API_FORECAST_DATE,
-    ATTR_API_HEAT_STRESS,
-    ATTR_API_HEAT_STRESS_LEVEL,
-    ATTR_API_MAXIMUM_TEMPERATURE,
-    ATTR_API_MAXIMUM_UV_INDEX,
-    ATTR_API_MINIMUM_TEMPERATURE,
-    ATTR_API_RAIN,
-    ATTR_API_RELATIVE_HUMIDITY,
-    ATTR_API_TEMPERATURE,
-    ATTR_API_UV_INDEX,
-    ATTR_API_UV_LEVEL,
-    ATTR_API_WEATHER_CODE,
-    ATTR_API_WIND_BEARING,
-    ATTR_API_WIND_CHILL,
-    ATTR_API_WIND_SPEED,
     CONF_CITY,
     CONF_MODE,
     CONF_LANGUAGE,
@@ -73,13 +38,10 @@ from .const import (
     FORECAST_MODE_HOURLY,
     IMS_PLATFORMS,
     IMS_PLATFORM,
-    IMS_PREVPLATFORM,
     ENTRY_WEATHER_COORDINATOR,
     WEATHER_CODE_TO_CONDITION,
     WIND_DIRECTIONS,
 )
-
-from homeassistant.const import UnitOfTemperature
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -143,14 +105,13 @@ async def async_setup_entry(
     unique_id = f"{config_entry.unique_id}"
 
     # Round Output
-    outputRound = "No"
+    output_round = "No"
 
     ims_weather = IMSWeather(
-        name, unique_id, forecast_mode, weather_coordinator, city, outputRound
+        name, unique_id, forecast_mode, weather_coordinator, city, output_round
     )
 
     async_add_entities([ims_weather], False)
-    return True
 
 
 def round_if_needed(value: int | float, outputRound: bool):
@@ -189,7 +150,7 @@ class IMSWeather(WeatherEntity):
         self._mode = forecast_mode
         self._unique_id = unique_id
         self._city = city
-        self.outputRound = outputRound
+        self.outputRound = outputRound == "Yes"
         self._ds_data = self._weather_coordinator.data
 
     @callback
