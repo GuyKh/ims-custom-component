@@ -85,7 +85,6 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         forecast.days = filtered_day_list
 
 
-
 class WeatherData:
     def __init__(self, current_weather, forecast, images):
         self.current_weather = current_weather

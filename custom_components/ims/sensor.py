@@ -19,7 +19,7 @@ from homeassistant.components.sensor import (
     SensorDeviceClass
 )
 
-from homeassistant.const import UV_INDEX, UnitOfTime,  CONF_NAME, UnitOfTemperature, PERCENTAGE, UnitOfSpeed
+from homeassistant.const import UV_INDEX, UnitOfTime,  CONF_NAME, UnitOfTemperature, PERCENTAGE, UnitOfSpeed, UnitOfPrecipitationDepth
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -57,9 +57,10 @@ from .const import (
     TYPE_MAX_UV_INDEX, FIELD_NAME_UV_INDEX, FIELD_NAME_UV_LEVEL, FIELD_NAME_UV_INDEX_MAX, TYPE_HUMIDITY,
     FIELD_NAME_HUMIDITY, FIELD_NAME_TEMPERATURE, FIELD_NAME_LOCATION, TYPE_FEELS_LIKE, FIELD_NAME_FEELS_LIKE,
     FIELD_NAME_RAIN, TYPE_WIND_SPEED, TYPE_FORECAST_TIME, FIELD_NAME_FORECAST_TIME, TYPE_CITY, TYPE_TEMPERATURE,
-    TYPE_RAIN, FIELD_NAME_WIND_SPEED, TYPE_FORECAST_PREFIX, TYPE_FORECAST_TODAY, TYPE_FORECAST_DAY1, TYPE_FORECAST_DAY2,
+    FIELD_NAME_WIND_SPEED, TYPE_FORECAST_PREFIX, TYPE_FORECAST_TODAY, TYPE_FORECAST_DAY1, TYPE_FORECAST_DAY2,
     TYPE_FORECAST_DAY3, TYPE_FORECAST_DAY4, TYPE_FORECAST_DAY5, TYPE_FORECAST_DAY6, TYPE_FORECAST_DAY7,
-    WEATHER_CODE_TO_ICON,
+    WEATHER_CODE_TO_ICON, TYPE_PRECIPITATION, TYPE_IS_RAINING, TYPE_PRECIPITATION_PROBABILITY,
+    FIELD_NAME_RAIN_CHANCE,
 )
 
 IMS_SENSOR_KEY_PREFIX = "ims_"
@@ -73,7 +74,9 @@ sensor_keys.TYPE_TEMPERATURE = IMS_SENSOR_KEY_PREFIX + TYPE_TEMPERATURE
 sensor_keys.TYPE_HUMIDITY = IMS_SENSOR_KEY_PREFIX + TYPE_HUMIDITY
 sensor_keys.TYPE_FORECAST_TIME = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_TIME
 sensor_keys.TYPE_FEELS_LIKE = IMS_SENSOR_KEY_PREFIX + TYPE_FEELS_LIKE
-sensor_keys.TYPE_RAIN = IMS_SENSOR_KEY_PREFIX + TYPE_RAIN
+sensor_keys.TYPE_IS_RAINING = IMS_SENSOR_KEY_PREFIX + TYPE_IS_RAINING
+sensor_keys.TYPE_PRECIPITATION = IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION
+sensor_keys.TYPE_PRECIPITATION_PROBABILITY = IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION_PROBABILITY
 sensor_keys.TYPE_WIND_SPEED = IMS_SENSOR_KEY_PREFIX + TYPE_WIND_SPEED
 sensor_keys.TYPE_FORECAST_TODAY = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_TODAY
 sensor_keys.TYPE_FORECAST_DAY1 = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_DAY1
@@ -177,8 +180,8 @@ SENSOR_DESCRIPTIONS = (
         field_name=FIELD_NAME_HUMIDITY,
     ),
     ImsSensorEntityDescription(
-        key=IMS_SENSOR_KEY_PREFIX + TYPE_RAIN,
-        name="IMS Rain",
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_IS_RAINING,
+        name="IMS Is Raining",
         icon="mdi:weather-rainy",
         forecast_mode=forecast_mode.CURRENT,
         field_name=FIELD_NAME_RAIN,
@@ -200,6 +203,26 @@ SENSOR_DESCRIPTIONS = (
         device_class=SensorDeviceClass.TIMESTAMP,
         forecast_mode=forecast_mode.CURRENT,
         field_name=FIELD_NAME_FORECAST_TIME,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION,
+        name="IMS Precipitation",
+        icon="mdi:weather-pouring",
+        native_unit_of_measurement=UnitOfPrecipitationDepth.MILLIMETERS,
+        device_class=SensorDeviceClass.PRECIPITATION,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_RAIN,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION_PROBABILITY,
+        name="IMS Precipitation Probability",
+        icon="mdi:cloud-percent",
+        native_unit_of_measurement=PERCENTAGE,
+        device_class=SensorDeviceClass.PRECIPITATION,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=forecast_mode.CURRENT,
+        field_name=FIELD_NAME_RAIN_CHANCE,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_TODAY,
@@ -244,7 +267,7 @@ SENSOR_DESCRIPTIONS = (
 )
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+async def async_setup_platform(hass, config_entry, async_add_entities, discovery_info=None):
     _LOGGER.warning(
         "Configuration of IMS Weather sensor in YAML is deprecated "
         "Your existing configuration has been imported into the UI automatically "
@@ -253,9 +276,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
     # Define as a sensor platform
     config_entry[IMS_PLATFORM] = [IMS_PLATFORMS[0]]
-
-    # Set as no rounding for compatability
-    config_entry[PW_ROUND] = "No"
 
     hass.async_create_task(
         hass.config_entries.flow.async_init(
@@ -374,9 +394,16 @@ class ImsSensor(ImsEntity, SensorEntity):
             case sensor_keys.TYPE_HUMIDITY:
                 self._attr_native_value = data.current_weather.humidity
 
-            case sensor_keys.TYPE_RAIN:
+            case sensor_keys.TYPE_IS_RAINING:
                 self._attr_native_value = "raining" if (
                             data.current_weather.rain and data.current_weather.rain > 0.0) else "not_raining"
+
+            case sensor_keys.TYPE_PRECIPITATION:
+                self._attr_native_value = data.current_weather.rain if (
+                            data.current_weather.rain and data.current_weather.rain > 0.0) else 0.0
+
+            case sensor_keys.TYPE_PRECIPITATION_PROBABILITY:
+                self._attr_native_value = data.current_weather.rain_chance
 
             case sensor_keys.TYPE_FORECAST_TIME:
                 self._attr_native_value = data.current_weather.forecast_time.astimezone(timezone('Asia/Jerusalem'))
