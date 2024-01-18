@@ -30,7 +30,10 @@ from .const import (
     IMS_PLATFORMS,
     IMS_PLATFORM,
     IMS_PREVPLATFORM,
+    DEFAULT_LANGUAGE,
+    FORECAST_MODE_HOURLY,
 )
+from .sensor import SENSOR_DESCRIPTIONS_KEYS
 
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
@@ -45,12 +48,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up IMS Weather as config entry."""
     name = entry.data[CONF_NAME]
     city = _get_config_value(entry, CONF_CITY)
-    forecast_mode = _get_config_value(entry, CONF_MODE)
+    forecast_mode = _get_config_value(entry, CONF_MODE, FORECAST_MODE_HOURLY)
     images_path = _get_config_value(entry, CONF_IMAGES_PATH)
-    language = _get_config_value(entry, CONF_LANGUAGE)
+    language = _get_config_value(entry, CONF_LANGUAGE, DEFAULT_LANGUAGE)
     ims_entity_platform = _get_config_value(entry, IMS_PLATFORM)
     ims_scan_int = entry.data[CONF_UPDATE_INTERVAL]
-    conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS)
+    conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS, SENSOR_DESCRIPTIONS_KEYS)
 
 
     # Extract list of int from forecast days/ hours string if present
@@ -142,20 +145,20 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-def _get_config_value(config_entry: ConfigEntry, key: str) -> Any:
+def _get_config_value(config_entry: ConfigEntry, key: str, default = None) -> Any:
     if config_entry.options:
         val = config_entry.options.get(key)
         if val:
             return val
         else:
             _LOGGER.warning("Key %s is missing from config_entry.options", key)
-            return None
+            return default
     val = config_entry.data.get(key)
     if val:
         return val
     else:
         _LOGGER.warning("Key %s is missing from config_entry.data", key)
-        return None
+        return default
 
 
 
