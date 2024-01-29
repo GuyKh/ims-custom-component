@@ -33,7 +33,6 @@ from .const import (
     DEFAULT_LANGUAGE,
     FORECAST_MODE_HOURLY,
 )
-from .sensor import SENSOR_DESCRIPTIONS_KEYS
 
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
@@ -53,7 +52,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     language = _get_config_value(entry, CONF_LANGUAGE, DEFAULT_LANGUAGE)
     ims_entity_platform = _get_config_value(entry, IMS_PLATFORM)
     ims_scan_int = entry.data[CONF_UPDATE_INTERVAL]
-    conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS, SENSOR_DESCRIPTIONS_KEYS)
+    conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS)
 
 
     # Extract list of int from forecast days/ hours string if present
