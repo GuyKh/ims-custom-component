@@ -280,6 +280,10 @@ async def async_setup_entry(
     # Add IMS Sensors
     sensors: list[ImsSensor] = []
 
+    if conditions is None:
+        # If a problem happens - create all sensors
+        conditions = SENSOR_DESCRIPTIONS_KEYS
+
     for condition in conditions:
         description = SENSOR_DESCRIPTIONS_DICT[condition]
         sensors.append(ImsSensor(weather_coordinator, description))

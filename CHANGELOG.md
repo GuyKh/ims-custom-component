@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.23
+
+* Another Fix for Monitored Condition backward compatibility
+
 ## v0.1.22
 
 * Fix Monitored Condition backward compatibility

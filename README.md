@@ -1,7 +1,7 @@
 
 # ims-custom-component
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=techblog_ims-custom-component&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=techblog_ims-custom-component)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 
 
 
