@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.24
+
+* Update icon mapping with latest weather conditions
+
 ## v0.1.23
 
 * Another Fix for Monitored Condition backward compatibility
