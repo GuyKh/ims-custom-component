@@ -2,6 +2,7 @@ import logging
 import types
 
 import homeassistant.helpers.config_validation as cv
+import homeassistant.util.dt as dt_util
 import voluptuous as vol
 from homeassistant.components.sensor import (
     PLATFORM_SCHEMA,
@@ -398,7 +399,7 @@ class ImsSensor(ImsEntity, SensorEntity):
                 self._attr_native_value = data.current_weather.rain_chance
 
             case sensor_keys.TYPE_FORECAST_TIME:
-                self._attr_native_value = data.current_weather.forecast_time.astimezone(timezone('Asia/Jerusalem'))
+                self._attr_native_value = data.current_weather.forecast_time.astimezone(dt_util.async_get_time_zone('Asia/Jerusalem'))
 
             case sensor_keys.TYPE_WIND_SPEED:
                 self._attr_native_value = data.current_weather.wind_speed
