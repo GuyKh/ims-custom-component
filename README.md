@@ -13,7 +13,7 @@ With IMS, you can get the following information for the current status (Updates 
 * Wind speed
 * Rain status
 
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/ims.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/ims.png?raw=true "IMS custom component")
+[![IMS custom component](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/ims.png?raw=true "IMS custom component")](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/ims.png?raw=true "IMS custom component")
 
 
 
@@ -29,7 +29,7 @@ And also, the forecast data for today and the next four days in six hours interv
 * Temperature.
 
 
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/ims_attributes.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/ims_attributes.png?raw=true "IMS custom component")
+[![IMS custom component](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/ims_attributes.png?raw=true "IMS custom component")](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/ims_attributes.png?raw=true "IMS custom component")
 
 
 ### Installation
@@ -41,18 +41,18 @@ Finally, use the UI to add the integration:
 
 Under settings, go to "Devices & Services"
 
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/settings-devices.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/settings-devices.png?raw=true "IMS custom component")
+[![IMS custom component](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/settings-devices.png?raw=true "IMS custom component")](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/settings-devices.png?raw=true "IMS custom component")
 
 In the lower left cornet click on "Add Integration" button
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add-integration.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/add-integration.png?raw=true "IMS custom component")
+[![IMS custom component](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/add-integration.png?raw=true "IMS custom component")](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/add-integration.png?raw=true "IMS custom component")
 
 In the list of integrations, search for IMS:
 
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/select-brand.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/select-brand.png?raw=true "IMS custom component")
+[![IMS custom component](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/select-brand.png?raw=true "IMS custom component")](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/select-brand.png?raw=true "IMS custom component")
 
 Enter the relevant parameters (Location and Language) and click sthe submit button in the bottom:
 
-[![IMS custom component](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/submit-settings.png?raw=true "IMS custom component")](https://github.com/t0mer/ims-custom-component/blob/main/screenshots/submit-settings.png?raw=true "IMS custom component")
+[![IMS custom component](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/submit-settings.png?raw=true "IMS custom component")](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/submit-settings.png?raw=true "IMS custom component")
 
 
 The Languages can be one of two:
