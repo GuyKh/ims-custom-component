@@ -9,6 +9,7 @@ from homeassistant.components.weather import (
     ATTR_CONDITION_HAIL,
     ATTR_CONDITION_LIGHTNING_RAINY,
     ATTR_CONDITION_PARTLYCLOUDY,
+    ATTR_CONDITION_PARTLYCLOUDY_NIGHT
     ATTR_CONDITION_POURING,
     ATTR_CONDITION_RAINY,
     ATTR_CONDITION_SNOWY,
@@ -155,6 +156,7 @@ WEATHER_CODE_TO_CONDITION = {
     "1140": ATTR_CONDITION_POURING,
     "1160": ATTR_CONDITION_FOG,
     "1220": ATTR_CONDITION_PARTLYCLOUDY,
+    "1220-night": ATTR_CONDITION_PARTLYCLOUDY, #no "-night"
     "1230": ATTR_CONDITION_CLOUDY,
     "1250": ATTR_CONDITION_SUNNY,
     "1250-night": ATTR_CONDITION_CLEAR_NIGHT,
@@ -183,6 +185,7 @@ WEATHER_CODE_TO_ICON = {
     "1140": "mdi:weather-pouring",
     "1160": "mdi:weather-fog",
     "1220": "mdi:weather-partly-cloudy",
+    "1220-night": "mdi:weather-partly-cloudy-night",
     "1230": "mdi:weather-cloudy",
     "1250": "mdi:weather-sunny",
     "1250-night": "mdi:clear-night",
