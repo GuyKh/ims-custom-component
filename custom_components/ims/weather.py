@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+
 import pytz
 from weatheril import *
 import voluptuous as vol
@@ -45,6 +46,7 @@ from .const import (
 
 from homeassistant.const import UnitOfTemperature
 
+from .utils import get_hourly_weather_icon
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -220,14 +222,18 @@ class IMSWeather(WeatherEntity):
     def wind_bearing(self):
         """Return the wind bearing."""
         return WIND_DIRECTIONS[
-            int(self._weather_coordinator.data.current_weather.json["wind_direction_id"])
+            int(self._weather_coordinator.data.current_weather.wind_direction_id)
         ]
 
     @property
     def condition(self):
         """Return the weather condition."""
+
+        date_str = self._weather_coordinator.data.current_weather.json["forecast_time"]
+        weather_code = get_hourly_weather_icon(date_str, self._weather_coordinator.data.current_weather.weather_code, "%Y-%m-%d %H:%M:%S")
+
         condition = WEATHER_CODE_TO_CONDITION[
-            self._weather_coordinator.data.current_weather.weather_code
+            weather_code
         ]
         if not condition or condition == "Nothing":
             condition = WEATHER_CODE_TO_CONDITION[
@@ -264,9 +270,12 @@ class IMSWeather(WeatherEntity):
                         last_weather_code = hourly_forecast.weather_code
                     elif not last_weather_code:
                         last_weather_code = daily_forecast.weather_code
+
+                    hourly_weather_code = get_hourly_weather_icon(hourly_forecast.hour, last_weather_code)
+
                     data.append(
                         Forecast(
-                            condition=WEATHER_CODE_TO_CONDITION[last_weather_code],
+                            condition=WEATHER_CODE_TO_CONDITION[hourly_weather_code],
                             datetime=hourly_forecast.forecast_time.astimezone(pytz.UTC).isoformat(),
                             native_temperature=hourly_forecast.precise_temperature,
                             native_templow=daily_forecast.minimum_temperature,
