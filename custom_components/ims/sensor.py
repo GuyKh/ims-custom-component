@@ -40,6 +40,7 @@ from .const import (
     WEATHER_CODE_TO_ICON, TYPE_PRECIPITATION, TYPE_IS_RAINING, TYPE_PRECIPITATION_PROBABILITY,
     FIELD_NAME_RAIN_CHANCE,
 )
+from .utils import get_hourly_weather_icon
 
 IMS_SENSOR_KEY_PREFIX = "ims_"
 
@@ -323,10 +324,12 @@ def generate_forecast_extra_state_attributes(daily_forecast):
         elif not last_weather_code:
             last_weather_code = daily_forecast.weather_code
 
+        hourly_weather_code = get_hourly_weather_icon(hour.hour, last_weather_code)
+
         attributes[hour.hour] = {
             "weather": {
                 "value": last_weather_status,
-                "icon": WEATHER_CODE_TO_ICON.get(last_weather_code)
+                "icon": WEATHER_CODE_TO_ICON.get(hourly_weather_code)
             },
             "temperature": {"value": hour.precise_temperature or hour.temperature, "unit": UnitOfTemperature.CELSIUS},
         }
