@@ -2,6 +2,8 @@ import logging
 import types
 
 import homeassistant.helpers.config_validation as cv
+import homeassistant.util.dt as dt_util
+
 import voluptuous as vol
 from homeassistant.components.sensor import (
     PLATFORM_SCHEMA,
@@ -14,7 +16,7 @@ from homeassistant.const import UV_INDEX, UnitOfTemperature, PERCENTAGE, UnitOfS
     UnitOfPrecipitationDepth, CONF_MONITORED_CONDITIONS
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from pytz import timezone
+
 
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
@@ -248,6 +250,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 weather = None
+timezone = dt_util.get_time_zone('Asia/Jerusalem')
 
 async def async_setup_platform(hass, config_entry, async_add_entities, discovery_info=None):
     _LOGGER.warning(
@@ -398,7 +401,7 @@ class ImsSensor(ImsEntity, SensorEntity):
                 self._attr_native_value = data.current_weather.rain_chance
 
             case sensor_keys.TYPE_FORECAST_TIME:
-                self._attr_native_value = data.current_weather.forecast_time.astimezone(timezone('Asia/Jerusalem'))
+                self._attr_native_value = data.current_weather.forecast_time.astimezone()
 
             case sensor_keys.TYPE_WIND_SPEED:
                 self._attr_native_value = data.current_weather.wind_speed

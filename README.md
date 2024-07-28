@@ -8,7 +8,7 @@
 IMS custom component for HomeAssistant allows you to integrate the Israel Meteorological Service easily and with minimal configuration.
 With IMS, you can get the following information for the current status (Updates every hour):
 * Temperature
-* Real feel
+* Feels Like
 * Humidity
 * Wind speed
 * Rain status
