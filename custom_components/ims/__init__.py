@@ -19,17 +19,13 @@ from .const import (
     CONF_LANGUAGE,
     CONF_IMAGES_PATH,
     CONF_UPDATE_INTERVAL,
-    CONFIG_FLOW_VERSION,
     DOMAIN,
-    DEFAULT_FORECAST_MODE,
     ENTRY_NAME,
     ENTRY_WEATHER_COORDINATOR,
-    FORECAST_MODES,
     UPDATE_LISTENER,
     PLATFORMS,
     IMS_PLATFORMS,
     IMS_PLATFORM,
-    IMS_PREVPLATFORM,
     DEFAULT_LANGUAGE,
     FORECAST_MODE_HOURLY,
 )
@@ -58,7 +54,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Extract list of int from forecast days/ hours string if present
     # _LOGGER.warning('forecast_days_type: ' + str(type(forecast_days)))
 
-    unique_location = f"ims-{language}-{city}"
+    unique_location = f"ims-{language}-{city['lid']}"
 
     hass.data.setdefault(DOMAIN, {})
     # If coordinator already exists for this API key, we'll use that, otherwise
@@ -70,7 +66,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     else:
         weather_coordinator = WeatherUpdateCoordinator(
-            city, language, timedelta(minutes=ims_scan_int), hass
+            city['lid'], language, timedelta(minutes=ims_scan_int), hass
         )
         hass.data[DOMAIN][unique_location] = weather_coordinator
         # _LOGGER.warning('New Coordinator')
