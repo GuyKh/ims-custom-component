@@ -1,5 +1,6 @@
 """Consts for the OpenWeatherMap."""
 from __future__ import annotations
+import types
 
 from homeassistant.components.weather import (
     ATTR_CONDITION_CLEAR_NIGHT,
@@ -56,7 +57,7 @@ ATTR_API_WIND_BEARING = "wind_direction_id"
 ATTR_API_WIND_CHILL = "wind_chill"
 ATTR_API_WIND_SPEED = "wind_speed"
 UPDATE_LISTENER = "update_listener"
-PLATFORMS = [Platform.SENSOR, Platform.WEATHER]
+PLATFORMS = [Platform.SENSOR, Platform.WEATHER, Platform.BINARY_SENSOR]
 IMS_PLATFORMS = ["Sensor", "Weather"]
 IMS_PLATFORM = "ims_platform"
 IMS_PREVPLATFORM = "ims_prevplatform"
@@ -120,6 +121,21 @@ FIELD_NAME_WIND_DIRECTION_ID = "wind_direction_id"
 FIELD_NAME_WIND_SPEED = "wind_speed"
 
 LANGUAGES = ["en", "he"]
+
+IMS_SENSOR_KEY_PREFIX = "ims_"
+
+
+FORECAST_MODE = types.SimpleNamespace()
+FORECAST_MODE.CURRENT = "current"
+FORECAST_MODE.DAILY = "daily"
+FORECAST_MODE.HOURLY = "hourly"
+
+
+UV_LEVEL_EXTREME = "extreme"
+UV_LEVEL_VHIGH = "very_high"
+UV_LEVEL_HIGH = "high"
+UV_LEVEL_MODERATE = "moderate"
+UV_LEVEL_LOW = "low"
 
 # Based on https://ims.gov.il/en/wind_directions
 WIND_DIRECTIONS = {

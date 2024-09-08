@@ -94,6 +94,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # If only sensor
     elif IMS_PLATFORMS[0] in ims_entity_platform:
         await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[0])
+        await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[2])
     # If only weather
     elif IMS_PLATFORMS[1] in ims_entity_platform:
         await hass.config_entries.async_forward_entry_setup(entry, PLATFORMS[1])
@@ -121,7 +122,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # If only sensor
     elif IMS_PLATFORMS[0] in ims_entity_prevplatform:
         unload_ok = await hass.config_entries.async_unload_platforms(
-            entry, [PLATFORMS[0]]
+            entry, [PLATFORMS[0], PLATFORMS[2]]
         )
     # If only Weather
     elif IMS_PLATFORMS[1] in ims_entity_prevplatform:
