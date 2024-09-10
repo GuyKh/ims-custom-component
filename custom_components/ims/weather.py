@@ -3,23 +3,20 @@ import logging
 
 import pytz
 from weatheril import *
-import voluptuous as vol
 
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 
 from homeassistant.components.weather import (
-    PLATFORM_SCHEMA,
+    # PLATFORM_SCHEMA,
     Forecast,
     WeatherEntity,
     WeatherEntityFeature
 )
 
 from homeassistant.const import (
-    CONF_MODE,
     CONF_NAME,
     UnitOfSpeed,
     UnitOfPressure,
@@ -30,12 +27,7 @@ from .const import (
     ATTRIBUTION,
     CONF_CITY,
     CONF_MODE,
-    CONF_LANGUAGE,
-    CONF_IMAGES_PATH,
-    CONF_UPDATE_INTERVAL,
     DOMAIN,
-    DEFAULT_UPDATE_INTERVAL,
-    FORECAST_MODES,
     FORECAST_MODE_HOURLY,
     IMS_PLATFORMS,
     IMS_PLATFORM,
@@ -50,19 +42,6 @@ from .utils import get_hourly_weather_icon
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_CITY): cv.positive_int,
-        vol.Required(CONF_LANGUAGE): cv.string,
-        vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
-        vol.Optional(
-            CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
-        ): cv.positive_int,
-        vol.Optional(IMS_PLATFORM): cv.string,
-        vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
-    }
-)
 
 weather = None
 
@@ -108,7 +87,7 @@ async def async_setup_entry(
     output_round = "No"
 
     ims_weather = IMSWeather(
-        name, unique_id, forecast_mode, weather_coordinator, city, output_round
+        name, unique_id, forecast_mode, weather_coordinator, city["name"], output_round
     )
 
     async_add_entities([ims_weather], False)

@@ -4,6 +4,7 @@ from datetime import timedelta
 
 import aiohttp
 import voluptuous as vol
+from math import radians, sin, cos, sqrt, atan2
 import socket
 
 from homeassistant import config_entries
@@ -36,6 +37,7 @@ from .sensor import SENSOR_DESCRIPTIONS_KEYS
 ATTRIBUTION = "Powered by IMS Weather"
 _LOGGER = logging.getLogger(__name__)
 
+cities_data = None
 
 class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for IMSWeather."""
@@ -51,32 +53,12 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         """Handle a flow initialized by the user."""
         errors = {}
-
-        schema = vol.Schema(
-            {
-                vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
-                vol.Required(CONF_CITY, default=1): int,
-                vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(
-                    LANGUAGES
-                ),
-                vol.Optional(
-                    CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
-                ): int,
-                vol.Required(IMS_PLATFORM, default=[IMS_PLATFORMS[1]]): cv.multi_select(
-                    IMS_PLATFORMS
-                ),
-                vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
-                    FORECAST_MODES
-                ),
-                vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_DESCRIPTIONS_KEYS): cv.multi_select(
-                    SENSOR_DESCRIPTIONS_KEYS
-                ),
-                vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
-            }
-        )
+        global cities_data
 
         if user_input is not None:
-            city = user_input[CONF_CITY]
+            city_id = user_input[CONF_CITY]
+            city = cities_data[str(city_id)]
+            user_input[CONF_CITY] = city
             language = user_input[CONF_LANGUAGE]
             forecast_mode = user_input[CONF_MODE]
             entity_name = user_input[CONF_NAME]
@@ -97,7 +79,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             # Unique value include to separate WeatherEntity/Sensor
             await self.async_set_unique_id(
-                f"ims-{city}-{language}-{forecast_mode}-{forecast_platform}-{entity_name}"
+                f"ims-{city_id}-{language}-{forecast_mode}-{forecast_platform}-{entity_name}"
             )
 
             self._abort_if_unique_id_configured()
@@ -116,8 +98,44 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(
                     title=user_input[CONF_NAME], data=user_input
                 )
-
             _LOGGER.warning(errors)
+
+        # Step 1: Fetch the cities from an external URL based on the user's locale
+        cities = await _get_localized_cities(self.hass)
+        if not cities:
+            errors["base"] = "cannot_retrieve_cities"
+            return self.async_show_form(step_id="user", data_schema=vol.Schema({}), errors=errors)
+
+        # Step 2: Calculate the closest city based on Home Assistant's coordinates
+        ha_latitude = self.hass.config.latitude
+        ha_longitude = self.hass.config.longitude
+        closest_city = _find_closest_city(cities, ha_latitude, ha_longitude)
+
+        # Step 3: Create a selection field for cities
+        city_options = {city_id: city["name"] for city_id, city in cities.items()}
+        
+        schema = vol.Schema(
+            {
+                vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
+                vol.Required(CONF_CITY, default=closest_city["lid"]): vol.In(city_options),
+                vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(
+                    LANGUAGES
+                ),
+                vol.Optional(
+                    CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
+                ): int,
+                vol.Required(IMS_PLATFORM, default=[IMS_PLATFORMS[1]]): cv.multi_select(
+                    IMS_PLATFORMS
+                ),
+                vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
+                    FORECAST_MODES
+                ),
+                vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_DESCRIPTIONS_KEYS): cv.multi_select(
+                    SENSOR_DESCRIPTIONS_KEYS
+                ),
+                vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
+            }
+        )
 
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
@@ -145,6 +163,80 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             config[CONF_MONITORED_CONDITIONS] = SENSOR_DESCRIPTIONS_KEYS
         return await self.async_step_user(config)
 
+supported_ims_languages = ["en", "he", "ar"]
+
+async def _is_ims_api_online(hass, language, city):
+    forecast_url = "https://ims.gov.il/" + language + "/forecast_data/" + str(city)
+
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(family=socket.AF_INET), raise_for_status=False) as session:
+        async with session.get(forecast_url) as resp:
+            status = resp.status
+
+    return status
+
+async def _get_localized_cities(hass):
+    global cities_data
+    if cities_data:
+        return cities_data
+
+    lang = hass.config.language
+    if lang not in supported_ims_languages:
+        lang = 'en'
+    locations_info_url = "https://ims.gov.il/" + lang + "/locations_info"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(locations_info_url) as response:
+                if response.status == 200:
+                    # Return the JSON data
+                    cities_json = await response.json()
+                    cities_data = cities_json.get("data", {})
+                else:
+                    # Handle HTTP errors
+                    _handle_http_error(response.status)
+                    return None
+    except aiohttp.ClientError as e:
+        # Handle connection issues, timeouts, etc.
+        _handle_http_error(e)
+        return None
+
+    return cities_data
+
+@callback
+def _handle_http_error(self, error):
+    """Handle HTTP errors."""
+    self.hass.logger.error(f"Error fetching data from URL: {error}")
+
+def _find_closest_city(cities, ha_latitude, ha_longitude):
+    """Find the closest city based on the Home Assistant coordinates."""
+    def distance(lat1, lon1, lat2, lon2):
+        # Calculate the distance between two lat/lon points (Haversine formula)
+        R = 6371  # Radius of Earth in kilometers
+        lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return R * c  # Distance in kilometers
+
+    closest_city = None
+    closest_distance = float("inf")
+    
+    for city_id, city in cities.items():
+        city_lat = float(city["lat"])
+        city_lon = float(city["lon"])
+        dist = distance(ha_latitude, ha_longitude, city_lat, city_lon)
+        
+        if dist < closest_distance:
+            closest_distance = dist
+            closest_city = city
+    
+    if closest_distance > 10:
+        return cities["1"]
+    else:
+        return closest_city
+
+
 
 class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
     """Handle options."""
@@ -155,6 +247,10 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
+        global cities_data
+        if not cities_data:
+            cities_data = _get_localized_cities(self.hass)
+
         if user_input is not None:
             # entry = self.config_entry
 
@@ -176,7 +272,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_CITY,
                         default=self.config_entry.options.get(
                             CONF_CITY,
-                            self.config_entry.data.get(CONF_CITY, 1),
+                            self.config_entry.data.get(CONF_CITY, cities_data["1"]),
                         ),
                     ): int,
                     vol.Optional(
@@ -230,13 +326,3 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                 }
             ),
         )
-
-
-async def _is_ims_api_online(hass, language, city):
-    forecast_url = "https://ims.gov.il/" + language + "/forecast_data/" + str(city)
-
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(family=socket.AF_INET), raise_for_status=False) as session:
-        async with session.get(forecast_url) as resp:
-            status = resp.status
-
-    return status

@@ -1,11 +1,10 @@
 """Weather data coordinator for the OpenWeatherMap (OWM) service."""
 import asyncio
 import logging
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 
-import async_timeout
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from weatheril import *
+from weatheril import WeatherIL
 
 from .const import (
     DOMAIN,
@@ -28,14 +27,16 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
 
         self.data = None
         self._connect_error = False
+        self._hass = hass
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
 
     async def _async_update_data(self):
         """Update the data."""
         data = {}
-        async with async_timeout.timeout(30):
+        async with self._hass.timeout.async_timeout(30):
             try:
+                _LOGGER.info("Fetching data from IMS")
                 data = await self._get_ims_weather()
             except Exception as error:
                 raise UpdateFailed(error) from error
@@ -44,10 +45,9 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
     async def _get_ims_weather(self):
         """Poll weather data from IMS."""
 
-        loop = None
         try:
             loop = asyncio.get_event_loop()
-        except:
+        except Exception:
             loop = asyncio.new_event_loop()
 
         current_weather = await loop.run_in_executor(

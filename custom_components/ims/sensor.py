@@ -1,12 +1,9 @@
 import logging
 import types
 
-import homeassistant.helpers.config_validation as cv
 import homeassistant.util.dt as dt_util
 
-import voluptuous as vol
 from homeassistant.components.sensor import (
-    PLATFORM_SCHEMA,
     SensorEntity,
     SensorStateClass,
     SensorDeviceClass
@@ -20,15 +17,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
-    DEFAULT_UPDATE_INTERVAL,
-    CONF_CITY,
-    CONF_MODE,
-    CONF_LANGUAGE,
-    CONF_IMAGES_PATH,
-    CONF_UPDATE_INTERVAL,
     DOMAIN,
-    FORECAST_MODES,
-    FORECAST_MODE_HOURLY,
     IMS_PLATFORMS,
     IMS_PLATFORM,
     ENTRY_WEATHER_COORDINATOR,
@@ -234,22 +223,6 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
 SENSOR_DESCRIPTIONS_DICT = {desc.key: desc for desc in SENSOR_DESCRIPTIONS}
 SENSOR_DESCRIPTIONS_KEYS = [desc.key for desc in SENSOR_DESCRIPTIONS]
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_CITY): cv.positive_int,
-        vol.Required(CONF_LANGUAGE): cv.string,
-        vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
-        vol.Optional(
-            CONF_UPDATE_INTERVAL, default=DEFAULT_UPDATE_INTERVAL
-        ): cv.positive_int,
-        vol.Optional(IMS_PLATFORM): cv.string,
-        vol.Optional(CONF_MODE, default=FORECAST_MODE_HOURLY): vol.In(FORECAST_MODES),
-        vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_DESCRIPTIONS_KEYS): cv.multi_select(
-            SENSOR_DESCRIPTIONS_KEYS
-        ),
-    }
-)
-
 weather = None
 timezone = dt_util.get_time_zone('Asia/Jerusalem')
 
@@ -380,7 +353,7 @@ class ImsSensor(ImsEntity, SensorEntity):
                 self._attr_native_value = data.current_weather.u_v_i_max
 
             case sensor_keys.TYPE_CITY:
-                _LOGGER.info("Location: %s, entity: %s", data.current_weather.location, self.entity_description.key)
+                _LOGGER.debug("Location: %s, entity: %s", data.current_weather.location, self.entity_description.key)
                 self._attr_native_value = data.current_weather.location
 
             case sensor_keys.TYPE_TEMPERATURE:
