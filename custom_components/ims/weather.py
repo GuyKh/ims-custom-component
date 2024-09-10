@@ -2,7 +2,6 @@ from __future__ import annotations
 import logging
 
 import pytz
-from weatheril import *
 
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType

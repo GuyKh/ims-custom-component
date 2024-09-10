@@ -33,11 +33,13 @@ from .const import (
     IMS_PLATFORM,
 )
 from .sensor import SENSOR_DESCRIPTIONS_KEYS
+from .binary_sensor import BINARY_SENSOR_DESCRIPTIONS_KEYS
 
 ATTRIBUTION = "Powered by IMS Weather"
 _LOGGER = logging.getLogger(__name__)
 
 cities_data = None
+SENSOR_KEYS = SENSOR_DESCRIPTIONS_KEYS + BINARY_SENSOR_DESCRIPTIONS_KEYS
 
 class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for IMSWeather."""
@@ -62,7 +64,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             language = user_input[CONF_LANGUAGE]
             forecast_mode = user_input[CONF_MODE]
             entity_name = user_input[CONF_NAME]
-            image_path = user_input[CONF_IMAGES_PATH]
+            # image_path = user_input[CONF_IMAGES_PATH]
             forecast_platform = user_input[IMS_PLATFORM]
 
             # Convert scan interval to timedelta
@@ -90,7 +92,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass, user_input[CONF_LANGUAGE], user_input[CONF_CITY]
                 )
 
-            except:
+            except Exception:
                 _LOGGER.warning("IMS Weather Setup Error: HTTP Error: %s", api_status)
                 errors["base"] = "API Error: " + api_status
 
@@ -160,7 +162,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if CONF_IMAGES_PATH not in config:
             config[CONF_IMAGES_PATH] = DEFAULT_IMAGE_PATH
         if CONF_MONITORED_CONDITIONS not in config:
-            config[CONF_MONITORED_CONDITIONS] = SENSOR_DESCRIPTIONS_KEYS
+            config[CONF_MONITORED_CONDITIONS] = SENSOR_KEYS
         return await self.async_step_user(config)
 
 supported_ims_languages = ["en", "he", "ar"]
@@ -311,9 +313,9 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_MONITORED_CONDITIONS,
                         default=self.config_entry.options.get(
                             CONF_MONITORED_CONDITIONS,
-                            self.config_entry.data.get(CONF_MONITORED_CONDITIONS, SENSOR_DESCRIPTIONS_KEYS),
+                            self.config_entry.data.get(CONF_MONITORED_CONDITIONS, SENSOR_KEYS),
                         ),
-                    ): cv.multi_select(SENSOR_DESCRIPTIONS_KEYS),
+                    ): cv.multi_select(SENSOR_KEYS),
                     vol.Optional(
                         CONF_IMAGES_PATH,
                         default=self.config_entry.options.get(
