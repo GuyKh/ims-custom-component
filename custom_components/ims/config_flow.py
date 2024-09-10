@@ -132,8 +132,8 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
                     FORECAST_MODES
                 ),
-                vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_DESCRIPTIONS_KEYS): cv.multi_select(
-                    SENSOR_DESCRIPTIONS_KEYS
+                vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_KEYS): cv.multi_select(
+                    SENSOR_KEYS
                 ),
                 vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
             }
