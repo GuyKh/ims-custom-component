@@ -45,6 +45,22 @@
         }
     },
   "entity": {
+    "binary_sensor": {
+      "ims_is_raining_he": {
+        "name": "גשם",
+        "state": {
+          "on": "יורד",
+          "off": "לא יורד"
+        }
+      },
+      "ims_is_raining_en": {
+        "name": "Rain",
+        "state": {
+          "on": "Raining",
+          "off": "Not Raining"
+        }
+      }
+    },
     "sensor": {
       "ims_city_he": {
         "name": "ישוב"
@@ -63,20 +79,6 @@
       },
       "ims_wind_speed_en": {
         "name": "Wind Speed"
-      },
-      "ims_is_raining_he": {
-        "name": "גשם",
-        "state": {
-          "raining": "יורד",
-          "not_raining": "לא יורד"
-        }
-      },
-      "ims_is_raining_en": {
-        "name": "Rain",
-        "state": {
-          "raining": "Raining",
-          "not_raining": "Not Raining"
-        }
       },
       "ims_precipitation_he": {
         "name": "משקעים"

@@ -43,6 +43,22 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "ims_is_raining_he": {
+        "name": "Chuva",
+        "state": {
+          "on": "A chover",
+          "off": "Não está a chover"
+        }
+      },
+      "ims_is_raining_en": {
+        "name": "Chuva",
+        "state": {
+          "on": "A chover",
+          "off": "Não está a chover"
+        }
+      }
+    },
     "sensor": {
       "ims_city_he": {
         "name": "Localidade"
@@ -61,20 +77,6 @@
       },
       "ims_wind_speed_en": {
         "name": "Velocidade do Vento"
-      },
-      "ims_is_raining_he": {
-        "name": "Chuva",
-        "state": {
-          "raining": "A chover",
-          "not_raining": "Não está a chover"
-        }
-      },
-      "ims_is_raining_en": {
-        "name": "Chuva",
-        "state": {
-          "raining": "A chover",
-          "not_raining": "Não está a chover"
-        }
       },
       "ims_precipitation_he": {
         "name": "Precipitação"
