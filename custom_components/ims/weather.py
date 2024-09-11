@@ -82,11 +82,16 @@ async def async_setup_entry(
 
     unique_id = f"{config_entry.unique_id}"
 
+    is_legacy_city = False
+    if isinstance(city, int | str):
+        is_legacy_city = True
+        
+
     # Round Output
     output_round = "No"
 
     ims_weather = IMSWeather(
-        name, unique_id, forecast_mode, weather_coordinator, city["name"], output_round
+        name, unique_id, forecast_mode, weather_coordinator, city["name"] if not is_legacy_city else city, output_round
     )
 
     async_add_entities([ims_weather], False)
