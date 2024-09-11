@@ -274,7 +274,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_CITY,
                         default=self.config_entry.options.get(
                             CONF_CITY,
-                            self.config_entry.data.get(CONF_CITY, cities_data["1"]),
+                            self.config_entry.data.get(CONF_CITY, 1),
                         ),
                     ): int,
                     vol.Optional(

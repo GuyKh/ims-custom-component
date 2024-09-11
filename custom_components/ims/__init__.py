@@ -54,7 +54,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Extract list of int from forecast days/ hours string if present
     # _LOGGER.warning('forecast_days_type: ' + str(type(forecast_days)))
 
-    unique_location = f"ims-{language}-{city['lid']}"
+    is_legacy_city = False
+    if isinstance(city, int | str):
+        is_legacy_city = True
+
+    city_id = city if is_legacy_city else city['lid']
+
+    unique_location = f"ims-{language}-{city_id}"
 
     hass.data.setdefault(DOMAIN, {})
     # If coordinator already exists for this API key, we'll use that, otherwise
@@ -66,7 +72,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     else:
         weather_coordinator = WeatherUpdateCoordinator(
-            city['lid'], language, timedelta(minutes=ims_scan_int), hass
+            city_id, language, timedelta(minutes=ims_scan_int), hass
         )
         hass.data[DOMAIN][unique_location] = weather_coordinator
         # _LOGGER.warning('New Coordinator')
