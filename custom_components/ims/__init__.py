@@ -53,7 +53,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Extract list of int from forecast days/ hours string if present
     # _LOGGER.warning('forecast_days_type: ' + str(type(forecast_days)))
-
     is_legacy_city = False
     if isinstance(city, int | str):
         is_legacy_city = True
@@ -136,7 +135,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry, [PLATFORMS[1]]
         )
 
-    _LOGGER.info("Unloading IMS Weather")
+    _LOGGER.info(f"Unloading IMS Weather. Successful: {unload_ok}")
 
     if unload_ok:
         update_listener = hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER]
