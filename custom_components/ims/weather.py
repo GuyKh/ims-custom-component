@@ -87,6 +87,11 @@ async def async_setup_entry(
 
     unique_id = f"{config_entry.unique_id}"
 
+    is_legacy_city = False
+    if isinstance(city, int | str):
+        is_legacy_city = True
+        
+
     # Round Output
     output_round = "No"
 
