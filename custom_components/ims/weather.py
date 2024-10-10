@@ -105,8 +105,6 @@ def round_if_needed(value: int | float, output_round: bool):
     else:
         return round(value, 2)
 
-timezone = dt_util.get_time_zone('Asia/Jerusalem')
-
 class IMSWeather(WeatherEntity):
     """Implementation of an IMSWeather sensor."""
 
@@ -243,7 +241,7 @@ class IMSWeather(WeatherEntity):
             data = [
                 Forecast(
                     condition=WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code],
-                    datetime=daily_forecast.date.astimezone(pytz.UTC).isoformat(),
+                    datetime=daily_forecast.date.isoformat(),
                     native_temperature=daily_forecast.maximum_temperature,
                     native_templow=daily_forecast.minimum_temperature
                 ) for daily_forecast in self._weather_coordinator.data.forecast.days
@@ -262,7 +260,7 @@ class IMSWeather(WeatherEntity):
                     data.append(
                         Forecast(
                             condition=WEATHER_CODE_TO_CONDITION[hourly_weather_code],
-                            datetime=hourly_forecast.forecast_time.astimezone(timezone).isoformat(),
+                            datetime=hourly_forecast.forecast_time.isoformat(),
                             native_temperature=hourly_forecast.precise_temperature,
                             native_templow=daily_forecast.minimum_temperature,
                             native_precipitation=hourly_forecast.rain,

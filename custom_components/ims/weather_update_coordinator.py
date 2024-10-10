@@ -1,7 +1,8 @@
 """Weather data coordinator for the OpenWeatherMap (OWM) service."""
 import asyncio
+import datetime
 import logging
-from datetime import timedelta, date, datetime
+import homeassistant.util.dt as dt_util
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from weatheril import WeatherIL
@@ -14,6 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 ATTRIBUTION = "Powered by IMS Weather"
 
+timezone = dt_util.get_time_zone("Asia/Jerusalem")
 
 class WeatherUpdateCoordinator(DataUpdateCoordinator):
     """Weather data update coordinator."""
@@ -64,14 +66,14 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
     @staticmethod
     def _filter_future_forecast(weather_forecast):
         """ Filter Forecast to include only future dates """
-        today_datetime = datetime.fromordinal(date.today().toordinal())
+        today_datetime = dt_util.as_local(datetime.datetime.combine(dt_util.now(timezone).date(), datetime.time()))
         filtered_day_list = list(filter(lambda daily: daily.date >= today_datetime, weather_forecast.days))
 
         for daily_forecast in filtered_day_list:
             filtered_hours = []
             for hourly_forecast in daily_forecast.hours:
-                forecast_datetime = daily_forecast.date + timedelta(hours=int(hourly_forecast.hour.split(":")[0]))
-                if datetime.now() <= forecast_datetime:
+                forecast_datetime = daily_forecast.date + datetime.timedelta(hours=int(hourly_forecast.hour.split(":")[0]))
+                if dt_util.now(timezone) <= forecast_datetime:
                     filtered_hours.append(hourly_forecast)
             daily_forecast.hours = filtered_hours
 
