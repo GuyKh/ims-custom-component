@@ -18,6 +18,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
     DOMAIN,
+    PLATFORMS,
     IMS_PLATFORMS,
     IMS_PLATFORM,
     ENTRY_WEATHER_COORDINATOR,
@@ -203,7 +204,6 @@ SENSOR_DESCRIPTIONS_DICT = {desc.key: desc for desc in SENSOR_DESCRIPTIONS}
 SENSOR_DESCRIPTIONS_KEYS = [desc.key for desc in SENSOR_DESCRIPTIONS]
 
 weather = None
-timezone = dt_util.get_time_zone('Asia/Jerusalem')
 
 async def async_setup_platform(hass, config_entry, async_add_entities, discovery_info=None):
     _LOGGER.warning(
@@ -291,7 +291,6 @@ def generate_forecast_extra_state_attributes(daily_forecast):
         }
 
     return attributes
-
 
 class ImsSensor(ImsEntity, SensorEntity):
     """Representation of an IMS sensor."""

@@ -1,12 +1,14 @@
 from __future__ import annotations
 import logging
 
+import homeassistant.util.dt as dt_util
 import pytz
 
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+
 
 from homeassistant.components.weather import (
     # PLATFORM_SCHEMA,
@@ -102,7 +104,6 @@ def round_if_needed(value: int | float, output_round: bool):
         return round(value, 0) + 0
     else:
         return round(value, 2)
-
 
 class IMSWeather(WeatherEntity):
     """Implementation of an IMSWeather sensor."""
@@ -240,7 +241,7 @@ class IMSWeather(WeatherEntity):
             data = [
                 Forecast(
                     condition=WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code],
-                    datetime=daily_forecast.date.astimezone(pytz.UTC).isoformat(),
+                    datetime=daily_forecast.date.isoformat(),
                     native_temperature=daily_forecast.maximum_temperature,
                     native_templow=daily_forecast.minimum_temperature
                 ) for daily_forecast in self._weather_coordinator.data.forecast.days
@@ -259,7 +260,7 @@ class IMSWeather(WeatherEntity):
                     data.append(
                         Forecast(
                             condition=WEATHER_CODE_TO_CONDITION[hourly_weather_code],
-                            datetime=hourly_forecast.forecast_time.astimezone(pytz.UTC).isoformat(),
+                            datetime=hourly_forecast.forecast_time.isoformat(),
                             native_temperature=hourly_forecast.precise_temperature,
                             native_templow=daily_forecast.minimum_temperature,
                             native_precipitation=hourly_forecast.rain,
