@@ -18,6 +18,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
     DOMAIN,
+    PLATFORMS,
     IMS_PLATFORMS,
     IMS_PLATFORM,
     ENTRY_WEATHER_COORDINATOR,
@@ -291,7 +292,6 @@ def generate_forecast_extra_state_attributes(daily_forecast):
         }
 
     return attributes
-
 
 class ImsSensor(ImsEntity, SensorEntity):
     """Representation of an IMS sensor."""
