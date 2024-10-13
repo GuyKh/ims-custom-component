@@ -95,13 +95,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if (IMS_PLATFORMS[0] in ims_entity_platform) and (
             IMS_PLATFORMS[1] in ims_entity_platform
     ):
-        hass.async_create_task(hass.config_entries.async_forward_entry_setups(entry, PLATFORMS))
+        platforms = PLATFORMS
     # If only sensor
     elif IMS_PLATFORMS[0] in ims_entity_platform:
-        hass.async_create_task(hass.config_entries.async_forward_entry_setups(entry, [PLATFORMS[0], PLATFORMS[2]]))
+        platforms = [PLATFORMS[0], PLATFORMS[2]]
     # If only weather
     elif IMS_PLATFORMS[1] in ims_entity_platform:
-        hass.async_create_task(hass.config_entries.async_forward_entry_setup(entry, [PLATFORMS[1]]))
+        platforms = [PLATFORMS[1]]
+    
+    await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
     update_listener = entry.add_update_listener(async_update_options)
     hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
