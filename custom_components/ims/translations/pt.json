@@ -42,6 +42,12 @@
       }
     }
   },
+  "services": {
+    "debug_get_coordinator_data": {
+      "name": "Get IMS Coordinator Data",
+      "description": "Fetch and return the coordinator data for debugging purposes."
+    }
+  },
   "entity": {
     "binary_sensor": {
       "ims_is_raining_he": {

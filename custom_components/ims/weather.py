@@ -1,8 +1,6 @@
 from __future__ import annotations
 import logging
 
-import homeassistant.util.dt as dt_util
-import pytz
 
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import DiscoveryInfoType
@@ -14,15 +12,10 @@ from homeassistant.components.weather import (
     # PLATFORM_SCHEMA,
     Forecast,
     WeatherEntity,
-    WeatherEntityFeature
+    WeatherEntityFeature,
 )
 
-from homeassistant.const import (
-    CONF_NAME,
-    UnitOfSpeed,
-    UnitOfPressure,
-    UnitOfLength
-)
+from homeassistant.const import CONF_NAME, UnitOfSpeed, UnitOfPressure, UnitOfLength
 
 from .const import (
     ATTRIBUTION,
@@ -48,10 +41,10 @@ weather = None
 
 
 async def async_setup_platform(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
-        discovery_info: DiscoveryInfoType | None = None,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Import the platform into a config entry."""
     _LOGGER.warning(
@@ -71,9 +64,9 @@ async def async_setup_platform(
 
 
 async def async_setup_entry(
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        async_add_entities: AddEntitiesCallback,
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up IMS Weather entity based on a config entry."""
     domain_data = hass.data[DOMAIN][config_entry.entry_id]
@@ -86,14 +79,18 @@ async def async_setup_entry(
     if isinstance(city, int | str):
         is_legacy_city = True
 
-
     unique_id = f"{config_entry.unique_id}"
 
     # Round Output
     output_round = "No"
 
     ims_weather = IMSWeather(
-        name, unique_id, forecast_mode, weather_coordinator, city if is_legacy_city else city["name"], output_round
+        name,
+        unique_id,
+        forecast_mode,
+        weather_coordinator,
+        city if is_legacy_city else city["name"],
+        output_round,
     )
 
     async_add_entities([ims_weather], False)
@@ -104,6 +101,7 @@ def round_if_needed(value: int | float, output_round: bool):
         return round(value, 0) + 0
     else:
         return round(value, 2)
+
 
 class IMSWeather(WeatherEntity):
     """Implementation of an IMSWeather sensor."""
@@ -116,17 +114,17 @@ class IMSWeather(WeatherEntity):
     _attr_native_visibility_unit = UnitOfLength.KILOMETERS
     _attr_native_wind_speed_unit = UnitOfSpeed.KILOMETERS_PER_HOUR
     _attr_supported_features = (
-            WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
+        WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
     )
 
     def __init__(
-            self,
-            name: str,
-            unique_id,
-            forecast_mode: str,
-            weather_coordinator: WeatherUpdateCoordinator,
-            city: str,
-            output_round: str,
+        self,
+        name: str,
+        unique_id,
+        forecast_mode: str,
+        weather_coordinator: WeatherUpdateCoordinator,
+        city: str,
+        output_round: str,
     ) -> None:
         """Initialize the sensor."""
         self._attr_name = name
@@ -155,7 +153,11 @@ class IMSWeather(WeatherEntity):
     @property
     def available(self):
         """Return if weather data is available from IMSWeather."""
-        return self._weather_coordinator.data is not None and self._weather_coordinator.data.current_weather is not None and self._weather_coordinator.data.forecast is not None
+        return (
+            self._weather_coordinator.data is not None
+            and self._weather_coordinator.data.current_weather is not None
+            and self._weather_coordinator.data.forecast is not None
+        )
 
     @property
     def attribution(self):
@@ -177,7 +179,9 @@ class IMSWeather(WeatherEntity):
     @property
     def native_apparent_temperature(self):
         """Return the native apparent temperature (feel-like)."""
-        feels_like_temperature = float(self._weather_coordinator.data.current_weather.feels_like)
+        feels_like_temperature = float(
+            self._weather_coordinator.data.current_weather.feels_like
+        )
 
         return round_if_needed(feels_like_temperature, self._output_round)
 
@@ -214,11 +218,13 @@ class IMSWeather(WeatherEntity):
         """Return the weather condition."""
 
         date_str = self._weather_coordinator.data.current_weather.json["forecast_time"]
-        weather_code = get_hourly_weather_icon(date_str, self._weather_coordinator.data.current_weather.weather_code, "%Y-%m-%d %H:%M:%S")
+        weather_code = get_hourly_weather_icon(
+            date_str,
+            self._weather_coordinator.data.current_weather.weather_code,
+            "%Y-%m-%d %H:%M:%S",
+        )
 
-        condition = WEATHER_CODE_TO_CONDITION[
-            weather_code
-        ]
+        condition = WEATHER_CODE_TO_CONDITION[weather_code]
         if not condition or condition == "Nothing":
             condition = WEATHER_CODE_TO_CONDITION[
                 self._weather_coordinator.data.forecast.days[0].weather_code
@@ -243,19 +249,25 @@ class IMSWeather(WeatherEntity):
                     condition=WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code],
                     datetime=daily_forecast.date.isoformat(),
                     native_temperature=daily_forecast.maximum_temperature,
-                    native_templow=daily_forecast.minimum_temperature
-                ) for daily_forecast in self._weather_coordinator.data.forecast.days
+                    native_templow=daily_forecast.minimum_temperature,
+                )
+                for daily_forecast in self._weather_coordinator.data.forecast.days
             ]
         else:
             last_weather_code = None
             for daily_forecast in self._weather_coordinator.data.forecast.days:
                 for hourly_forecast in daily_forecast.hours:
-                    if hourly_forecast.weather_code and hourly_forecast.weather_code != "0":
+                    if (
+                        hourly_forecast.weather_code
+                        and hourly_forecast.weather_code != "0"
+                    ):
                         last_weather_code = hourly_forecast.weather_code
                     elif not last_weather_code:
                         last_weather_code = daily_forecast.weather_code
 
-                    hourly_weather_code = get_hourly_weather_icon(hourly_forecast.hour, last_weather_code)
+                    hourly_weather_code = get_hourly_weather_icon(
+                        hourly_forecast.hour, last_weather_code
+                    )
 
                     data.append(
                         Forecast(
@@ -264,10 +276,12 @@ class IMSWeather(WeatherEntity):
                             native_temperature=hourly_forecast.precise_temperature,
                             native_templow=daily_forecast.minimum_temperature,
                             native_precipitation=hourly_forecast.rain,
-                            wind_bearing=WIND_DIRECTIONS[hourly_forecast.wind_direction_id],
+                            wind_bearing=WIND_DIRECTIONS[
+                                hourly_forecast.wind_direction_id
+                            ],
                             precipitation_probability=hourly_forecast.rain_chance,
                             native_wind_speed=hourly_forecast.wind_speed,
-                            uv_index=hourly_forecast.u_v_index
+                            uv_index=hourly_forecast.u_v_index,
                         )
                     )
 
