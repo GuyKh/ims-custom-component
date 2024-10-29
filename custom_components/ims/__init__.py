@@ -9,7 +9,8 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
-    CONF_NAME, CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
+    CONF_MONITORED_CONDITIONS,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -50,14 +51,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ims_scan_int = entry.data[CONF_UPDATE_INTERVAL]
     conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS)
 
-
     # Extract list of int from forecast days/ hours string if present
     # _LOGGER.warning('forecast_days_type: ' + str(type(forecast_days)))
     is_legacy_city = False
     if isinstance(city, int | str):
         is_legacy_city = True
 
-    city_id = city if is_legacy_city else city['lid']
+    city_id = city if is_legacy_city else city["lid"]
 
     unique_location = f"ims-{language}-{city_id}"
 
@@ -93,7 +93,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # If both platforms
     if (IMS_PLATFORMS[0] in ims_entity_platform) and (
-            IMS_PLATFORMS[1] in ims_entity_platform
+        IMS_PLATFORMS[1] in ims_entity_platform
     ):
         platforms = PLATFORMS
     # If only sensor
@@ -102,11 +102,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # If only weather
     elif IMS_PLATFORMS[1] in ims_entity_platform:
         platforms = [PLATFORMS[1]]
-    
+
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
     update_listener = entry.add_update_listener(async_update_options)
     hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
+
+    # Register the debug service
+    async def handle_debug_get_coordinator_data(call) -> None:  # noqa: ANN001 ARG001
+        # Log or return coordinator data
+        data = weather_coordinator.data
+        _LOGGER.info("Coordinator data: %s", data)
+        hass.bus.async_fire("custom_component_debug_event", {"data": data})
+
+    hass.services.async_register(
+        DOMAIN, "debug_get_coordinator_data", handle_debug_get_coordinator_data
+    )
     return True
 
 
@@ -122,7 +133,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = False
     # If both
     if (IMS_PLATFORMS[0] in ims_entity_prevplatform) and (
-            IMS_PLATFORMS[1] in ims_entity_prevplatform
+        IMS_PLATFORMS[1] in ims_entity_prevplatform
     ):
         unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     # If only sensor
@@ -147,7 +158,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-def _get_config_value(config_entry: ConfigEntry, key: str, default = None) -> Any:
+def _get_config_value(config_entry: ConfigEntry, key: str, default=None) -> Any:
     if config_entry.options:
         val = config_entry.options.get(key)
         if val:
@@ -163,7 +174,6 @@ def _get_config_value(config_entry: ConfigEntry, key: str, default = None) -> An
         return default
 
 
-
 def _filter_domain_configs(elements, domain):
     return list(filter(lambda elem: elem["platform"] == domain, elements))
 
@@ -171,6 +181,7 @@ def _filter_domain_configs(elements, domain):
 @dataclass(kw_only=True, frozen=True)
 class ImsSensorEntityDescription(SensorEntityDescription):
     """Describes IMS Weather sensor entity."""
+
     field_name: str | None = None
     forecast_mode: str | None = None
 
@@ -181,7 +192,9 @@ class ImsEntity(CoordinatorEntity):
     _attr_has_entity_name = True
 
     def __init__(
-            self, coordinator: WeatherUpdateCoordinator, description: ImsSensorEntityDescription
+        self,
+        coordinator: WeatherUpdateCoordinator,
+        description: ImsSensorEntityDescription,
     ) -> None:
         """Initialize."""
         super().__init__(coordinator)

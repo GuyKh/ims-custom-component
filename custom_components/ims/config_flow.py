@@ -1,4 +1,5 @@
 """Config flow for IMS Weather."""
+
 import logging
 from datetime import timedelta
 
@@ -10,7 +11,8 @@ import socket
 from homeassistant import config_entries
 from homeassistant.const import (
     CONF_MODE,
-    CONF_NAME, CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
+    CONF_MONITORED_CONDITIONS,
 )
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
@@ -40,6 +42,7 @@ _LOGGER = logging.getLogger(__name__)
 
 cities_data = None
 SENSOR_KEYS = SENSOR_DESCRIPTIONS_KEYS + BINARY_SENSOR_DESCRIPTIONS_KEYS
+
 
 class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for IMSWeather."""
@@ -106,7 +109,9 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         cities = await _get_localized_cities(self.hass)
         if not cities:
             errors["base"] = "cannot_retrieve_cities"
-            return self.async_show_form(step_id="user", data_schema=vol.Schema({}), errors=errors)
+            return self.async_show_form(
+                step_id="user", data_schema=vol.Schema({}), errors=errors
+            )
 
         # Step 2: Calculate the closest city based on Home Assistant's coordinates
         ha_latitude = self.hass.config.latitude
@@ -115,11 +120,13 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Step 3: Create a selection field for cities
         city_options = {city_id: city["name"] for city_id, city in cities.items()}
-        
+
         schema = vol.Schema(
             {
                 vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
-                vol.Required(CONF_CITY, default=closest_city["lid"]): vol.In(city_options),
+                vol.Required(CONF_CITY, default=closest_city["lid"]): vol.In(
+                    city_options
+                ),
                 vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(
                     LANGUAGES
                 ),
@@ -132,9 +139,9 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_MODE, default=DEFAULT_FORECAST_MODE): vol.In(
                     FORECAST_MODES
                 ),
-                vol.Optional(CONF_MONITORED_CONDITIONS, default=SENSOR_KEYS): cv.multi_select(
-                    SENSOR_KEYS
-                ),
+                vol.Optional(
+                    CONF_MONITORED_CONDITIONS, default=SENSOR_KEYS
+                ): cv.multi_select(SENSOR_KEYS),
                 vol.Required(CONF_IMAGES_PATH, default="/tmp"): cv.string,
             }
         )
@@ -165,16 +172,21 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             config[CONF_MONITORED_CONDITIONS] = SENSOR_KEYS
         return await self.async_step_user(config)
 
+
 supported_ims_languages = ["en", "he", "ar"]
+
 
 async def _is_ims_api_online(hass, language, city):
     forecast_url = "https://ims.gov.il/" + language + "/forecast_data/" + str(city)
 
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(family=socket.AF_INET), raise_for_status=False) as session:
+    async with aiohttp.ClientSession(
+        connector=aiohttp.TCPConnector(family=socket.AF_INET), raise_for_status=False
+    ) as session:
         async with session.get(forecast_url) as resp:
             status = resp.status
 
     return status
+
 
 async def _get_localized_cities(hass):
     global cities_data
@@ -183,7 +195,7 @@ async def _get_localized_cities(hass):
 
     lang = hass.config.language
     if lang not in supported_ims_languages:
-        lang = 'en'
+        lang = "en"
     locations_info_url = "https://ims.gov.il/" + lang + "/locations_info"
 
     try:
@@ -204,13 +216,16 @@ async def _get_localized_cities(hass):
 
     return cities_data
 
+
 @callback
 def _handle_http_error(self, error):
     """Handle HTTP errors."""
     self.hass.logger.error(f"Error fetching data from URL: {error}")
 
+
 def _find_closest_city(cities, ha_latitude, ha_longitude):
     """Find the closest city based on the Home Assistant coordinates."""
+
     def distance(lat1, lon1, lat2, lon2):
         # Calculate the distance between two lat/lon points (Haversine formula)
         R = 6371  # Radius of Earth in kilometers
@@ -223,21 +238,20 @@ def _find_closest_city(cities, ha_latitude, ha_longitude):
 
     closest_city = None
     closest_distance = float("inf")
-    
+
     for city_id, city in cities.items():
         city_lat = float(city["lat"])
         city_lon = float(city["lon"])
         dist = distance(ha_latitude, ha_longitude, city_lat, city_lon)
-        
+
         if dist < closest_distance:
             closest_distance = dist
             closest_city = city
-    
+
     if closest_distance > 10:
         return cities["1"]
     else:
         return closest_city
-
 
 
 class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
@@ -313,7 +327,9 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_MONITORED_CONDITIONS,
                         default=self.config_entry.options.get(
                             CONF_MONITORED_CONDITIONS,
-                            self.config_entry.data.get(CONF_MONITORED_CONDITIONS, SENSOR_KEYS),
+                            self.config_entry.data.get(
+                                CONF_MONITORED_CONDITIONS, SENSOR_KEYS
+                            ),
                         ),
                     ): cv.multi_select(SENSOR_KEYS),
                     vol.Optional(

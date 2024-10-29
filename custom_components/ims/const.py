@@ -1,4 +1,5 @@
 """Consts for the OpenWeatherMap."""
+
 from __future__ import annotations
 import types
 
@@ -171,7 +172,7 @@ WEATHER_CODE_TO_CONDITION = {
     "1140": ATTR_CONDITION_POURING,
     "1160": ATTR_CONDITION_FOG,
     "1220": ATTR_CONDITION_PARTLYCLOUDY,
-    "1220-night": ATTR_CONDITION_PARTLYCLOUDY, #no "-night"
+    "1220-night": ATTR_CONDITION_PARTLYCLOUDY,  # no "-night"
     "1230": ATTR_CONDITION_CLOUDY,
     "1250": ATTR_CONDITION_SUNNY,
     "1250-night": ATTR_CONDITION_CLEAR_NIGHT,
