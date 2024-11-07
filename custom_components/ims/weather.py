@@ -273,13 +273,13 @@ class IMSWeather(WeatherEntity):
                         Forecast(
                             condition=WEATHER_CODE_TO_CONDITION[hourly_weather_code],
                             datetime=hourly_forecast.forecast_time.isoformat(),
+                            humidity=hourly_forecast.relative_humidity,
                             native_temperature=hourly_forecast.precise_temperature,
-                            native_templow=daily_forecast.minimum_temperature,
                             native_precipitation=hourly_forecast.rain,
+                            precipitation_probability=hourly_forecast.rain_chance,
                             wind_bearing=WIND_DIRECTIONS[
                                 hourly_forecast.wind_direction_id
                             ],
-                            precipitation_probability=hourly_forecast.rain_chance,
                             native_wind_speed=hourly_forecast.wind_speed,
                             uv_index=hourly_forecast.u_v_index,
                         )
