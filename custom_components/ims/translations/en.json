@@ -78,6 +78,12 @@
             "ims_forecast_time_en": {
                 "name": "Forecast Time"
             },
+            "ims_wind_direction_he": {
+                "name": "כיוון רוח"
+            },
+            "ims_wind_direction_en": {
+                "name": "Wind Direction"
+            },
             "ims_wind_speed_he": {
                 "name": "מהירות רוח"
             },
