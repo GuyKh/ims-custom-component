@@ -1,153 +1,151 @@
 {
-  "config": {
-      "abort": {
-          "already_configured": "Location is already configured"
-      },
-      "error": {
-          "cannot_connect": "Failed to connect"
-      },
-      "step": {
-          "user": {
-              "data": {
-                  "city": "City",
-                  "language": "Language",
-                  "mode": "Forecast mode for the Weather entity",
-                  "name": "Integration Name",
-                  "images_path": "Path to download the images to",
-                  "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recommended.",
-                  "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!",
-                  "monitored_conditions": "Monitored conditions to create sensors for. Only used if sensors are requested."
-              },
-              "description": "Set up IMS Weather integration",
-              "data_description": {
-              }
-          }
-      }
-  },
-  "options": {
-      "step": {
-          "init": {
-              "data": {
-                  "city": "City",
-                  "language": "Language",
-                  "mode": "Forecast mode for the Weather entity",
-                  "name": "Integration Name",
-                  "units": "Units for sensors. Only used for if sensors are requested.",
-                  "images_path": "Path to download the images to",
-                  "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recommended.",
-                  "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!",
-                  "monitored_conditions": "Monitored conditions to create sensors for. Only used if sensors are requested.\n NOTE: Removing sensors will produce orphaned entities that need to be deleted."
-              },
-              "description": "Set up IMS Weather integration",
-              "data_description": {
-              }
-          }
-      }
-  },
-  "services": {
-    "debug_get_coordinator_data": {
-      "name": "Get IMS Coordinator Data",
-      "description": "Fetch and return the coordinator data for debugging purposes."
-    }
-  },
-  "entity": {
-    "binary_sensor": {
-      "ims_is_raining_he": {
-        "name": "גשם",
-        "state": {
-          "on": "יורד",
-          "off": "לא יורד"
+    "config": {
+        "abort": {
+            "already_configured": "Location is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "city": "City",
+                    "language": "Language",
+                    "mode": "Forecast mode for the Weather entity",
+                    "name": "Integration Name",
+                    "images_path": "Path to download the images to",
+                    "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recommended.",
+                    "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!",
+                    "monitored_conditions": "Monitored conditions to create sensors for. Only used if sensors are requested."
+                },
+                "description": "Set up IMS Weather integration",
+                "data_description": {}
+            }
         }
-      },
-      "ims_is_raining_en": {
-        "name": "Rain",
-        "state": {
-          "on": "Raining",
-          "off": "Not Raining"
-        }
-      }
     },
-    "sensor": {
-      "ims_city_he": {
-        "name": "ישוב"
-      },
-      "ims_city_en": {
-        "name": "City"
-      },
-      "ims_forecast_time_he": {
-        "name": "תאריך"
-      },
-      "ims_forecast_time_en": {
-        "name": "Date"
-      },
-      "ims_wind_speed_he": {
-        "name": "מהירות רוח"
-      },
-      "ims_wind_speed_en": {
-        "name": "Wind Speed"
-      },
-      "ims_precipitation_he": {
-        "name": "משקעים"
-      },
-      "ims_precipitation_en": {
-        "name": "Precipitation"
-      },
-      "ims_precipitation_probability_he": {
-        "name": "סיכוי לגשם"
-      },
-      "ims_precipitation_probability_en": {
-        "name": "Chance of Rain"
-      },
-      "ims_temperature_he": {
-        "name": "טמפרטורה"
-      },
-      "ims_temperature_en": {
-        "name": "Temperature"
-      },
-      "ims_humidity_he": {
-        "name": "לחות"
-      },
-      "ims_humidity_en": {
-        "name": "Humidity"
-      },
-      "ims_feels_like_he": {
-        "name": "מרגיש כמו"
-      },
-      "ims_feels_like_en": {
-        "name": "Feels Like"
-      },
-      "ims_current_uv_index_he": {
-        "name": "אינדקס קרינה נוכחי"
-      },
-      "ims_current_uv_index_en": {
-        "name": "Current UV Index"
-      },
-      "ims_max_uv_index_he": {
-        "name": "אינדקס קרינה מירבי"
-      },
-      "ims_max_uv_index_en": {
-        "name": "Maximum UV Index"
-      },
-      "ims_current_uv_level_he": {
-        "name": "רמת קרינה נוכחית",
-        "state": {
-          "extreme": "קיצוני",
-          "very_high": "גבוה מאוד",
-          "high": "גבוה",
-          "moderate": "בינוני",
-          "low": "נמוך"
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "city": "City",
+                    "language": "Language",
+                    "mode": "Forecast mode for the Weather entity",
+                    "name": "Integration Name",
+                    "units": "Units for sensors. Only used for if sensors are requested.",
+                    "images_path": "Path to download the images to",
+                    "update_interval": "Minutes to wait between updates. Reducing this below 15 minutes is not recommended.",
+                    "ims_platform": "Weather Entity and/or Sensor Entity. Sensor will create entities for each condition at each time. If unsure, only select Weather!",
+                    "monitored_conditions": "Monitored conditions to create sensors for. Only used if sensors are requested.\n NOTE: Removing sensors will produce orphaned entities that need to be deleted."
+                },
+                "description": "Set up IMS Weather integration",
+                "data_description": {}
+            }
         }
-      },
-      "ims_current_uv_level_en": {
-        "name": "Current UV Level",
-        "state": {
-          "extreme": "Extreme",
-          "very_high": "Very High",
-          "high": "High",
-          "moderate": "Moderate",
-          "low": "Low"
+    },
+    "services": {
+        "debug_get_coordinator_data": {
+            "name": "Get IMS Coordinator Data",
+            "description": "Fetch and return the coordinator data for debugging purposes."
         }
-      }
+    },
+    "entity": {
+        "binary_sensor": {
+            "ims_is_raining_he": {
+                "name": "גשם",
+                "state": {
+                    "on": "יורד",
+                    "off": "לא יורד"
+                }
+            },
+            "ims_is_raining_en": {
+                "name": "Rain",
+                "state": {
+                    "on": "Raining",
+                    "off": "Not Raining"
+                }
+            }
+        },
+        "sensor": {
+            "ims_city_he": {
+                "name": "ישוב"
+            },
+            "ims_city_en": {
+                "name": "City"
+            },
+            "ims_forecast_time_he": {
+                "name": "זמן התחזית"
+            },
+            "ims_forecast_time_en": {
+                "name": "Forecast Time"
+            },
+            "ims_wind_speed_he": {
+                "name": "מהירות רוח"
+            },
+            "ims_wind_speed_en": {
+                "name": "Wind Speed"
+            },
+            "ims_precipitation_he": {
+                "name": "משקעים"
+            },
+            "ims_precipitation_en": {
+                "name": "Precipitation"
+            },
+            "ims_precipitation_probability_he": {
+                "name": "סיכוי לגשם"
+            },
+            "ims_precipitation_probability_en": {
+                "name": "Chance of Rain"
+            },
+            "ims_temperature_he": {
+                "name": "טמפרטורה"
+            },
+            "ims_temperature_en": {
+                "name": "Temperature"
+            },
+            "ims_humidity_he": {
+                "name": "לחות"
+            },
+            "ims_humidity_en": {
+                "name": "Humidity"
+            },
+            "ims_feels_like_he": {
+                "name": "מרגיש כמו"
+            },
+            "ims_feels_like_en": {
+                "name": "Feels Like"
+            },
+            "ims_current_uv_index_he": {
+                "name": "אינדקס קרינה נוכחי"
+            },
+            "ims_current_uv_index_en": {
+                "name": "Current UV Index"
+            },
+            "ims_max_uv_index_he": {
+                "name": "אינדקס קרינה מירבי"
+            },
+            "ims_max_uv_index_en": {
+                "name": "Maximum UV Index"
+            },
+            "ims_current_uv_level_he": {
+                "name": "רמת קרינה נוכחית",
+                "state": {
+                    "extreme": "קיצוני",
+                    "very_high": "גבוה מאוד",
+                    "high": "גבוה",
+                    "moderate": "בינוני",
+                    "low": "נמוך"
+                }
+            },
+            "ims_current_uv_level_en": {
+                "name": "Current UV Level",
+                "state": {
+                    "extreme": "Extreme",
+                    "very_high": "Very High",
+                    "high": "High",
+                    "moderate": "Moderate",
+                    "low": "Low"
+                }
+            }
+        }
     }
-  }
 }
