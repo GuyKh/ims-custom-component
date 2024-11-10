@@ -73,10 +73,10 @@
                 "name": "Cidade"
             },
             "ims_forecast_time_he": {
-                "name": "Data"
+                "name": "Hora de previsão"
             },
             "ims_forecast_time_en": {
-                "name": "Data"
+                "name": "Hora de previsão"
             },
             "ims_wind_direction_he": {
                 "name": "Direção do Vento"

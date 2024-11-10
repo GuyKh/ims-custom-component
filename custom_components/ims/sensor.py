@@ -445,9 +445,7 @@ class ImsSensor(ImsEntity, SensorEntity):
 
             case sensor_keys.TYPE_WIND_DIRECTION:
                 self._attr_native_value = WIND_DIRECTIONS[
-                    int(
-                        self._weather_coordinator.data.current_weather.wind_direction_id
-                    )
+                    int(data.current_weather.wind_direction_id)
                 ]
 
             case sensor_keys.TYPE_WIND_SPEED:

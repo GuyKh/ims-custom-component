@@ -73,10 +73,10 @@
                 "name": "City"
             },
             "ims_forecast_time_he": {
-                "name": "תאריך"
+                "name": "זמן התחזית"
             },
             "ims_forecast_time_en": {
-                "name": "Date"
+                "name": "Forecast Time"
             },
             "ims_wind_direction_he": {
                 "name": "כיוון רוח"
