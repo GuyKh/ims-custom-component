@@ -1,153 +1,156 @@
 {
-  "config": {
-      "abort": {
-          "already_configured": "מוגדר חיישן עבור ישוב זה"
-      },
-      "error": {
-          "cannot_connect": "שגיאה בהתחברות"
-      },
-      "step": {
-          "user": {
-              "data": {
-                  "city": "יישוב",
-                  "language": "שפה",
-                  "mode": "מצב תחזית עבור חיישן התחזית",
-                  "name": "שם האינטגרציה",
-                  "images_path": "הנתיב אליו יורדו התמונות",
-                  "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
-                  "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!",
-                  "monitored_conditions": "תנאים ליצור חיישנים עבורם, רק כאשר בחרת ליצור חיישנים"
-
-              },
-              "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
-              "data_description": {
-              }
-          }
-      }
-  },
-  "options": {
-      "step": {
-          "init": {
-              "data": {
-                  "city": "יישוב",
-                  "language": "שפה",
-                  "mode": "מצב תחזית עבור חיישן התחזית",
-                  "name": "שם האינטגרציה",
-                  "images_path": "הנתיב אליו יורדו התמונות",
-                  "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
-                  "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!",
-                  "monitored_conditions": "תנאים ליצור חיישנים עבורם, רק כאשר בחרת ליצור חיישנים. \n הערה: הסרת חיישנים מהרשימה תיצור חיישנים יתומים שצריך להסיר ידנית"
-              },
-              "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
-              "data_description": {
-              }
-          }
-      }
-  },
-  "services": {
-    "debug_get_coordinator_data": {
-      "name": "הבא מידע שנטען מהשירות המטאורולוגי",
-      "description": "הדפס מידע במערכת שנטען מהשירות המטאורולוגי לצורך ניפוי שגיאות."
-    }
-  },
-  "entity": {
-    "binary_sensor": {
-      "ims_is_raining_he": {
-        "name": "גשם",
-        "state": {
-          "on": "יורד",
-          "off": "לא יורד"
+    "config": {
+        "abort": {
+            "already_configured": "מוגדר חיישן עבור ישוב זה"
+        },
+        "error": {
+            "cannot_connect": "שגיאה בהתחברות"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "city": "יישוב",
+                    "language": "שפה",
+                    "mode": "מצב תחזית עבור חיישן התחזית",
+                    "name": "שם האינטגרציה",
+                    "images_path": "הנתיב אליו יורדו התמונות",
+                    "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
+                    "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!",
+                    "monitored_conditions": "תנאים ליצור חיישנים עבורם, רק כאשר בחרת ליצור חיישנים"
+                },
+                "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
+                "data_description": {}
+            }
         }
-      },
-      "ims_is_raining_en": {
-        "name": "Rain",
-        "state": {
-          "on": "Raining",
-          "off": "Not Raining"
-        }
-      }
     },
-    "sensor": {
-      "ims_city_he": {
-        "name": "ישוב"
-      },
-      "ims_city_en": {
-        "name": "City"
-      },
-      "ims_forecast_time_he": {
-        "name": "תאריך"
-      },
-      "ims_forecast_time_en": {
-        "name": "Date"
-      },
-      "ims_wind_speed_he": {
-        "name": "מהירות רוח"
-      },
-      "ims_wind_speed_en": {
-        "name": "Wind Speed"
-      },
-      "ims_precipitation_he": {
-        "name": "משקעים"
-      },
-      "ims_precipitation_en": {
-        "name": "Precipitation"
-      },
-      "ims_precipitation_probability_he": {
-        "name": "סיכוי לגשם"
-      },
-      "ims_precipitation_probability_en": {
-        "name": "Chance of Rain"
-      },
-      "ims_temperature_he": {
-        "name": "טמפרטורה"
-      },
-      "ims_temperature_en": {
-        "name": "Temperature"
-      },
-      "ims_humidity_he": {
-        "name": "לחות"
-      },
-      "ims_humidity_en": {
-        "name": "Humidity"
-      },
-      "ims_feels_like_he": {
-        "name": "מרגיש כמו"
-      },
-      "ims_feels_like_en": {
-        "name": "Feels Like"
-      },
-      "ims_current_uv_index_he": {
-        "name": "אינדקס קרינה נוכחי"
-      },
-      "ims_current_uv_index_en": {
-        "name": "Current UV Index"
-      },
-      "ims_max_uv_index_he": {
-        "name": "אינדקס קרינה מירבי"
-      },
-      "ims_max_uv_index_en": {
-        "name": "Maximum UV Index"
-      },
-      "ims_current_uv_level_he": {
-        "name": "רמת קרינה נוכחית",
-        "state": {
-          "extreme": "קיצוני",
-          "very_high": "גבוה מאוד",
-          "high": "גבוה",
-          "moderate": "בינוני",
-          "low": "נמוך"
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "city": "יישוב",
+                    "language": "שפה",
+                    "mode": "מצב תחזית עבור חיישן התחזית",
+                    "name": "שם האינטגרציה",
+                    "images_path": "הנתיב אליו יורדו התמונות",
+                    "update_interval": "מס' הדקות בין כל משיכת עדכון. לא מומלץ לשים ערך קטן מ-15 דק'.",
+                    "ims_platform": "ישות תחזית מזג אוויר ו/או יישות חיישן. בחירה בחיישן תייצר יישות עבור כל אחד מהמאפיינים בנפרד. אם יש ספק, בחרו במזג אוויר!",
+                    "monitored_conditions": "תנאים ליצור חיישנים עבורם, רק כאשר בחרת ליצור חיישנים. \n הערה: הסרת חיישנים מהרשימה תיצור חיישנים יתומים שצריך להסיר ידנית"
+                },
+                "description": "הגדרות שילוב השירות המטאורולוגי הישראלי",
+                "data_description": {}
+            }
         }
-      },
-      "ims_current_uv_level_en": {
-        "name": "Current UV Level",
-        "state": {
-          "extreme": "Extreme",
-          "very_high": "Very High",
-          "high": "High",
-          "moderate": "Moderate",
-          "low": "Low"
+    },
+    "services": {
+        "debug_get_coordinator_data": {
+            "name": "הבא מידע שנטען מהשירות המטאורולוגי",
+            "description": "הדפס מידע במערכת שנטען מהשירות המטאורולוגי לצורך ניפוי שגיאות."
         }
-      }
+    },
+    "entity": {
+        "binary_sensor": {
+            "ims_is_raining_he": {
+                "name": "גשם",
+                "state": {
+                    "on": "יורד",
+                    "off": "לא יורד"
+                }
+            },
+            "ims_is_raining_en": {
+                "name": "Rain",
+                "state": {
+                    "on": "Raining",
+                    "off": "Not Raining"
+                }
+            }
+        },
+        "sensor": {
+            "ims_city_he": {
+                "name": "ישוב"
+            },
+            "ims_city_en": {
+                "name": "City"
+            },
+            "ims_forecast_time_he": {
+                "name": "תאריך"
+            },
+            "ims_forecast_time_en": {
+                "name": "Date"
+            },
+            "ims_wind_direction_he": {
+                "name": "כיוון רוח"
+            },
+            "ims_wind_direction_en": {
+                "name": "Wind Direction"
+            },
+            "ims_wind_speed_he": {
+                "name": "מהירות רוח"
+            },
+            "ims_wind_speed_en": {
+                "name": "Wind Speed"
+            },
+            "ims_precipitation_he": {
+                "name": "משקעים"
+            },
+            "ims_precipitation_en": {
+                "name": "Precipitation"
+            },
+            "ims_precipitation_probability_he": {
+                "name": "סיכוי לגשם"
+            },
+            "ims_precipitation_probability_en": {
+                "name": "Chance of Rain"
+            },
+            "ims_temperature_he": {
+                "name": "טמפרטורה"
+            },
+            "ims_temperature_en": {
+                "name": "Temperature"
+            },
+            "ims_humidity_he": {
+                "name": "לחות"
+            },
+            "ims_humidity_en": {
+                "name": "Humidity"
+            },
+            "ims_feels_like_he": {
+                "name": "מרגיש כמו"
+            },
+            "ims_feels_like_en": {
+                "name": "Feels Like"
+            },
+            "ims_current_uv_index_he": {
+                "name": "אינדקס קרינה נוכחי"
+            },
+            "ims_current_uv_index_en": {
+                "name": "Current UV Index"
+            },
+            "ims_max_uv_index_he": {
+                "name": "אינדקס קרינה מירבי"
+            },
+            "ims_max_uv_index_en": {
+                "name": "Maximum UV Index"
+            },
+            "ims_current_uv_level_he": {
+                "name": "רמת קרינה נוכחית",
+                "state": {
+                    "extreme": "קיצוני",
+                    "very_high": "גבוה מאוד",
+                    "high": "גבוה",
+                    "moderate": "בינוני",
+                    "low": "נמוך"
+                }
+            },
+            "ims_current_uv_level_en": {
+                "name": "Current UV Level",
+                "state": {
+                    "extreme": "Extreme",
+                    "very_high": "Very High",
+                    "high": "High",
+                    "moderate": "Moderate",
+                    "low": "Low"
+                }
+            }
+        }
     }
-  }
 }

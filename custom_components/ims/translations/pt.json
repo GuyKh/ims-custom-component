@@ -1,151 +1,157 @@
 {
-  "config": {
-    "abort": {
-      "already_configured": "Localização já está configurada"
-    },
-    "error": {
-      "cannot_connect": "Falha ao conectar"
-    },
-    "step": {
-      "user": {
-        "data": {
-          "city": "Cidade",
-          "language": "Idioma",
-          "mode": "Modo de previsão para a entidade Meteorológica",
-          "name": "Nome da Integração",
-          "images_path": "Caminho para download das imagens",
-          "update_interval": "Minutos de espera entre atualizações. Reduzir este valor abaixo de 15 minutos não é recomendado.",
-          "ims_platform": "Entidade Meteorológica e/ou Entidade de Sensor. O sensor criará entidades para cada condição a cada hora. Se estiver em dúvida, selecione apenas Meteorologia!",
-          "monitored_conditions": "Condições monitorizadas para as quais serão criados sensores. Só é usado se os sensores forem solicitados."
+    "config": {
+        "abort": {
+            "already_configured": "Localização já está configurada"
         },
-        "description": "Configurar a integração IMS Weather",
-        "data_description": {}
-      }
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "city": "Cidade",
-          "language": "Idioma",
-          "mode": "Modo de previsão para a entidade Meteorológica",
-          "name": "Nome da Integração",
-          "units": "Unidades para os sensores. Só é usado se os sensores forem solicitados.",
-          "images_path": "Caminho para download das imagens",
-          "update_interval": "Minutos de espera entre atualizações. Reduzir este valor abaixo de 15 minutos não é recomendado.",
-          "ims_platform": "Entidade Meteorológica e/ou Entidade de Sensor. O sensor criará entidades para cada condição a cada hora. Se estiver em dúvida, selecione apenas Meteorologia!",
-          "monitored_conditions": "Condições monitorizadas para as quais serão criados sensores. Só é usado se os sensores forem solicitados.\n NOTA: Remover sensores criará entidades órfãs que precisam de ser apagadas."
+        "error": {
+            "cannot_connect": "Falha ao conectar"
         },
-        "description": "Configurar a integração IMS Weather",
-        "data_description": {}
-      }
-    }
-  },
-  "services": {
-    "debug_get_coordinator_data": {
-      "name": "Get IMS Coordinator Data",
-      "description": "Fetch and return the coordinator data for debugging purposes."
-    }
-  },
-  "entity": {
-    "binary_sensor": {
-      "ims_is_raining_he": {
-        "name": "Chuva",
-        "state": {
-          "on": "A chover",
-          "off": "Não está a chover"
+        "step": {
+            "user": {
+                "data": {
+                    "city": "Cidade",
+                    "language": "Idioma",
+                    "mode": "Modo de previsão para a entidade Meteorológica",
+                    "name": "Nome da Integração",
+                    "images_path": "Caminho para download das imagens",
+                    "update_interval": "Minutos de espera entre atualizações. Reduzir este valor abaixo de 15 minutos não é recomendado.",
+                    "ims_platform": "Entidade Meteorológica e/ou Entidade de Sensor. O sensor criará entidades para cada condição a cada hora. Se estiver em dúvida, selecione apenas Meteorologia!",
+                    "monitored_conditions": "Condições monitorizadas para as quais serão criados sensores. Só é usado se os sensores forem solicitados."
+                },
+                "description": "Configurar a integração IMS Weather",
+                "data_description": {}
+            }
         }
-      },
-      "ims_is_raining_en": {
-        "name": "Chuva",
-        "state": {
-          "on": "A chover",
-          "off": "Não está a chover"
-        }
-      }
     },
-    "sensor": {
-      "ims_city_he": {
-        "name": "Localidade"
-      },
-      "ims_city_en": {
-        "name": "Cidade"
-      },
-      "ims_forecast_time_he": {
-        "name": "Data"
-      },
-      "ims_forecast_time_en": {
-        "name": "Data"
-      },
-      "ims_wind_speed_he": {
-        "name": "Velocidade do Vento"
-      },
-      "ims_wind_speed_en": {
-        "name": "Velocidade do Vento"
-      },
-      "ims_precipitation_he": {
-        "name": "Precipitação"
-      },
-      "ims_precipitation_en": {
-        "name": "Precipitação"
-      },
-      "ims_precipitation_probability_he": {
-        "name": "Probabilidade de Chuva"
-      },
-      "ims_precipitation_probability_en": {
-        "name": "Probabilidade de Chuva"
-      },
-      "ims_temperature_he": {
-        "name": "Temperatura"
-      },
-      "ims_temperature_en": {
-        "name": "Temperatura"
-      },
-      "ims_humidity_he": {
-        "name": "Humidade"
-      },
-      "ims_humidity_en": {
-        "name": "Humidade"
-      },
-      "ims_feels_like_he": {
-        "name": "Sensação Térmica"
-      },
-      "ims_feels_like_en": {
-        "name": "Sensação Térmica"
-      },
-      "ims_current_uv_index_he": {
-        "name": "Índice UV Atual"
-      },
-      "ims_current_uv_index_en": {
-        "name": "Índice UV Atual"
-      },
-      "ims_max_uv_index_he": {
-        "name": "Índice UV Máximo"
-      },
-      "ims_max_uv_index_en": {
-        "name": "Índice UV Máximo"
-      },
-      "ims_current_uv_level_he": {
-        "name": "Nível UV Atual",
-        "state": {
-          "extreme": "Extremo",
-          "very_high": "Muito Alto",
-          "high": "Alto",
-          "moderate": "Moderado",
-          "low": "Baixo"
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "city": "Cidade",
+                    "language": "Idioma",
+                    "mode": "Modo de previsão para a entidade Meteorológica",
+                    "name": "Nome da Integração",
+                    "units": "Unidades para os sensores. Só é usado se os sensores forem solicitados.",
+                    "images_path": "Caminho para download das imagens",
+                    "update_interval": "Minutos de espera entre atualizações. Reduzir este valor abaixo de 15 minutos não é recomendado.",
+                    "ims_platform": "Entidade Meteorológica e/ou Entidade de Sensor. O sensor criará entidades para cada condição a cada hora. Se estiver em dúvida, selecione apenas Meteorologia!",
+                    "monitored_conditions": "Condições monitorizadas para as quais serão criados sensores. Só é usado se os sensores forem solicitados.\n NOTA: Remover sensores criará entidades órfãs que precisam de ser apagadas."
+                },
+                "description": "Configurar a integração IMS Weather",
+                "data_description": {}
+            }
         }
-      },
-      "ims_current_uv_level_en": {
-        "name": "Nível UV Atual",
-        "state": {
-          "extreme": "Extremo",
-          "very_high": "Muito Alto",
-          "high": "Alto",
-          "moderate": "Moderado",
-          "low": "Baixo"
+    },
+    "services": {
+        "debug_get_coordinator_data": {
+            "name": "Get IMS Coordinator Data",
+            "description": "Fetch and return the coordinator data for debugging purposes."
         }
-      }
+    },
+    "entity": {
+        "binary_sensor": {
+            "ims_is_raining_he": {
+                "name": "Chuva",
+                "state": {
+                    "on": "A chover",
+                    "off": "Não está a chover"
+                }
+            },
+            "ims_is_raining_en": {
+                "name": "Chuva",
+                "state": {
+                    "on": "A chover",
+                    "off": "Não está a chover"
+                }
+            }
+        },
+        "sensor": {
+            "ims_city_he": {
+                "name": "Localidade"
+            },
+            "ims_city_en": {
+                "name": "Cidade"
+            },
+            "ims_forecast_time_he": {
+                "name": "Data"
+            },
+            "ims_forecast_time_en": {
+                "name": "Data"
+            },
+            "ims_wind_direction_he": {
+                "name": "Direção do Vento"
+            },
+            "ims_wind_direction_en": {
+                "name": "Direção do Vento"
+            },
+            "ims_wind_speed_he": {
+                "name": "Velocidade do Vento"
+            },
+            "ims_wind_speed_en": {
+                "name": "Velocidade do Vento"
+            },
+            "ims_precipitation_he": {
+                "name": "Precipitação"
+            },
+            "ims_precipitation_en": {
+                "name": "Precipitação"
+            },
+            "ims_precipitation_probability_he": {
+                "name": "Probabilidade de Chuva"
+            },
+            "ims_precipitation_probability_en": {
+                "name": "Probabilidade de Chuva"
+            },
+            "ims_temperature_he": {
+                "name": "Temperatura"
+            },
+            "ims_temperature_en": {
+                "name": "Temperatura"
+            },
+            "ims_humidity_he": {
+                "name": "Humidade"
+            },
+            "ims_humidity_en": {
+                "name": "Humidade"
+            },
+            "ims_feels_like_he": {
+                "name": "Sensação Térmica"
+            },
+            "ims_feels_like_en": {
+                "name": "Sensação Térmica"
+            },
+            "ims_current_uv_index_he": {
+                "name": "Índice UV Atual"
+            },
+            "ims_current_uv_index_en": {
+                "name": "Índice UV Atual"
+            },
+            "ims_max_uv_index_he": {
+                "name": "Índice UV Máximo"
+            },
+            "ims_max_uv_index_en": {
+                "name": "Índice UV Máximo"
+            },
+            "ims_current_uv_level_he": {
+                "name": "Nível UV Atual",
+                "state": {
+                    "extreme": "Extremo",
+                    "very_high": "Muito Alto",
+                    "high": "Alto",
+                    "moderate": "Moderado",
+                    "low": "Baixo"
+                }
+            },
+            "ims_current_uv_level_en": {
+                "name": "Nível UV Atual",
+                "state": {
+                    "extreme": "Extremo",
+                    "very_high": "Muito Alto",
+                    "high": "Alto",
+                    "moderate": "Moderado",
+                    "low": "Baixo"
+                }
+            }
+        }
     }
-  }
 }

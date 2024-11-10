@@ -9,6 +9,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
+    DEGREE,
     UV_INDEX,
     UnitOfTemperature,
     PERCENTAGE,
@@ -23,30 +24,27 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
     DOMAIN,
-    IMS_PLATFORMS,
-    IMS_PLATFORM,
     ENTRY_WEATHER_COORDINATOR,
+    FIELD_NAME_FEELS_LIKE,
+    FIELD_NAME_FORECAST_TIME,
+    FIELD_NAME_HUMIDITY,
+    FIELD_NAME_LOCATION,
+    FIELD_NAME_RAIN,
+    FIELD_NAME_RAIN_CHANCE,
+    FIELD_NAME_TEMPERATURE,
+    FIELD_NAME_UV_INDEX,
+    FIELD_NAME_UV_INDEX_MAX,
+    FIELD_NAME_UV_LEVEL,
+    FIELD_NAME_WIND_DIRECTION_ID,
+    FIELD_NAME_WIND_SPEED,
+    FORECAST_MODE,
+    IMS_PLATFORM,
+    IMS_PLATFORMS,
+    IMS_SENSOR_KEY_PREFIX,
+    TYPE_CITY,
     TYPE_CURRENT_UV_INDEX,
     TYPE_CURRENT_UV_LEVEL,
-    TYPE_MAX_UV_INDEX,
-    FIELD_NAME_UV_INDEX,
-    FIELD_NAME_UV_LEVEL,
-    FIELD_NAME_UV_INDEX_MAX,
-    TYPE_HUMIDITY,
-    FIELD_NAME_HUMIDITY,
-    FIELD_NAME_TEMPERATURE,
-    FIELD_NAME_LOCATION,
     TYPE_FEELS_LIKE,
-    FIELD_NAME_FEELS_LIKE,
-    FIELD_NAME_RAIN,
-    TYPE_WIND_SPEED,
-    TYPE_FORECAST_TIME,
-    FIELD_NAME_FORECAST_TIME,
-    TYPE_CITY,
-    TYPE_TEMPERATURE,
-    FIELD_NAME_WIND_SPEED,
-    TYPE_FORECAST_PREFIX,
-    TYPE_FORECAST_TODAY,
     TYPE_FORECAST_DAY1,
     TYPE_FORECAST_DAY2,
     TYPE_FORECAST_DAY3,
@@ -54,17 +52,23 @@ from .const import (
     TYPE_FORECAST_DAY5,
     TYPE_FORECAST_DAY6,
     TYPE_FORECAST_DAY7,
-    WEATHER_CODE_TO_ICON,
+    TYPE_FORECAST_PREFIX,
+    TYPE_FORECAST_TIME,
+    TYPE_FORECAST_TODAY,
+    TYPE_HUMIDITY,
+    TYPE_MAX_UV_INDEX,
     TYPE_PRECIPITATION,
     TYPE_PRECIPITATION_PROBABILITY,
-    FIELD_NAME_RAIN_CHANCE,
-    IMS_SENSOR_KEY_PREFIX,
-    FORECAST_MODE,
+    TYPE_TEMPERATURE,
+    TYPE_WIND_DIRECTION,
+    TYPE_WIND_SPEED,
     UV_LEVEL_EXTREME,
     UV_LEVEL_HIGH,
     UV_LEVEL_LOW,
     UV_LEVEL_MODERATE,
     UV_LEVEL_VHIGH,
+    WEATHER_CODE_TO_ICON,
+    WIND_DIRECTIONS,
 )
 from .utils import get_hourly_weather_icon
 
@@ -81,6 +85,7 @@ sensor_keys.TYPE_PRECIPITATION = IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION
 sensor_keys.TYPE_PRECIPITATION_PROBABILITY = (
     IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION_PROBABILITY
 )
+sensor_keys.TYPE_WIND_DIRECTION = IMS_SENSOR_KEY_PREFIX + TYPE_WIND_DIRECTION
 sensor_keys.TYPE_WIND_SPEED = IMS_SENSOR_KEY_PREFIX + TYPE_WIND_SPEED
 sensor_keys.TYPE_FORECAST_TODAY = (
     IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_TODAY
@@ -167,10 +172,18 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
         name="IMS Humidity",
         icon="mdi:weather-sunny",
         native_unit_of_measurement=PERCENTAGE,
-        device_class=SensorDeviceClass.HUMIDITY,
         state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_HUMIDITY,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_WIND_DIRECTION,
+        name="IMS Wind Direction",
+        icon="mdi:weather-windy",
+        native_unit_of_measurement=DEGREE,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=FORECAST_MODE.CURRENT,
+        field_name=FIELD_NAME_WIND_DIRECTION_ID,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_WIND_SPEED,
@@ -429,6 +442,13 @@ class ImsSensor(ImsEntity, SensorEntity):
                 self._attr_native_value = (
                     data.current_weather.forecast_time.astimezone()
                 )
+
+            case sensor_keys.TYPE_WIND_DIRECTION:
+                self._attr_native_value = WIND_DIRECTIONS[
+                    int(
+                        self._weather_coordinator.data.current_weather.wind_direction_id
+                    )
+                ]
 
             case sensor_keys.TYPE_WIND_SPEED:
                 self._attr_native_value = data.current_weather.wind_speed
