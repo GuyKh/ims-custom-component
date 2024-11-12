@@ -265,13 +265,60 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
         """Manage the options."""
         global cities_data
         if not cities_data:
-            cities_data = _get_localized_cities(self.hass)
+            cities_data = await _get_localized_cities(self.hass)
+        
+        city_options = {city_id: city["name"] for city_id, city in cities_data.items()}
+
+        current_city = self.config_entry.data.get(CONF_CITY)
+        conf_city = self.config_entry.options.get(CONF_CITY)
+
+        _LOGGER.info(f"current city: {current_city}")
+        _LOGGER.info(f"conf city: {conf_city}")
+        is_legacy_city = False
+        if isinstance(current_city, int | str):
+            is_legacy_city = True
+
+        city_id = current_city if is_legacy_city else current_city["lid"]
+        _LOGGER.info(f"city_id: {city_id}")
 
         if user_input is not None:
-            # entry = self.config_entry
+            errors = []
+            city_id = user_input[CONF_CITY]
+            city = cities_data[str(city_id)]
+            user_input[CONF_CITY] = city
+            language = user_input[CONF_LANGUAGE]
+            forecast_mode = user_input[CONF_MODE]
+            entity_name = user_input[CONF_NAME]
+            # image_path = user_input[CONF_IMAGES_PATH]
+            forecast_platform = user_input[IMS_PLATFORM]
 
-            # _LOGGER.warning('async_step_init_Options')
-            return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
+            # Convert scan interval to timedelta
+            if isinstance(user_input[CONF_UPDATE_INTERVAL], str):
+                user_input[CONF_UPDATE_INTERVAL] = cv.time_period_str(
+                    user_input[CONF_UPDATE_INTERVAL]
+                )
+
+            # Convert scan interval to number of minutes
+            if isinstance(user_input[CONF_UPDATE_INTERVAL], timedelta):
+                user_input[CONF_UPDATE_INTERVAL] = user_input[
+                    CONF_UPDATE_INTERVAL
+                ].total_minutes()
+
+            api_status = "No API Call made"
+            try:
+                api_status = await _is_ims_api_online(
+                    self.hass, user_input[CONF_LANGUAGE], user_input[CONF_CITY]
+                )
+
+            except Exception:
+                _LOGGER.warning("IMS Weather Setup Error: HTTP Error: %s", api_status)
+                errors["base"] = "API Error: " + api_status
+
+            if not errors:
+                return self.async_create_entry(
+                    title=user_input[CONF_NAME], data=user_input
+                )
+            _LOGGER.warning(errors)
 
         return self.async_show_form(
             step_id="init",
@@ -288,9 +335,9 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_CITY,
                         default=self.config_entry.options.get(
                             CONF_CITY,
-                            self.config_entry.data.get(CONF_CITY, 1),
+                            str(city_id),
                         ),
-                    ): int,
+                    ): vol.In(city_options),
                     vol.Optional(
                         CONF_LANGUAGE,
                         default=self.config_entry.options.get(
