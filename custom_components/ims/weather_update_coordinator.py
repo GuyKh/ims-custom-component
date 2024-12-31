@@ -6,11 +6,12 @@ import logging
 import homeassistant.util.dt as dt_util
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from weatheril import WeatherIL
+from weatheril import WeatherIL, Forecast, Weather, RadarSatellite
 
 from .const import (
     DOMAIN,
 )
+from dataclasses import dataclass
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -91,8 +92,8 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         weather_forecast.days = filtered_day_list
 
 
+@dataclass
 class WeatherData:
-    def __init__(self, current_weather, weather_forecast, images):
-        self.current_weather = current_weather
-        self.forecast = weather_forecast
-        self.images = images
+    current_weather: Weather
+    forecast: Forecast
+    images: RadarSatellite
