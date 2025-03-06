@@ -259,7 +259,7 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry):
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
@@ -279,64 +279,64 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                 {
                     vol.Optional(
                         CONF_NAME,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             CONF_NAME,
-                            self.config_entry.data.get(CONF_NAME, DEFAULT_NAME),
+                            self._config_entry.data.get(CONF_NAME, DEFAULT_NAME),
                         ),
                     ): str,
                     vol.Optional(
                         CONF_CITY,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             CONF_CITY,
-                            self.config_entry.data.get(CONF_CITY, 1),
+                            self._config_entry.data.get(CONF_CITY, 1),
                         ),
                     ): int,
                     vol.Optional(
                         CONF_LANGUAGE,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             CONF_LANGUAGE,
-                            self.config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
+                            self._config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
                         ),
                     ): vol.In(LANGUAGES),
                     vol.Required(
                         IMS_PLATFORM,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             IMS_PLATFORM,
-                            self.config_entry.data.get(IMS_PLATFORM, []),
+                            self._config_entry.data.get(IMS_PLATFORM, []),
                         ),
                     ): cv.multi_select(IMS_PLATFORMS),
                     vol.Optional(
                         CONF_MODE,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             CONF_MODE,
-                            self.config_entry.data.get(
+                            self._config_entry.data.get(
                                 CONF_MODE, DEFAULT_FORECAST_MODE
                             ),
                         ),
                     ): vol.In(FORECAST_MODES),
                     vol.Optional(
                         CONF_UPDATE_INTERVAL,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             CONF_UPDATE_INTERVAL,
-                            self.config_entry.data.get(
+                            self._config_entry.data.get(
                                 CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL
                             ),
                         ),
                     ): int,
                     vol.Optional(
                         CONF_MONITORED_CONDITIONS,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             CONF_MONITORED_CONDITIONS,
-                            self.config_entry.data.get(
+                            self._config_entry.data.get(
                                 CONF_MONITORED_CONDITIONS, SENSOR_KEYS
                             ),
                         ),
                     ): cv.multi_select(SENSOR_KEYS),
                     vol.Optional(
                         CONF_IMAGES_PATH,
-                        default=self.config_entry.options.get(
+                        default=self._config_entry.options.get(
                             CONF_IMAGES_PATH,
-                            self.config_entry.data.get(
+                            self._config_entry.data.get(
                                 CONF_IMAGES_PATH, DEFAULT_IMAGE_PATH
                             ),
                         ),
