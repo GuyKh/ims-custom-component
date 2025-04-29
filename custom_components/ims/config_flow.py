@@ -295,7 +295,9 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                         CONF_LANGUAGE,
                         default=self._config_entry.options.get(
                             CONF_LANGUAGE,
-                            self._config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
+                            self._config_entry.data.get(
+                                CONF_LANGUAGE, DEFAULT_LANGUAGE
+                            ),
                         ),
                     ): vol.In(LANGUAGES),
                     vol.Required(

@@ -1,34 +1,35 @@
 import logging
 import types
 
-
 from homeassistant.components.sensor import (
+    SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
-    SensorDeviceClass,
 )
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
-    DEGREE,
-    UV_INDEX,
-    UnitOfTemperature,
-    PERCENTAGE,
-    UnitOfSpeed,
-    UnitOfPrecipitationDepth,
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
     CONF_MONITORED_CONDITIONS,
+    DEGREE,
+    PERCENTAGE,
+    UV_INDEX,
+    UnitOfPrecipitationDepth,
+    UnitOfSpeed,
+    UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
     DOMAIN,
     ENTRY_WEATHER_COORDINATOR,
+    FIELD_NAME_DEW_POINT_TEMP,
     FIELD_NAME_FEELS_LIKE,
     FIELD_NAME_FORECAST_TIME,
     FIELD_NAME_HUMIDITY,
     FIELD_NAME_LOCATION,
+    FIELD_NAME_PM10,
     FIELD_NAME_RAIN,
     FIELD_NAME_RAIN_CHANCE,
     FIELD_NAME_TEMPERATURE,
@@ -44,6 +45,7 @@ from .const import (
     TYPE_CITY,
     TYPE_CURRENT_UV_INDEX,
     TYPE_CURRENT_UV_LEVEL,
+    TYPE_DEW_POINT_TEMP,
     TYPE_FEELS_LIKE,
     TYPE_FORECAST_DAY1,
     TYPE_FORECAST_DAY2,
@@ -57,6 +59,7 @@ from .const import (
     TYPE_FORECAST_TODAY,
     TYPE_HUMIDITY,
     TYPE_MAX_UV_INDEX,
+    TYPE_PM10,
     TYPE_PRECIPITATION,
     TYPE_PRECIPITATION_PROBABILITY,
     TYPE_TEMPERATURE,
@@ -75,12 +78,14 @@ from .utils import get_hourly_weather_icon
 sensor_keys = types.SimpleNamespace()
 sensor_keys.TYPE_CURRENT_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX
 sensor_keys.TYPE_CURRENT_UV_LEVEL = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL
+sensor_keys.TYPE_DEW_POINT_TEMP = IMS_SENSOR_KEY_PREFIX + TYPE_DEW_POINT_TEMP
 sensor_keys.TYPE_MAX_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX
 sensor_keys.TYPE_CITY = IMS_SENSOR_KEY_PREFIX + TYPE_CITY
 sensor_keys.TYPE_TEMPERATURE = IMS_SENSOR_KEY_PREFIX + TYPE_TEMPERATURE
 sensor_keys.TYPE_HUMIDITY = IMS_SENSOR_KEY_PREFIX + TYPE_HUMIDITY
 sensor_keys.TYPE_FORECAST_TIME = IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_TIME
 sensor_keys.TYPE_FEELS_LIKE = IMS_SENSOR_KEY_PREFIX + TYPE_FEELS_LIKE
+sensor_keys.TYPE_PM10 = IMS_SENSOR_KEY_PREFIX + TYPE_PM10
 sensor_keys.TYPE_PRECIPITATION = IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION
 sensor_keys.TYPE_PRECIPITATION_PROBABILITY = (
     IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION_PROBABILITY
@@ -181,7 +186,8 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
         name="IMS Wind Direction",
         icon="mdi:weather-windy",
         native_unit_of_measurement=DEGREE,
-        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.WIND_DIRECTION,
+        state_class=SensorStateClass.MEASUREMENT_ANGLE,
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_WIND_DIRECTION_ID,
     ),
@@ -221,6 +227,26 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
         state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_RAIN_CHANCE,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_PM10,
+        name="IMS PM10",
+        icon="mdi:air-filter",
+        device_class=SensorDeviceClass.PM10,
+        native_unit_of_measurement=CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=FORECAST_MODE.CURRENT,
+        field_name=FIELD_NAME_PM10,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_DEW_POINT_TEMP,
+        name="IMS Dew Point",
+        icon="mdi:water-circle",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=FORECAST_MODE.CURRENT,
+        field_name=FIELD_NAME_DEW_POINT_TEMP,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_TODAY,
@@ -329,7 +355,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
         "weather": {
             "value": daily_forecast.weather,
             "icon": WEATHER_CODE_TO_ICON.get(
-                daily_forecast.weather_code, "mdi:weather-sunny"
+                str(daily_forecast.weather_code), "mdi:weather-sunny"
             ),
         },
         "description": {"value": daily_forecast.description},
@@ -354,7 +380,7 @@ def generate_forecast_extra_state_attributes(daily_forecast):
         attributes[hour.hour] = {
             "weather": {
                 "value": last_weather_status,
-                "icon": WEATHER_CODE_TO_ICON.get(hourly_weather_code),
+                "icon": WEATHER_CODE_TO_ICON.get(str(hourly_weather_code)),
             },
             "temperature": {
                 "value": hour.precise_temperature or hour.temperature,
@@ -422,11 +448,17 @@ class ImsSensor(ImsEntity, SensorEntity):
             case sensor_keys.TYPE_TEMPERATURE:
                 self._attr_native_value = data.current_weather.temperature
 
+            case sensor_keys.TYPE_DEW_POINT_TEMP:
+                self._attr_native_value = data.current_weather.due_point_temp
+
             case sensor_keys.TYPE_FEELS_LIKE:
                 self._attr_native_value = data.current_weather.feels_like
 
             case sensor_keys.TYPE_HUMIDITY:
                 self._attr_native_value = data.current_weather.humidity
+
+            case sensor_keys.TYPE_PM10:
+                self._attr_native_value = data.current_weather.pm10
 
             case sensor_keys.TYPE_PRECIPITATION:
                 self._attr_native_value = (
@@ -473,7 +505,7 @@ class ImsSensor(ImsEntity, SensorEntity):
                         generate_forecast_extra_state_attributes(daily_forecast)
                     )
                     self._attr_icon = WEATHER_CODE_TO_ICON.get(
-                        daily_forecast.weather_code, "mdi:weather-sunny"
+                        str(daily_forecast.weather_code), "mdi:weather-sunny"
                     )
 
             case _:

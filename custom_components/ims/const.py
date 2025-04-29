@@ -91,6 +91,7 @@ TYPE_MAX_UV_INDEX = "max_uv_index"
 TYPE_MIN_TEMP = "min_temp"
 TYPE_PRECIPITATION = "precipitation"
 TYPE_PRECIPITATION_PROBABILITY = "precipitation_probability"
+TYPE_PM10 = "pm10"
 TYPE_TEMPERATURE = "temperature"
 TYPE_WAVE_HEIGHT = "wave_height"
 TYPE_WEATHER_CODE = "weather_code"
@@ -98,7 +99,7 @@ TYPE_WIND_CHILL = "wind_chill"
 TYPE_WIND_DIRECTION = "wind_direction"
 TYPE_WIND_SPEED = "wind_speed"
 
-FIELD_NAME_DEW_POINT_TEMP = "due_point_Temp"
+FIELD_NAME_DEW_POINT_TEMP = "due_point_temp"
 FIELD_NAME_FEELS_LIKE = "feels_like"
 FIELD_NAME_FORECAST_TIME = "forecast_time"
 FIELD_NAME_HEAT_STRESS = "heat_stress"
@@ -107,6 +108,7 @@ FIELD_NAME_HUMIDITY = "relative_humidity"
 FIELD_NAME_LOCATION = "location"
 FIELD_NAME_MAX_TEMP = "max_temp"
 FIELD_NAME_MIN_TEMP = "min_temp"
+FIELD_NAME_PM10 = "pm10"
 FIELD_NAME_RAIN = "rain"
 FIELD_NAME_RAIN_CHANCE = "rain_chance"
 FIELD_NAME_TEMPERATURE = "temperature"
@@ -139,6 +141,7 @@ UV_LEVEL_LOW = "low"
 
 # Based on https://ims.gov.il/en/wind_directions
 WIND_DIRECTIONS = {
+    None: None,
     0: None,
     1: float(360),
     2: float(23),
@@ -162,6 +165,7 @@ WIND_DIRECTIONS = {
 # Based on https://ims.gov.il/en/weather_codes
 WEATHER_CODE_TO_CONDITION = {
     None: None,
+    "None": None,
     "0": None,
     "1010": ATTR_CONDITION_EXCEPTIONAL,
     "1020": ATTR_CONDITION_LIGHTNING_RAINY,
