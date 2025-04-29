@@ -224,10 +224,10 @@ class IMSWeather(WeatherEntity):
             "%Y-%m-%d %H:%M:%S",
         )
 
-        condition = WEATHER_CODE_TO_CONDITION[weather_code]
+        condition = WEATHER_CODE_TO_CONDITION[str(weather_code)]
         if not condition or condition == "Nothing":
             condition = WEATHER_CODE_TO_CONDITION[
-                self._weather_coordinator.data.forecast.days[0].weather_code
+                str(self._weather_coordinator.data.forecast.days[0].weather_code)
             ]
         return condition
 
@@ -246,10 +246,15 @@ class IMSWeather(WeatherEntity):
         if not hourly:
             data = [
                 Forecast(
-                    condition=WEATHER_CODE_TO_CONDITION[daily_forecast.weather_code],
+                    condition=WEATHER_CODE_TO_CONDITION[
+                        str(daily_forecast.weather_code)
+                    ],
                     datetime=daily_forecast.date.isoformat(),
                     native_temperature=daily_forecast.maximum_temperature,
                     native_templow=daily_forecast.minimum_temperature,
+                    native_precipitation=sum(
+                        hour.rain or 0 for hour in daily_forecast.hours
+                    ),
                 )
                 for daily_forecast in self._weather_coordinator.data.forecast.days
             ]
@@ -271,7 +276,9 @@ class IMSWeather(WeatherEntity):
 
                     data.append(
                         Forecast(
-                            condition=WEATHER_CODE_TO_CONDITION[hourly_weather_code],
+                            condition=WEATHER_CODE_TO_CONDITION[
+                                str(hourly_weather_code)
+                            ],
                             datetime=hourly_forecast.forecast_time.isoformat(),
                             humidity=hourly_forecast.relative_humidity,
                             native_temperature=hourly_forecast.precise_temperature,

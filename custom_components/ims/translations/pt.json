@@ -96,6 +96,18 @@
             "ims_precipitation_en": {
                 "name": "Precipitação"
             },
+            "ims_dew_point_temp_he": {
+                "name": "Ponto de Orvalho"
+            },
+            "ims_dew_point_temp_en": {
+                "name": "Ponto de Orvalho"
+            },
+            "ims_pm10_he": {
+                "name": "Matéria Particulada Grossa (PM10)"
+            },
+            "ims_pm10_en": {
+                "name": "Matéria Particulada Grossa (PM10)"
+            },
             "ims_precipitation_probability_he": {
                 "name": "Probabilidade de Chuva"
             },

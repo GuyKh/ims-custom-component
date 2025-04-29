@@ -96,6 +96,18 @@
             "ims_precipitation_en": {
                 "name": "Precipitation"
             },
+            "ims_pm10_he": {
+                "name": "חומר חלקיקי (PM10)"
+            },
+            "ims_pm10_en": {
+                "name": "Coarse Particulate Matter (PM10)"
+            },
+            "ims_dew_point_temp_he": {
+                "name": "נקודת טל"
+            },
+            "ims_dew_point_temp_en": {
+                "name": "Dew Point Temperature"
+            },
             "ims_precipitation_probability_he": {
                 "name": "סיכוי לגשם"
             },
