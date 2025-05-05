@@ -2,5 +2,5 @@
 	"name": "Israel Meteorological Service / sensor",
 	"render_readme": true,
 	"country": "IL",
-	"homeassistant": "2024.1.0b0"
+	"homeassistant": "2025.4.0"
   }
