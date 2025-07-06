@@ -214,6 +214,11 @@ class IMSWeather(WeatherEntity):
         ]
 
     @property
+    def uv_index(self):
+        """Return the wind bearing."""
+        return int(self._weather_coordinator.data.current_weather.u_v_index)
+
+    @property
     def condition(self):
         """Return the weather condition."""
 
