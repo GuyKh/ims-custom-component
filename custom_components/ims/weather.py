@@ -229,11 +229,11 @@ class IMSWeather(WeatherEntity):
             "%Y-%m-%d %H:%M:%S",
         )
 
-        condition = WEATHER_CODE_TO_CONDITION[str(weather_code)]
+        condition = WEATHER_CODE_TO_CONDITION.get(str(weather_code))
         if not condition or condition == "Nothing":
-            condition = WEATHER_CODE_TO_CONDITION[
+            condition = WEATHER_CODE_TO_CONDITION.get(
                 str(self._weather_coordinator.data.forecast.days[0].weather_code)
-            ]
+            )
         return condition
 
     @property
@@ -251,14 +251,14 @@ class IMSWeather(WeatherEntity):
         if not hourly:
             data = [
                 Forecast(
-                    condition=WEATHER_CODE_TO_CONDITION[
+                    condition=WEATHER_CODE_TO_CONDITION.get(
                         str(daily_forecast.weather_code)
-                    ],
+                    ),
                     datetime=daily_forecast.date.isoformat(),
                     native_temperature=daily_forecast.maximum_temperature,
                     native_templow=daily_forecast.minimum_temperature,
                     native_precipitation=sum(
-                        hour.rain or 0 for hour in daily_forecast.hours
+                        max(hour.rain or 0, 0) for hour in daily_forecast.hours
                     ),
                 )
                 for daily_forecast in self._weather_coordinator.data.forecast.days
@@ -267,13 +267,26 @@ class IMSWeather(WeatherEntity):
             last_weather_code = None
             for daily_forecast in self._weather_coordinator.data.forecast.days:
                 for hourly_forecast in daily_forecast.hours:
+                    # Skip negative weather codes
+                    try:
+                        weather_code_int = int(hourly_forecast.weather_code) if hourly_forecast.weather_code else 0
+                    except (ValueError, TypeError):
+                        weather_code_int = 0
+                    
                     if (
                         hourly_forecast.weather_code
                         and hourly_forecast.weather_code != "0"
+                        and weather_code_int >= 0
                     ):
                         last_weather_code = hourly_forecast.weather_code
                     elif not last_weather_code:
-                        last_weather_code = daily_forecast.weather_code
+                        try:
+                            daily_weather_code_int = int(daily_forecast.weather_code) if daily_forecast.weather_code else 0
+                        except (ValueError, TypeError):
+                            daily_weather_code_int = 0
+                        
+                        if daily_forecast.weather_code and daily_weather_code_int >= 0:
+                            last_weather_code = daily_forecast.weather_code
 
                     hourly_weather_code = get_hourly_weather_icon(
                         hourly_forecast.hour, last_weather_code
@@ -281,13 +294,13 @@ class IMSWeather(WeatherEntity):
 
                     data.append(
                         Forecast(
-                            condition=WEATHER_CODE_TO_CONDITION[
+                            condition=WEATHER_CODE_TO_CONDITION.get(
                                 str(hourly_weather_code)
-                            ],
+                            ),
                             datetime=hourly_forecast.forecast_time.isoformat(),
                             humidity=hourly_forecast.relative_humidity,
                             native_temperature=hourly_forecast.precise_temperature,
-                            native_precipitation=hourly_forecast.rain,
+                            native_precipitation=max(hourly_forecast.rain or 0, 0),
                             precipitation_probability=hourly_forecast.rain_chance,
                             wind_bearing=WIND_DIRECTIONS[
                                 hourly_forecast.wind_direction_id
