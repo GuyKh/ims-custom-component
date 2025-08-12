@@ -90,6 +90,12 @@
             "ims_wind_speed_en": {
                 "name": "Velocidade do Vento"
             },
+            "ims_gust_speed_he": {
+                "name": "Velocidade da Rajada"
+            },
+            "ims_gust_speed_en": {
+                "name": "Velocidade da Rajada"
+            },
             "ims_precipitation_he": {
                 "name": "Precipitação"
             },

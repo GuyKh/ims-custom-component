@@ -89,6 +89,12 @@
             "ims_wind_speed_en": {
                 "name": "Wind Speed"
             },
+            "ims_gust_speed_he": {
+                "name": "מהירות משב רוח"
+            },
+            "ims_gust_speed_en": {
+                "name": "Gust Speed"
+            },
             "ims_pm10_he": {
                 "name": "חומר חלקיקי (PM10)"
             },
