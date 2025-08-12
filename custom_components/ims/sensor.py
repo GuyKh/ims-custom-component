@@ -28,6 +28,7 @@ from .const import (
     FIELD_NAME_FEELS_LIKE,
     FIELD_NAME_FORECAST_TIME,
     FIELD_NAME_HUMIDITY,
+    FIELD_NAME_GUST_SPEED,
     FIELD_NAME_LOCATION,
     FIELD_NAME_PM10,
     FIELD_NAME_RAIN,
@@ -57,6 +58,7 @@ from .const import (
     TYPE_FORECAST_PREFIX,
     TYPE_FORECAST_TIME,
     TYPE_FORECAST_TODAY,
+    TYPE_GUST_SPEED,
     TYPE_HUMIDITY,
     TYPE_MAX_UV_INDEX,
     TYPE_PM10,
@@ -80,6 +82,7 @@ sensor_keys.TYPE_CURRENT_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDE
 sensor_keys.TYPE_CURRENT_UV_LEVEL = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_LEVEL
 sensor_keys.TYPE_DEW_POINT_TEMP = IMS_SENSOR_KEY_PREFIX + TYPE_DEW_POINT_TEMP
 sensor_keys.TYPE_MAX_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_MAX_UV_INDEX
+sensor_keys.TYPE_GUST_SPEED = IMS_SENSOR_KEY_PREFIX + TYPE_GUST_SPEED
 sensor_keys.TYPE_CITY = IMS_SENSOR_KEY_PREFIX + TYPE_CITY
 sensor_keys.TYPE_TEMPERATURE = IMS_SENSOR_KEY_PREFIX + TYPE_TEMPERATURE
 sensor_keys.TYPE_HUMIDITY = IMS_SENSOR_KEY_PREFIX + TYPE_HUMIDITY
@@ -200,6 +203,16 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
         state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_WIND_SPEED,
+    ),
+    ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_GUST_SPEED,
+        name="IMS Gust Speed",
+        icon="mdi:weather-dust",
+        native_unit_of_measurement=UnitOfSpeed.KILOMETERS_PER_HOUR,
+        device_class=SensorDeviceClass.SPEED,
+        state_class=SensorStateClass.MEASUREMENT,
+        forecast_mode=FORECAST_MODE.CURRENT,
+        field_name=FIELD_NAME_GUST_SPEED,
     ),
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_TIME,
@@ -436,6 +449,9 @@ class ImsSensor(ImsEntity, SensorEntity):
 
             case sensor_keys.TYPE_MAX_UV_INDEX:
                 self._attr_native_value = data.current_weather.u_v_i_max
+
+            case sensor_keys.TYPE_GUST_SPEED:
+                self._attr_native_value = data.current_weather.gust_speed
 
             case sensor_keys.TYPE_CITY:
                 _LOGGER.debug(

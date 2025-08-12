@@ -214,6 +214,15 @@ class IMSWeather(WeatherEntity):
         ]
 
     @property
+    def native_wind_gust_speed(self):
+        """Return the gust wind speed."""
+        return (
+            int(self._weather_coordinator.data.current_weather.gust_speed)
+            if self._weather_coordinator.data.current_weather.gust_speed
+            else None
+        )
+
+    @property
     def uv_index(self):
         """Return the wind bearing."""
         return int(self._weather_coordinator.data.current_weather.u_v_index)
@@ -269,10 +278,14 @@ class IMSWeather(WeatherEntity):
                 for hourly_forecast in daily_forecast.hours:
                     # Skip negative weather codes
                     try:
-                        weather_code_int = int(hourly_forecast.weather_code) if hourly_forecast.weather_code else 0
+                        weather_code_int = (
+                            int(hourly_forecast.weather_code)
+                            if hourly_forecast.weather_code
+                            else 0
+                        )
                     except (ValueError, TypeError):
                         weather_code_int = 0
-                    
+
                     if (
                         hourly_forecast.weather_code
                         and hourly_forecast.weather_code != "0"
@@ -281,10 +294,14 @@ class IMSWeather(WeatherEntity):
                         last_weather_code = hourly_forecast.weather_code
                     elif not last_weather_code:
                         try:
-                            daily_weather_code_int = int(daily_forecast.weather_code) if daily_forecast.weather_code else 0
+                            daily_weather_code_int = (
+                                int(daily_forecast.weather_code)
+                                if daily_forecast.weather_code
+                                else 0
+                            )
                         except (ValueError, TypeError):
                             daily_weather_code_int = 0
-                        
+
                         if daily_forecast.weather_code and daily_weather_code_int >= 0:
                             last_weather_code = daily_forecast.weather_code
 
@@ -306,6 +323,7 @@ class IMSWeather(WeatherEntity):
                                 hourly_forecast.wind_direction_id
                             ],
                             native_wind_speed=hourly_forecast.wind_speed,
+                            native_wind_gust_speed=hourly_forecast.gust_speed,
                             uv_index=hourly_forecast.u_v_index,
                         )
                     )
