@@ -217,7 +217,7 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
     ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_TIME,
         name="IMS Forecast Time",
-        icon="mdi:weather-windy",
+        icon="mdi:calendar-clock",
         device_class=SensorDeviceClass.TIMESTAMP,
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_FORECAST_TIME,
