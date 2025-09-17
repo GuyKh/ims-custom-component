@@ -73,7 +73,8 @@ from .const import (
     UV_LEVEL_MODERATE,
     UV_LEVEL_VHIGH,
     WEATHER_CODE_TO_ICON,
-    WIND_DIRECTIONS,
+    WIND_DIRECTIONS, FIELD_NAME_WARNING,
+    TYPE_WEATHER_WARNINGS, DATETIME_FORMAT,
 )
 from .utils import get_hourly_weather_icon
 
@@ -94,6 +95,7 @@ sensor_keys.TYPE_PRECIPITATION_PROBABILITY = (
     IMS_SENSOR_KEY_PREFIX + TYPE_PRECIPITATION_PROBABILITY
 )
 sensor_keys.TYPE_WIND_DIRECTION = IMS_SENSOR_KEY_PREFIX + TYPE_WIND_DIRECTION
+sensor_keys.TYPE_WEATHER_WARNINGS = IMS_SENSOR_KEY_PREFIX + TYPE_WEATHER_WARNINGS
 sensor_keys.TYPE_WIND_SPEED = IMS_SENSOR_KEY_PREFIX + TYPE_WIND_SPEED
 sensor_keys.TYPE_FORECAST_TODAY = (
     IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_TODAY
@@ -262,6 +264,13 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
         field_name=FIELD_NAME_DEW_POINT_TEMP,
     ),
     ImsSensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_WEATHER_WARNINGS,
+        name="IMS Weather Warnings",
+        icon="mdi:weather-cloudy-alert",
+        forecast_mode=FORECAST_MODE.CURRENT,
+        field_name=FIELD_NAME_WARNING,
+    ),
+    ImsSensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_FORECAST_PREFIX + TYPE_FORECAST_TODAY,
         name="IMS Forecast Today",
         icon="mdi:weather-sunny",
@@ -352,6 +361,17 @@ async def async_setup_entry(
             sensors.append(ImsSensor(weather_coordinator, description))
 
     async_add_entities(sensors, update_before_add=True)
+
+def generate_single_warning_string(warning):
+    return f"{warning.valid_from.strftime(DATETIME_FORMAT)} - {warning.valid_to.strftime(DATETIME_FORMAT)}\n{warning.text_full}"
+
+def generate_warnings_extra_state_attributes(warnings):
+    warnings_str = []
+    for warning in warnings:
+        warnings_str.append(generate_single_warning_string(warning))
+
+    attributes = { "warnings": warnings_str }
+    return attributes
 
 
 def generate_forecast_extra_state_attributes(daily_forecast):
@@ -498,6 +518,10 @@ class ImsSensor(ImsEntity, SensorEntity):
 
             case sensor_keys.TYPE_WIND_SPEED:
                 self._attr_native_value = data.current_weather.wind_speed
+
+            case sensor_keys.TYPE_WEATHER_WARNINGS:
+                self._attr_native_value = len(data.warnings)
+                self._attr_extra_state_attributes = generate_warnings_extra_state_attributes(data.warnings)
 
             case (
                 sensor_keys.TYPE_FORECAST_TODAY

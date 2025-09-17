@@ -4,11 +4,13 @@ from dataclasses import dataclass
 from homeassistant.components.binary_sensor import (
     BinarySensorEntityDescription,
     BinarySensorEntity,
+    BinarySensorDeviceClass,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_MONITORED_CONDITIONS
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+import homeassistant.util.dt as dt_util
 
 from . import ImsEntity, ImsSensorEntityDescription
 from .const import (
@@ -17,7 +19,7 @@ from .const import (
     FORECAST_MODE,
     FIELD_NAME_RAIN,
     DOMAIN,
-    ENTRY_WEATHER_COORDINATOR,
+    ENTRY_WEATHER_COORDINATOR, TYPE_IS_ACTIVE_WEATHER_WARNING, FIELD_NAME_WARNING,
 )
 from .weather_update_coordinator import WeatherData
 
@@ -47,6 +49,15 @@ BINARY_SENSORS_DESCRIPTIONS: tuple[ImsBinarySensorEntityDescription, ...] = (
         field_name=FIELD_NAME_RAIN,
         value_fn=lambda data: data.current_weather.rain
         and data.current_weather.rain > 0.0,
+    ),
+    ImsBinarySensorEntityDescription(
+        key=IMS_SENSOR_KEY_PREFIX + TYPE_IS_ACTIVE_WEATHER_WARNING,
+        name="IMS Is Active Weather Warning",
+        icon="mdi:weather-sunny-alert",
+        device_class=BinarySensorDeviceClass.SAFETY,
+        forecast_mode=FORECAST_MODE.CURRENT,
+        field_name=FIELD_NAME_WARNING,
+        value_fn=lambda data: any(warning.valid_from >= dt_util.now() >= warning.valid_to for warning in data.warnings)
     ),
 )
 

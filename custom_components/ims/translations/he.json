@@ -62,6 +62,20 @@
                     "on": "Raining",
                     "off": "Not Raining"
                 }
+            },
+            "ims_is_active_weather_warning_he": {
+                "name": "יש התראת מז\"א בתוקף",
+                "state": {
+                    "on": "יש",
+                    "off": "אין"
+                }
+            },
+            "ims_is_active_weather_warning_en": {
+                "name": "Is Active Weather Warning",
+                "state": {
+                    "on": "Alert",
+                    "off": "Clear"
+                }
             }
         },
         "sensor": {
@@ -167,6 +181,18 @@
                     "high": "High",
                     "moderate": "Moderate",
                     "low": "Low"
+                }
+            },
+            "ims_weather_warnings_en": {
+                "name": "Weather Warnings",
+                "state_attributes": {
+                    "warnings": { "name": "Warnings" }
+                }
+            },
+            "ims_weather_warnings_he": {
+                "name": "אזהרות מז\"א",
+                "state_attributes": {
+                    "warnings": { "name": "אזהרות" }
                 }
             }
         }

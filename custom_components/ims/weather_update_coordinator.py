@@ -6,7 +6,7 @@ import logging
 import homeassistant.util.dt as dt_util
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from weatheril import WeatherIL, Forecast, Weather, RadarSatellite
+from weatheril import WeatherIL, Forecast, Weather, RadarSatellite, Warning
 
 from .const import (
     DOMAIN,
@@ -59,6 +59,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
             None, self.weather.get_current_analysis
         )
         weather_forecast = await loop.run_in_executor(None, self.weather.get_forecast)
+        warnings = await loop.run_in_executor(None, self.weather.get_warnings)
         images = await loop.run_in_executor(None, self.weather.get_radar_images)
 
         _LOGGER.debug(
@@ -67,7 +68,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         )
 
         self._filter_future_forecast(weather_forecast)
-        return WeatherData(current_weather, weather_forecast, images)
+        return WeatherData(current_weather, weather_forecast, images, warnings)
 
     @staticmethod
     def _filter_future_forecast(weather_forecast):
@@ -97,3 +98,4 @@ class WeatherData:
     current_weather: Weather
     forecast: Forecast
     images: RadarSatellite
+    warnings: list[Warning]

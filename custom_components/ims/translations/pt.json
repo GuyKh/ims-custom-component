@@ -63,6 +63,32 @@
                     "on": "A chover",
                     "off": "Não está a chover"
                 }
+            },
+            "ims_is_active_weather_warning_he": {
+                "name": "Existe um alerta meteorológico ativo",
+                "state": {
+                    "on": "Existe",
+                    "off": "Não Existe"
+                }
+            },
+            "ims_is_active_weather_warning_en": {
+                "name": "Existe um alerta meteorológico ativo",
+                "state": {
+                    "on": "Existe",
+                    "off": "Não Existe"
+                }
+            },
+            "ims_weather_warnings_en": {
+                "name": "Alertas meteorológicos",
+                "state_attributes": {
+                    "warnings": { "name": "Alertas" }
+                }
+            },
+            "ims_weather_warnings_he": {
+                "name": "Alertas meteorológicos",
+                "state_attributes": {
+                    "warnings": { "name": "Alertas" }
+                }
             }
         },
         "sensor": {
