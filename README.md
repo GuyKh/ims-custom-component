@@ -2,16 +2,22 @@
 # ims-custom-component
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
+[![GitHub Release][releases-shield]][releases]
+[![GitHub Activity][commits-shield]][commits]
+[![License][license-shield]](LICENSE)
 
+![Project Maintenance][maintenance-shield]
+[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 
 IMS custom component for HomeAssistant allows you to integrate the Israel Meteorological Service easily and with minimal configuration.
-With IMS, you can get the following information for the current status (Updates every hour):
+With IMS, you can get the following information for the current status (Updates every hour) and future weather forecast:
 * Temperature
 * Feels Like
 * Humidity
 * Wind speed
 * Rain status
+* Weather Alerts
 
 [![IMS custom component](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/ims.png?raw=true "IMS custom component")](https://github.com/GuyKh/ims-custom-component/blob/main/screenshots/ims.png?raw=true "IMS custom component")
 
@@ -23,8 +29,6 @@ And also, the forecast data for today and the next four days in six hours interv
 * Max UVI.
 * Weather.
 * Daily forecast.
-
-* And in six hours interval:
 * Weather forecast.
 * Temperature.
 
@@ -217,4 +221,12 @@ The city code must be one of the codes in the following table:
 | 277| Hay-Bar Yotvata|
 | 278| Coral Beach|
 
+[buymecoffee]: https://www.buymeacoffee.com/guykh
+[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
+[commits-shield]: https://img.shields.io/github/commit-activity/y/guykh/ims-custom-component.svg?style=for-the-badge
+[commits]: https://github.com/guykh/ims-custom-component/commits/main
+[license-shield]: https://img.shields.io/github/license/guykh/ims-custom-component.svg?style=for-the-badge
+[maintenance-shield]: https://img.shields.io/badge/maintainer-Guy%20Khmelnitsky%20%40GuyKh-blue.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/guykh/ims-custom-component.svg?style=for-the-badge
+[releases]: https://github.com/guykh/ims-custom-component/releases
 
