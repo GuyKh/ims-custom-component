@@ -1,0 +1,49 @@
+alias: Outfit Notification
+description: Advanced clothing suggestions with multiple weather factors
+triggers:
+  - at: "21:00:00"
+    trigger: time
+conditions: []
+actions:
+  - variables:
+      temp_min: >-
+        {{ state_attr('sensor.ims_forecast_day1', 'minimum_temperature')['value'] | float }}
+      temp_max: >-
+        {{ state_attr('sensor.ims_forecast_day1', 'maximum_temperature')['value'] | float }}
+      feels_like: >-
+        {{ state_attr('sensor.ims_forecast_day1', '12:00')['temperature']['value'] | float }}
+      humidity: "{{ states('sensor.ims_humidity') | float(0) }}"
+      condition: >-
+        {{ state_attr('sensor.ims_forecast_day1', '12:00')['weather']['value'] }}
+      uv: >-
+        {{ state_attr('sensor.ims_forecast_day1', 'maximum_uvi')['value'] | float(0) }}
+      ntfy_icon: "{{ state_attr('sensor.ims_forecast_day1', '12:00')['weather']['icon'] }}"
+      weather_icon: >
+        {% if 'rain' in condition or 'גשם' in condition %} 🌧️
+        {% elif 'snow' in condition or 'שלג' in condition %} ❄️
+        {% elif 'cloud' in condition or 'מעונן' in condition %} ☁️
+        {% elif 'thunder' in condition or 'lightning' in condition or 'רעמים' in condition or 'ברקים' in condition %} ⛈️
+        {% elif 'wind' in condition or 'רוח' in condition %} 💨
+        {% elif 'partlycloudy' in condition or 'מעונן חלקית' in condition %} ⛅
+        {% elif feels_like > 30 %} 🔥
+        {% elif feels_like < 10 %} 🥶
+        {% else %} ☀️
+        {% endif %}
+      outfit_msg: >
+        טמפרטורה מחר: {{ temp_min }}°C - {{ temp_max }}°C (מרגיש כמו: {{ feels_like }}°C)
+
+        ביגוד:
+        {% if feels_like < 5 %} • מעיל עבה • גופייה חמה • סוודר עבה • מגפיים • כפפות, צעיף וכובע
+        {% elif feels_like < 12 %} • ז'קט חם • סוודר או קפוצ'ון • מכנסיים ארוכים • נעליים סגורות • אפשר להוסיף: צעיף קל
+        {% elif feels_like < 18 %} • ז׳קט או קרדיגן • חולצה ארוכה • מכנסיים ארוכים • נעליים נוחות
+        {% elif feels_like < 24 %} • חולצה קצרה • מכנסיים קצרים/ חצאית • סניקרס או סנדלים
+        {% else %} • לבוש קל ונושם • שורטס או חצאית • סנדלים או כפכפים • אפשר להוסיף: משקפי שמש
+        {% endif %} 
+      title_with_icon: |
+        {{ weather_icon }} המלצת לבוש למחר
+  - action: notify.mobile_app_pixel_9_pro
+    data:
+      title: "{{ title_with_icon }}"
+      message: "{{ outfit_msg }}"
+      data:
+        notification_icon: "{{ ntfy_icon }}"
