@@ -10,6 +10,7 @@ from weatheril import WeatherIL, Forecast, Weather, RadarSatellite, Warning
 
 from .const import (
     DOMAIN,
+    IMS_TIMEZONE,
 )
 from dataclasses import dataclass
 
@@ -17,7 +18,8 @@ _LOGGER = logging.getLogger(__name__)
 
 ATTRIBUTION = "Powered by IMS Weather"
 
-timezone = dt_util.get_time_zone("Asia/Jerusalem")
+# Use the shared timezone constant
+timezone = IMS_TIMEZONE
 
 
 class WeatherUpdateCoordinator(DataUpdateCoordinator):
