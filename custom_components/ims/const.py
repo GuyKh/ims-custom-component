@@ -3,6 +3,8 @@
 from __future__ import annotations
 import types
 
+import homeassistant.util.dt as dt_util
+
 from homeassistant.components.weather import (
     ATTR_CONDITION_CLEAR_NIGHT,
     ATTR_CONDITION_CLOUDY,
@@ -25,6 +27,7 @@ from homeassistant.const import (
 DATETIME_FORMAT = "%H:%M:%S %d/%m/%Y"
 DOMAIN = "ims"
 DEFAULT_NAME = "IMS Weather"
+IMS_TIMEZONE = dt_util.get_time_zone("Asia/Jerusalem")
 DEFAULT_LANGUAGE = "en"
 DEFAULT_UPDATE_INTERVAL = 60
 DEFAULT_IMAGE_PATH = "/tmp"

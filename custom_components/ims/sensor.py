@@ -73,8 +73,10 @@ from .const import (
     UV_LEVEL_MODERATE,
     UV_LEVEL_VHIGH,
     WEATHER_CODE_TO_ICON,
-    WIND_DIRECTIONS, FIELD_NAME_WARNING,
-    TYPE_WEATHER_WARNINGS, DATETIME_FORMAT,
+    WIND_DIRECTIONS,
+    FIELD_NAME_WARNING,
+    TYPE_WEATHER_WARNINGS,
+    DATETIME_FORMAT,
 )
 from .utils import get_hourly_weather_icon
 
@@ -362,15 +364,17 @@ async def async_setup_entry(
 
     async_add_entities(sensors, update_before_add=True)
 
+
 def generate_single_warning_string(warning):
     return f"{warning.valid_from.strftime(DATETIME_FORMAT)} - {warning.valid_to.strftime(DATETIME_FORMAT)}\n{warning.text_full}"
+
 
 def generate_warnings_extra_state_attributes(warnings):
     warnings_str = []
     for warning in warnings:
         warnings_str.append(generate_single_warning_string(warning))
 
-    attributes = { "warnings": warnings_str }
+    attributes = {"warnings": warnings_str}
     return attributes
 
 
@@ -521,7 +525,9 @@ class ImsSensor(ImsEntity, SensorEntity):
 
             case sensor_keys.TYPE_WEATHER_WARNINGS:
                 self._attr_native_value = len(data.warnings)
-                self._attr_extra_state_attributes = generate_warnings_extra_state_attributes(data.warnings)
+                self._attr_extra_state_attributes = (
+                    generate_warnings_extra_state_attributes(data.warnings)
+                )
 
             case (
                 sensor_keys.TYPE_FORECAST_TODAY

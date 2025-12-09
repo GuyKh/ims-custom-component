@@ -19,7 +19,10 @@ from .const import (
     FORECAST_MODE,
     FIELD_NAME_RAIN,
     DOMAIN,
-    ENTRY_WEATHER_COORDINATOR, TYPE_IS_ACTIVE_WEATHER_WARNING, FIELD_NAME_WARNING,
+    ENTRY_WEATHER_COORDINATOR,
+    TYPE_IS_ACTIVE_WEATHER_WARNING,
+    FIELD_NAME_WARNING,
+    IMS_TIMEZONE,
 )
 from .weather_update_coordinator import WeatherData
 
@@ -57,7 +60,10 @@ BINARY_SENSORS_DESCRIPTIONS: tuple[ImsBinarySensorEntityDescription, ...] = (
         device_class=BinarySensorDeviceClass.SAFETY,
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_WARNING,
-        value_fn=lambda data: any(warning.valid_from >= dt_util.now() >= warning.valid_to for warning in data.warnings)
+        value_fn=lambda data: any(
+            warning.valid_from <= dt_util.now(IMS_TIMEZONE) <= warning.valid_to
+            for warning in data.warnings
+        ),
     ),
 )
 
