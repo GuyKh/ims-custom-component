@@ -50,8 +50,9 @@ BINARY_SENSORS_DESCRIPTIONS: tuple[ImsBinarySensorEntityDescription, ...] = (
         icon="mdi:weather-rainy",
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_RAIN,
-        value_fn=lambda data: data.current_weather.rain
-        and data.current_weather.rain > 0.0,
+        value_fn=lambda data: (
+            data.current_weather.rain and data.current_weather.rain > 0.0
+        ),
     ),
     ImsBinarySensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_IS_ACTIVE_WEATHER_WARNING,
