@@ -60,15 +60,29 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         global cities_data
 
+        # Step 1: Fetch the cities from an external URL based on the user's locale
+        cities = await _get_localized_cities(self.hass)
+        if not cities:
+            errors["base"] = "cannot_retrieve_cities"
+            return self.async_show_form(
+                step_id="user", data_schema=vol.Schema({}), errors=errors
+            )
+
         if user_input is not None:
-            city_id = user_input[CONF_CITY]
-            city = cities_data[str(city_id)]
-            user_input[CONF_CITY] = city
+            city_id = _extract_city_id(user_input[CONF_CITY])
+            if city_id is None or str(city_id) not in cities:
+                errors["base"] = "invalid_city"
+            else:
+                city_id = int(city_id)
+                user_input[CONF_CITY] = city_id
+
             language = user_input[CONF_LANGUAGE]
             forecast_mode = user_input[CONF_MODE]
             entity_name = user_input[CONF_NAME]
             # image_path = user_input[CONF_IMAGES_PATH]
             forecast_platform = user_input[IMS_PLATFORM]
+            if not forecast_platform:
+                errors["base"] = "at_least_one_platform"
 
             # Convert scan interval to timedelta
             if isinstance(user_input[CONF_UPDATE_INTERVAL], str):
@@ -80,38 +94,31 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if isinstance(user_input[CONF_UPDATE_INTERVAL], timedelta):
                 user_input[CONF_UPDATE_INTERVAL] = user_input[
                     CONF_UPDATE_INTERVAL
-                ].total_minutes()
+                ].total_seconds() / 60
 
             # Unique value include to separate WeatherEntity/Sensor
-            await self.async_set_unique_id(
-                f"ims-{city_id}-{language}-{forecast_mode}-{forecast_platform}-{entity_name}"
-            )
-
-            self._abort_if_unique_id_configured()
-
-            api_status = "No API Call made"
-            try:
-                api_status = await _is_ims_api_online(
-                    self.hass, user_input[CONF_LANGUAGE], user_input[CONF_CITY]
+            if not errors:
+                await self.async_set_unique_id(
+                    f"ims-{city_id}-{language}-{forecast_mode}-{forecast_platform}-{entity_name}"
                 )
+                self._abort_if_unique_id_configured()
 
-            except Exception:
-                _LOGGER.warning("IMS Weather Setup Error: HTTP Error: %s", api_status)
-                errors["base"] = "API Error: " + api_status
+            if not errors:
+                try:
+                    api_online = await _is_ims_api_online(
+                        self.hass, user_input[CONF_LANGUAGE], user_input[CONF_CITY]
+                    )
+                    if not api_online:
+                        errors["base"] = "cannot_connect"
+                except Exception as err:
+                    _LOGGER.warning("IMS Weather Setup Error: HTTP Error: %s", err)
+                    errors["base"] = "cannot_connect"
 
             if not errors:
                 return self.async_create_entry(
                     title=user_input[CONF_NAME], data=user_input
                 )
             _LOGGER.warning(errors)
-
-        # Step 1: Fetch the cities from an external URL based on the user's locale
-        cities = await _get_localized_cities(self.hass)
-        if not cities:
-            errors["base"] = "cannot_retrieve_cities"
-            return self.async_show_form(
-                step_id="user", data_schema=vol.Schema({}), errors=errors
-            )
 
         # Step 2: Calculate the closest city based on Home Assistant's coordinates
         ha_latitude = self.hass.config.latitude
@@ -124,7 +131,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema(
             {
                 vol.Optional(CONF_NAME, default=DEFAULT_NAME): str,
-                vol.Required(CONF_CITY, default=closest_city["lid"]): vol.In(
+                vol.Required(CONF_CITY, default=str(closest_city["lid"])): vol.In(
                     city_options
                 ),
                 vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): vol.In(
@@ -155,7 +162,7 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if CONF_NAME not in config:
             config[CONF_NAME] = DEFAULT_NAME
         if CONF_CITY not in config:
-            config[CONF_CITY] = self.hass.config.city
+            config[CONF_CITY] = 1
         if CONF_LANGUAGE not in config:
             config[CONF_LANGUAGE] = self.hass.config.language
         if CONF_MODE not in config:
@@ -185,7 +192,7 @@ async def _is_ims_api_online(hass, language, city):
         async with session.get(forecast_url) as resp:
             status = resp.status
 
-    return status
+    return 200 <= status < 300
 
 
 async def _get_localized_cities(hass):
@@ -218,9 +225,16 @@ async def _get_localized_cities(hass):
 
 
 @callback
-def _handle_http_error(self, error):
+def _handle_http_error(error):
     """Handle HTTP errors."""
-    self.hass.logger.error(f"Error fetching data from URL: {error}")
+    _LOGGER.error("Error fetching data from URL: %s", error)
+
+
+def _extract_city_id(city_value):
+    """Extract city id from entry value."""
+    if isinstance(city_value, dict):
+        return city_value.get("lid")
+    return city_value
 
 
 def _find_closest_city(cities, ha_latitude, ha_longitude):
@@ -263,15 +277,41 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
+        errors = {}
         global cities_data
         if not cities_data:
-            cities_data = _get_localized_cities(self.hass)
+            cities_data = await _get_localized_cities(self.hass)
+
+        if not cities_data:
+            errors["base"] = "cannot_connect"
 
         if user_input is not None:
+            if not user_input.get(IMS_PLATFORM):
+                errors["base"] = "at_least_one_platform"
+
+            city_id = _extract_city_id(user_input.get(CONF_CITY))
+            if city_id is None or str(city_id) not in cities_data:
+                errors["base"] = "invalid_city"
+            else:
+                user_input[CONF_CITY] = int(city_id)
+
             # entry = self.config_entry
 
             # _LOGGER.warning('async_step_init_Options')
-            return self.async_create_entry(title=user_input[CONF_NAME], data=user_input)
+            if not errors:
+                return self.async_create_entry(
+                    title=user_input[CONF_NAME], data=user_input
+                )
+
+        city_options = {}
+        if cities_data:
+            city_options = {city_id: city["name"] for city_id, city in cities_data.items()}
+        existing_city = self._config_entry.options.get(
+            CONF_CITY, self._config_entry.data.get(CONF_CITY, 1)
+        )
+        city_default = str(_extract_city_id(existing_city))
+        if city_options and city_default not in city_options:
+            city_default = next(iter(city_options))
 
         return self.async_show_form(
             step_id="init",
@@ -286,11 +326,8 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                     ): str,
                     vol.Optional(
                         CONF_CITY,
-                        default=self._config_entry.options.get(
-                            CONF_CITY,
-                            self._config_entry.data.get(CONF_CITY, 1),
-                        ),
-                    ): int,
+                        default=city_default,
+                    ): vol.In(city_options) if city_options else str,
                     vol.Optional(
                         CONF_LANGUAGE,
                         default=self._config_entry.options.get(
@@ -345,4 +382,5 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
                     ): str,
                 }
             ),
+            errors=errors,
         )
