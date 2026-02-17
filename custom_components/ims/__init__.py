@@ -47,7 +47,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     forecast_mode = _get_config_value(entry, CONF_MODE, FORECAST_MODE_HOURLY)
     images_path = _get_config_value(entry, CONF_IMAGES_PATH)
     language = _get_config_value(entry, CONF_LANGUAGE, DEFAULT_LANGUAGE)
-    ims_entity_platform = _get_config_value(entry, IMS_PLATFORM)
+    ims_entity_platform = _get_config_value(entry, IMS_PLATFORM, [IMS_PLATFORMS[1]])
     ims_scan_int = entry.data[CONF_UPDATE_INTERVAL]
     conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS)
 
@@ -91,17 +91,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_MONITORED_CONDITIONS: conditions,
     }
 
-    # If both platforms
-    if (IMS_PLATFORMS[0] in ims_entity_platform) and (
-        IMS_PLATFORMS[1] in ims_entity_platform
-    ):
-        platforms = PLATFORMS
-    # If only sensor
-    elif IMS_PLATFORMS[0] in ims_entity_platform:
-        platforms = [PLATFORMS[0], PLATFORMS[2]]
-    # If only weather
-    elif IMS_PLATFORMS[1] in ims_entity_platform:
-        platforms = [PLATFORMS[1]]
+    platforms = _platforms_from_selection(ims_entity_platform)
 
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
@@ -115,9 +105,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.info("Coordinator data: %s", data)
         hass.bus.async_fire("custom_component_debug_event", {"data": data})
 
-    hass.services.async_register(
-        DOMAIN, "debug_get_coordinator_data", handle_debug_get_coordinator_data
-    )
+    if not hass.services.has_service(DOMAIN, "debug_get_coordinator_data"):
+        hass.services.async_register(
+            DOMAIN, "debug_get_coordinator_data", handle_debug_get_coordinator_data
+        )
     return True
 
 
@@ -130,22 +121,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     ims_entity_prevplatform = hass.data[DOMAIN][entry.entry_id][IMS_PLATFORM]
 
-    unload_ok = False
-    # If both
-    if (IMS_PLATFORMS[0] in ims_entity_prevplatform) and (
-        IMS_PLATFORMS[1] in ims_entity_prevplatform
-    ):
-        unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    # If only sensor
-    elif IMS_PLATFORMS[0] in ims_entity_prevplatform:
-        unload_ok = await hass.config_entries.async_unload_platforms(
-            entry, [PLATFORMS[0], PLATFORMS[2]]
-        )
-    # If only Weather
-    elif IMS_PLATFORMS[1] in ims_entity_prevplatform:
-        unload_ok = await hass.config_entries.async_unload_platforms(
-            entry, [PLATFORMS[1]]
-        )
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry, _platforms_from_selection(ims_entity_prevplatform)
+    )
 
     _LOGGER.info(f"Unloading IMS Weather. Successful: {unload_ok}")
 
@@ -155,23 +133,52 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.data[DOMAIN].pop(entry.entry_id)
 
-    return True
+        has_other_entries = any(
+            config_entry.entry_id != entry.entry_id
+            for config_entry in hass.config_entries.async_entries(DOMAIN)
+        )
+        if not has_other_entries and hass.services.has_service(
+            DOMAIN, "debug_get_coordinator_data"
+        ):
+            hass.services.async_remove(DOMAIN, "debug_get_coordinator_data")
+
+    return unload_ok
 
 
 def _get_config_value(config_entry: ConfigEntry, key: str, default=None) -> Any:
     if config_entry.options:
         val = config_entry.options.get(key)
-        if val:
+        if val is not None:
             return val
         else:
             _LOGGER.warning("Key %s is missing from config_entry.options", key)
             return default
     val = config_entry.data.get(key)
-    if val:
+    if val is not None:
         return val
     else:
         _LOGGER.warning("Key %s is missing from config_entry.data", key)
         return default
+
+
+def _platforms_from_selection(ims_entity_platform: list[str] | None) -> list:
+    """Convert config selection to platform list."""
+    if not ims_entity_platform:
+        return [PLATFORMS[1]]
+
+    # If both platforms
+    if (IMS_PLATFORMS[0] in ims_entity_platform) and (
+        IMS_PLATFORMS[1] in ims_entity_platform
+    ):
+        return PLATFORMS
+    # If only sensor
+    if IMS_PLATFORMS[0] in ims_entity_platform:
+        return [PLATFORMS[0], PLATFORMS[2]]
+    # If only weather
+    if IMS_PLATFORMS[1] in ims_entity_platform:
+        return [PLATFORMS[1]]
+
+    return [PLATFORMS[1]]
 
 
 def _filter_domain_configs(elements, domain):

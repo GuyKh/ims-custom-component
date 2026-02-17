@@ -240,9 +240,11 @@ class IMSWeather(WeatherEntity):
 
         condition = WEATHER_CODE_TO_CONDITION.get(str(weather_code))
         if not condition or condition == "Nothing":
-            condition = WEATHER_CODE_TO_CONDITION.get(
-                str(self._weather_coordinator.data.forecast.days[0].weather_code)
-            )
+            forecast_days = self._weather_coordinator.data.forecast.days
+            if forecast_days:
+                condition = WEATHER_CODE_TO_CONDITION.get(
+                    str(forecast_days[0].weather_code)
+                )
         return condition
 
     @property
@@ -250,7 +252,9 @@ class IMSWeather(WeatherEntity):
         """Return the weather description."""
         description = self._weather_coordinator.data.current_weather.description
         if not description or description == "Nothing":
-            description = self._weather_coordinator.data.forecast.days[0].weather
+            forecast_days = self._weather_coordinator.data.forecast.days
+            if forecast_days:
+                description = forecast_days[0].weather
         return description
 
     def _forecast(self, hourly: bool) -> list[Forecast]:
