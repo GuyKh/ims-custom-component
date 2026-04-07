@@ -193,7 +193,7 @@ class ImsSensorEntityDescription(SensorEntityDescription):
     forecast_mode: str | None = None
 
 
-class ImsEntity(CoordinatorEntity):
+class ImsEntity(CoordinatorEntity[WeatherUpdateCoordinator]):
     """Define a generic Ims entity."""
 
     _attr_has_entity_name = True
@@ -206,7 +206,7 @@ class ImsEntity(CoordinatorEntity):
         """Initialize."""
         super().__init__(coordinator)
 
-        self._attr_extra_state_attributes = {}
+        self._attr_extra_state_attributes: dict[str, Any] = {}
         self._attr_unique_id = (
             f"{description.key}_{coordinator.city}_{coordinator.language}"
         )
