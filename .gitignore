@@ -1,0 +1,24 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# MyPy cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Project specific
+.ruff_cache/
+.ropeproject/

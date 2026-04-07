@@ -1,8 +1,13 @@
 """Weather data coordinator for the OpenWeatherMap (OWM) service."""
 
+from __future__ import annotations
+
 import asyncio
 import datetime
 import logging
+from dataclasses import dataclass
+from typing import Any
+
 import homeassistant.util.dt as dt_util
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -12,7 +17,6 @@ from .const import (
     DOMAIN,
     IMS_TIMEZONE,
 )
-from dataclasses import dataclass
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,25 +26,39 @@ ATTRIBUTION = "Powered by IMS Weather"
 timezone = IMS_TIMEZONE
 
 
-class WeatherUpdateCoordinator(DataUpdateCoordinator):
+@dataclass
+class WeatherData:
+    """Weather data container."""
+
+    current_weather: Weather
+    forecast: Forecast
+    images: RadarSatellite
+    warnings: list[Warning]
+
+
+class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
     """Weather data update coordinator."""
 
-    def __init__(self, city, language, update_interval, hass):
+    def __init__(
+        self,
+        city: int | str,
+        language: str,
+        update_interval: datetime.timedelta,
+        hass: Any,
+    ) -> None:
         """Initialize coordinator."""
         self.city = city
         self.language = language
         self.update_interval = update_interval
         self.weather = WeatherIL(str(city), language)
 
-        self.data = None
         self._connect_error = False
         self._hass = hass
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> WeatherData:
         """Update the data."""
-        data = {}
         async with self._hass.timeout.async_timeout(30):
             try:
                 _LOGGER.info("Fetching data from IMS")
@@ -49,7 +67,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
                 raise UpdateFailed(error) from error
         return data
 
-    async def _get_ims_weather(self):
+    async def _get_ims_weather(self) -> WeatherData:
         """Poll weather data from IMS."""
 
         try:
@@ -73,7 +91,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
         return WeatherData(current_weather, weather_forecast, images, warnings)
 
     @staticmethod
-    def _filter_future_forecast(weather_forecast):
+    def _filter_future_forecast(weather_forecast: Forecast) -> None:
         """Filter Forecast to include only future dates"""
         today_datetime = dt_util.as_local(
             datetime.datetime.combine(dt_util.now(timezone).date(), datetime.time())
@@ -93,11 +111,3 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator):
             daily_forecast.hours = filtered_hours
 
         weather_forecast.days = filtered_day_list
-
-
-@dataclass
-class WeatherData:
-    current_weather: Weather
-    forecast: Forecast
-    images: RadarSatellite
-    warnings: list[Warning]

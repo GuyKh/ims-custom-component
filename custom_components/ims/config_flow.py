@@ -44,7 +44,7 @@ cities_data = None
 SENSOR_KEYS = SENSOR_DESCRIPTIONS_KEYS + BINARY_SENSOR_DESCRIPTIONS_KEYS
 
 
-class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
     """Config flow for IMSWeather."""
 
     VERSION = CONFIG_FLOW_VERSION
@@ -92,9 +92,9 @@ class IMSWeatherConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             # Convert scan interval to number of minutes
             if isinstance(user_input[CONF_UPDATE_INTERVAL], timedelta):
-                user_input[CONF_UPDATE_INTERVAL] = user_input[
-                    CONF_UPDATE_INTERVAL
-                ].total_seconds() / 60
+                user_input[CONF_UPDATE_INTERVAL] = (
+                    user_input[CONF_UPDATE_INTERVAL].total_seconds() / 60
+                )
 
             # Unique value include to separate WeatherEntity/Sensor
             if not errors:
@@ -305,7 +305,9 @@ class IMSWeatherOptionsFlow(config_entries.OptionsFlow):
 
         city_options = {}
         if cities_data:
-            city_options = {city_id: city["name"] for city_id, city in cities_data.items()}
+            city_options = {
+                city_id: city["name"] for city_id, city in cities_data.items()
+            }
         existing_city = self._config_entry.options.get(
             CONF_CITY, self._config_entry.data.get(CONF_CITY, 1)
         )
