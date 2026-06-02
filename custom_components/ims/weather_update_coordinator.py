@@ -16,6 +16,7 @@ from weatheril import WeatherIL, Forecast, Weather, RadarSatellite, Warning
 from .const import (
     DOMAIN,
     IMS_TIMEZONE,
+    WARNING_SENSOR_KEYS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,8 +46,18 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
         language: str,
         update_interval: datetime.timedelta,
         hass: Any,
+        monitored_conditions: list[str] | None = None,
     ) -> None:
-        """Initialize coordinator."""
+        """Initialize coordinator.
+
+        ``monitored_conditions`` is the list of sensor keys the user has
+        enabled for this config entry. When none of them consume
+        ``WeatherData.warnings``, the coordinator skips the warnings HTTP
+        fetch entirely. ``None`` (the default) means "no conditions were
+        stored" and is treated as "all sensors enabled" — the legacy
+        behavior in ``sensor.py`` and ``binary_sensor.py`` falls back to
+        every description key when conditions are missing.
+        """
         self.city = city
         self.language = language
         self.update_interval = update_interval
@@ -54,6 +65,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
 
         self._connect_error = False
         self._hass = hass
+        self._monitored_conditions: list[str] | None = monitored_conditions
 
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
 
@@ -79,7 +91,11 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
             None, self.weather.get_current_analysis
         )
         weather_forecast = await loop.run_in_executor(None, self.weather.get_forecast)
-        warnings = await self._fetch_warnings(loop)
+        warnings = (
+            await self._fetch_warnings(loop)
+            if self._should_fetch_warnings()
+            else []
+        )
         images = await self._fetch_radar_images(loop)
 
         _LOGGER.debug(
@@ -100,6 +116,10 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
         endpoint cannot prevent the rest of the update from completing.
         Downstream consumers (sensor, binary_sensor) handle an empty
         list as "no active warnings".
+
+        Callers should gate this method with ``_should_fetch_warnings()``
+        so the HTTP round-trip is avoided entirely when no sensor in the
+        current config entry consumes warnings.
         """
         try:
             return await loop.run_in_executor(None, self.weather.get_warnings)
@@ -128,6 +148,18 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
                 error,
             )
             return None
+
+    def _should_fetch_warnings(self) -> bool:
+        """Return True if any enabled sensor consumes ``data.warnings``.
+
+        ``None`` ``monitored_conditions`` falls back to the legacy
+        "all sensors enabled" behavior (see ``__init__``). An empty list
+        means "no sensors enabled" and yields ``False``.
+        """
+        conditions = self._monitored_conditions
+        if conditions is None:
+            return True
+        return any(key in WARNING_SENSOR_KEYS for key in conditions)
 
     @staticmethod
     def _filter_future_forecast(weather_forecast: Forecast) -> None:
