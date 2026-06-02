@@ -36,8 +36,8 @@ class ImsBinaryEntityDescriptionMixin:
 
 @dataclass(frozen=True, kw_only=True)
 class ImsBinarySensorEntityDescription(
-    ImsSensorEntityDescription,
     BinarySensorEntityDescription,
+    ImsSensorEntityDescription,
     ImsBinaryEntityDescriptionMixin,
 ):
     """Class describing IMS Binary sensors entities"""
@@ -50,8 +50,9 @@ BINARY_SENSORS_DESCRIPTIONS: tuple[ImsBinarySensorEntityDescription, ...] = (
         icon="mdi:weather-rainy",
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_RAIN,
-        value_fn=lambda data: data.current_weather.rain
-        and data.current_weather.rain > 0.0,
+        value_fn=lambda data: (
+            data.current_weather.rain is not None and data.current_weather.rain > 0.0
+        ),
     ),
     ImsBinarySensorEntityDescription(
         key=IMS_SENSOR_KEY_PREFIX + TYPE_IS_ACTIVE_WEATHER_WARNING,
@@ -61,8 +62,21 @@ BINARY_SENSORS_DESCRIPTIONS: tuple[ImsBinarySensorEntityDescription, ...] = (
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_WARNING,
         value_fn=lambda data: any(
-            warning.valid_from <= dt_util.now(IMS_TIMEZONE) <= warning.valid_to
+            valid_from_dt <= now <= valid_to_dt
             for warning in data.warnings
+            if (now := dt_util.now(IMS_TIMEZONE)) is not None
+            and (
+                valid_from_dt := dt_util.parse_datetime(warning.valid_from)
+                if isinstance(warning.valid_from, str)
+                else warning.valid_from
+            )
+            is not None
+            and (
+                valid_to_dt := dt_util.parse_datetime(warning.valid_to)
+                if isinstance(warning.valid_to, str)
+                else warning.valid_to
+            )
+            is not None
         ),
     ),
 )
@@ -101,7 +115,13 @@ async def async_setup_entry(
 class ImsBinarySensor(ImsEntity, BinarySensorEntity):
     """Defines an IMS binary sensor."""
 
+    entity_description: ImsBinarySensorEntityDescription
+
     @callback
     def _update_from_latest_data(self) -> None:
         """Update the state."""
-        self._attr_is_on = self.entity_description.value_fn(self.coordinator.data)
+        data: WeatherData | None = self.coordinator.data
+        if data is None:
+            self._attr_is_on = None
+        else:
+            self._attr_is_on = self.entity_description.value_fn(data)

@@ -4,7 +4,9 @@
             "already_configured": "מוגדר חיישן עבור ישוב זה"
         },
         "error": {
-            "cannot_connect": "שגיאה בהתחברות"
+            "cannot_connect": "שגיאה בהתחברות",
+            "at_least_one_platform": "יש לבחור לפחות סוג ישות אחד",
+            "invalid_city": "היישוב שנבחר אינו זמין יותר"
         },
         "step": {
             "user": {

@@ -1,3 +1,4 @@
+from typing import Any
 import logging
 import types
 
@@ -21,6 +22,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ImsEntity, ImsSensorEntityDescription
+from .weather_update_coordinator import WeatherData
 from .const import (
     DOMAIN,
     ENTRY_WEATHER_COORDINATOR,
@@ -193,8 +195,7 @@ SENSOR_DESCRIPTIONS: list[ImsSensorEntityDescription] = [
         name="IMS Wind Direction",
         icon="mdi:weather-windy",
         native_unit_of_measurement=DEGREE,
-        device_class=SensorDeviceClass.WIND_DIRECTION,
-        state_class=SensorStateClass.MEASUREMENT_ANGLE,
+        state_class=SensorStateClass.MEASUREMENT,
         forecast_mode=FORECAST_MODE.CURRENT,
         field_name=FIELD_NAME_WIND_DIRECTION_ID,
     ),
@@ -431,10 +432,13 @@ def generate_forecast_extra_state_attributes(daily_forecast):
 class ImsSensor(ImsEntity, SensorEntity):
     """Representation of an IMS sensor."""
 
+    entity_description: ImsSensorEntityDescription
+    _attr_native_value: Any
+
     @callback
     def _update_from_latest_data(self) -> None:
         """Update the state."""
-        data = self.coordinator.data
+        data: WeatherData | None = self.coordinator.data
 
         if (
             self.entity_description.forecast_mode == FORECAST_MODE.DAILY
@@ -453,6 +457,9 @@ class ImsSensor(ImsEntity, SensorEntity):
                 )
                 self._attr_native_value = None
                 return
+
+        # After these checks, data is guaranteed to be not None
+        assert data is not None
 
         match self.entity_description.key:
             case sensor_keys.TYPE_CURRENT_UV_LEVEL:

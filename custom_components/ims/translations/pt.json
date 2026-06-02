@@ -4,7 +4,9 @@
             "already_configured": "Localização já está configurada"
         },
         "error": {
-            "cannot_connect": "Falha ao conectar"
+            "cannot_connect": "Falha ao conectar",
+            "at_least_one_platform": "Selecione pelo menos uma plataforma",
+            "invalid_city": "A cidade selecionada já não está disponível"
         },
         "step": {
             "user": {
