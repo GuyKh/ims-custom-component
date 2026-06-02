@@ -92,9 +92,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
         )
         weather_forecast = await loop.run_in_executor(None, self.weather.get_forecast)
         warnings = (
-            await self._fetch_warnings(loop)
-            if self._should_fetch_warnings()
-            else []
+            await self._fetch_warnings(loop) if self._should_fetch_warnings() else []
         )
         images = await self._fetch_radar_images(loop)
 
@@ -106,9 +104,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
         self._filter_future_forecast(weather_forecast)
         return WeatherData(current_weather, weather_forecast, images, warnings)
 
-    async def _fetch_warnings(
-        self, loop: asyncio.AbstractEventLoop
-    ) -> list[Warning]:
+    async def _fetch_warnings(self, loop: asyncio.AbstractEventLoop) -> list[Warning]:
         """Fetch active IMS weather warnings.
 
         Non-fatal: returns an empty list on any failure (timeout, network
