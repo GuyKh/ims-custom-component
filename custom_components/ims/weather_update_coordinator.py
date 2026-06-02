@@ -32,7 +32,7 @@ class WeatherData:
 
     current_weather: Weather
     forecast: Forecast
-    images: RadarSatellite
+    images: RadarSatellite | None
     warnings: list[Warning]
 
 
@@ -79,8 +79,8 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
             None, self.weather.get_current_analysis
         )
         weather_forecast = await loop.run_in_executor(None, self.weather.get_forecast)
-        warnings = await loop.run_in_executor(None, self.weather.get_warnings)
-        images = await loop.run_in_executor(None, self.weather.get_radar_images)
+        warnings = await self._fetch_warnings(loop)
+        images = await self._fetch_radar_images(loop)
 
         _LOGGER.debug(
             "Data fetched from IMS of %s",
@@ -89,6 +89,45 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
 
         self._filter_future_forecast(weather_forecast)
         return WeatherData(current_weather, weather_forecast, images, warnings)
+
+    async def _fetch_warnings(
+        self, loop: asyncio.AbstractEventLoop
+    ) -> list[Warning]:
+        """Fetch active IMS weather warnings.
+
+        Non-fatal: returns an empty list on any failure (timeout, network
+        error, parse error, server outage) so a misbehaving warnings
+        endpoint cannot prevent the rest of the update from completing.
+        Downstream consumers (sensor, binary_sensor) handle an empty
+        list as "no active warnings".
+        """
+        try:
+            return await loop.run_in_executor(None, self.weather.get_warnings)
+        except Exception as error:  # noqa: BLE001 - intentional, see docstring
+            _LOGGER.warning(
+                "Failed to fetch IMS weather warnings; continuing with no active warnings: %s",
+                error,
+            )
+            return []
+
+    async def _fetch_radar_images(
+        self, loop: asyncio.AbstractEventLoop
+    ) -> RadarSatellite | None:
+        """Fetch IMS radar/satellite imagery.
+
+        Non-fatal: returns ``None`` on any failure (timeout, network error,
+        parse error, server outage) so a misbehaving radar endpoint cannot
+        prevent the rest of the update from completing. ``WeatherData.images``
+        is typed as ``RadarSatellite | None`` to reflect this.
+        """
+        try:
+            return await loop.run_in_executor(None, self.weather.get_radar_images)
+        except Exception as error:  # noqa: BLE001 - intentional, see docstring
+            _LOGGER.warning(
+                "Failed to fetch IMS radar/satellite imagery; continuing without it: %s",
+                error,
+            )
+            return None
 
     @staticmethod
     def _filter_future_forecast(weather_forecast: Forecast) -> None:
