@@ -46,7 +46,7 @@ def setup_dependency_logging(entry_id: str) -> None:
 
         _loguru_sink_id = loguru_logger.add(
             _DependencyLoggingHandler(),
-            filter=lambda record: record["name"].startswith(_WEATHERIL_LOGGER_PREFIX),
+            filter=_WEATHERIL_LOGGER_PREFIX,
             level=0,
             format="{message}",
         )
