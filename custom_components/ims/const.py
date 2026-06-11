@@ -135,6 +135,17 @@ LANGUAGES = ["en", "he"]
 
 IMS_SENSOR_KEY_PREFIX = "ims_"
 
+# Sensor keys that consume ``WeatherData.warnings``. The coordinator skips
+# the warnings HTTP fetch when none of these are enabled, so a degraded IMS
+# warnings endpoint cannot fail (or even slow down) an update whose user is
+# not listening to warnings in the first place.
+WARNING_SENSOR_KEYS: frozenset[str] = frozenset(
+    {
+        IMS_SENSOR_KEY_PREFIX + TYPE_WEATHER_WARNINGS,
+        IMS_SENSOR_KEY_PREFIX + TYPE_IS_ACTIVE_WEATHER_WARNING,
+    }
+)
+
 
 FORECAST_MODE = types.SimpleNamespace()
 FORECAST_MODE.CURRENT = "current"

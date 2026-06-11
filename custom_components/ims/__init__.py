@@ -71,7 +71,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     else:
         weather_coordinator = WeatherUpdateCoordinator(
-            city_id, language, timedelta(minutes=ims_scan_int), hass
+            city_id,
+            language,
+            timedelta(minutes=ims_scan_int),
+            hass,
+            monitored_conditions=conditions,
         )
         hass.data[DOMAIN][unique_location] = weather_coordinator
         # _LOGGER.warning('New Coordinator')
