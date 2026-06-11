@@ -31,6 +31,7 @@ from .const import (
     FORECAST_MODE_HOURLY,
 )
 
+from .dependency_logging import remove_dependency_logging, setup_dependency_logging
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
 CONF_FORECAST = "forecast"
@@ -62,58 +63,65 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unique_location = f"ims-{language}-{city_id}"
 
     hass.data.setdefault(DOMAIN, {})
-    # If coordinator already exists for this API key, we'll use that, otherwise
-    # we have to create a new one
-    if unique_location in hass.data[DOMAIN]:
-        weather_coordinator = hass.data[DOMAIN].get(unique_location)
-        _LOGGER.info(
-            "An existing IMS weather coordinator already exists for this location. Using that one instead"
-        )
-    else:
-        weather_coordinator = WeatherUpdateCoordinator(
-            city_id,
-            language,
-            timedelta(minutes=ims_scan_int),
-            hass,
-            monitored_conditions=conditions,
-        )
-        hass.data[DOMAIN][unique_location] = weather_coordinator
-        # _LOGGER.warning('New Coordinator')
 
-    # await weather_coordinator.async_refresh()
-    await weather_coordinator.async_config_entry_first_refresh()
+    try:
+        setup_dependency_logging(entry.entry_id)
 
-    hass.data[DOMAIN][entry.entry_id] = {
-        ENTRY_NAME: name,
-        ENTRY_WEATHER_COORDINATOR: weather_coordinator,
-        CONF_CITY: city,
-        CONF_LANGUAGE: language,
-        CONF_MODE: forecast_mode,
-        CONF_IMAGES_PATH: images_path,
-        CONF_UPDATE_INTERVAL: ims_scan_int,
-        IMS_PLATFORM: ims_entity_platform,
-        CONF_MONITORED_CONDITIONS: conditions,
-    }
+        # If coordinator already exists for this API key, we'll use that, otherwise
+        # we have to create a new one
+        if unique_location in hass.data[DOMAIN]:
+            weather_coordinator = hass.data[DOMAIN].get(unique_location)
+            _LOGGER.info(
+                "An existing IMS weather coordinator already exists for this location. Using that one instead"
+            )
+        else:
+            weather_coordinator = WeatherUpdateCoordinator(
+                city_id,
+                language,
+                timedelta(minutes=ims_scan_int),
+                hass,
+                monitored_conditions=conditions,
+            )
+            hass.data[DOMAIN][unique_location] = weather_coordinator
+            # _LOGGER.warning('New Coordinator')
 
-    platforms = _platforms_from_selection(ims_entity_platform)
+        # await weather_coordinator.async_refresh()
+        await weather_coordinator.async_config_entry_first_refresh()
 
-    await hass.config_entries.async_forward_entry_setups(entry, platforms)
+        hass.data[DOMAIN][entry.entry_id] = {
+            ENTRY_NAME: name,
+            ENTRY_WEATHER_COORDINATOR: weather_coordinator,
+            CONF_CITY: city,
+            CONF_LANGUAGE: language,
+            CONF_MODE: forecast_mode,
+            CONF_IMAGES_PATH: images_path,
+            CONF_UPDATE_INTERVAL: ims_scan_int,
+            IMS_PLATFORM: ims_entity_platform,
+            CONF_MONITORED_CONDITIONS: conditions,
+        }
 
-    update_listener = entry.add_update_listener(async_update_options)
-    hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
+        platforms = _platforms_from_selection(ims_entity_platform)
 
-    # Register the debug service
-    async def handle_debug_get_coordinator_data(call) -> None:  # noqa: ANN001 ARG001
-        # Log or return coordinator data
-        data = weather_coordinator.data
-        _LOGGER.info("Coordinator data: %s", data)
-        hass.bus.async_fire("custom_component_debug_event", {"data": data})
+        await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
-    if not hass.services.has_service(DOMAIN, "debug_get_coordinator_data"):
-        hass.services.async_register(
-            DOMAIN, "debug_get_coordinator_data", handle_debug_get_coordinator_data
-        )
-    return True
+        update_listener = entry.add_update_listener(async_update_options)
+        hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
+
+        # Register the debug service
+        async def handle_debug_get_coordinator_data(call) -> None:  # noqa: ANN001 ARG001
+            # Log or return coordinator data
+            data = weather_coordinator.data
+            _LOGGER.info("Coordinator data: %s", data)
+            hass.bus.async_fire("custom_component_debug_event", {"data": data})
+
+        if not hass.services.has_service(DOMAIN, "debug_get_coordinator_data"):
+            hass.services.async_register(
+                DOMAIN, "debug_get_coordinator_data", handle_debug_get_coordinator_data
+            )
+        return True
+    except Exception:
+        remove_dependency_logging(entry.entry_id)
+        raise
 
 
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -145,6 +153,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             DOMAIN, "debug_get_coordinator_data"
         ):
             hass.services.async_remove(DOMAIN, "debug_get_coordinator_data")
+
+        remove_dependency_logging(entry.entry_id)
 
     return unload_ok
 
