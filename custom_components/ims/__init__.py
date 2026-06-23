@@ -6,6 +6,7 @@ from typing import Any
 from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
@@ -225,7 +226,10 @@ class ImsEntity(CoordinatorEntity[WeatherUpdateCoordinator]):
             f"{description.key}_{coordinator.city}_{coordinator.language}"
         )
 
-        self.entity_id = "sensor." + description.key
+        if isinstance(self, BinarySensorEntity):
+            self.entity_id = f"binary_sensor.{description.key}"
+        else:
+            self.entity_id = f"sensor.{description.key}"
         self._attr_translation_key = f"{description.key}_{coordinator.language}"
         self.entity_description = description
 
