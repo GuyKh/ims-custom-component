@@ -62,6 +62,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
         self.language = language
         self.update_interval = update_interval
         self.weather = WeatherIL(str(city), language)
+        self._patch_missing_hourly_forecast()
 
         self._connect_error = False
         self._hass = hass
@@ -103,6 +104,28 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
 
         self._filter_future_forecast(weather_forecast)
         return WeatherData(current_weather, weather_forecast, images, warnings)
+
+    def _patch_missing_hourly_forecast(self) -> None:
+        """Treat omitted hourly forecast blocks from IMS as empty data.
+
+        The IMS API can return ``"hourly": null`` for specific future days
+        while still returning valid daily forecast data. ``weatheril`` expects
+        hourly data to always be a mapping and crashes before returning any
+        forecast. Keep the integration available by preserving the day and
+        exposing an empty hourly list for that date.
+        """
+        original_get_hourly_forecast = self.weather._get_hourly_forecast
+
+        def get_hourly_forecast(data: Any) -> list:
+            if data is None:
+                _LOGGER.debug(
+                    "IMS forecast response omitted hourly data for a day; "
+                    "continuing with an empty hourly forecast"
+                )
+                return []
+            return original_get_hourly_forecast(data)
+
+        self.weather._get_hourly_forecast = get_hourly_forecast
 
     async def _fetch_warnings(self, loop: asyncio.AbstractEventLoop) -> list[Warning]:
         """Fetch active IMS weather warnings.
@@ -169,7 +192,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
 
         for daily_forecast in filtered_day_list:
             filtered_hours = []
-            for hourly_forecast in daily_forecast.hours:
+            for hourly_forecast in daily_forecast.hours or []:
                 forecast_datetime = daily_forecast.date + datetime.timedelta(
                     hours=int(hourly_forecast.hour.split(":")[0])
                 )
