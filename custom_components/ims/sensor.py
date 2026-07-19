@@ -551,7 +551,7 @@ class ImsSensor(ImsEntity, SensorEntity):
                     if self.entity_description.key == sensor_keys.TYPE_FORECAST_TODAY
                     else int(self.entity_description.key[-1])
                 )
-                if day_index < len(data.forecast.days):
+                if data.forecast is not None and day_index < len(data.forecast.days):
                     daily_forecast = data.forecast.days[day_index]
                     self._attr_native_value = daily_forecast.day
                     self._attr_extra_state_attributes = (

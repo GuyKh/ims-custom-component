@@ -32,7 +32,7 @@ class WeatherData:
     """Weather data container."""
 
     current_weather: Weather
-    forecast: Forecast
+    forecast: Forecast | None
     images: RadarSatellite | None
     warnings: list[Warning]
 
@@ -90,7 +90,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
         current_weather = await loop.run_in_executor(
             None, self.weather.get_current_analysis
         )
-        weather_forecast = await loop.run_in_executor(None, self.weather.get_forecast)
+        weather_forecast = await self._fetch_forecast(loop)
         warnings = (
             await self._fetch_warnings(loop) if self._should_fetch_warnings() else []
         )
@@ -101,8 +101,31 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
             current_weather.forecast_time.strftime("%m/%d/%Y, %H:%M:%S"),
         )
 
-        self._filter_future_forecast(weather_forecast)
+        if weather_forecast is not None:
+            self._filter_future_forecast(weather_forecast)
+        else:
+            _LOGGER.warning(
+                "IMS returned no forecast data; continuing without forecast"
+            )
         return WeatherData(current_weather, weather_forecast, images, warnings)
+
+    async def _fetch_forecast(self, loop: asyncio.AbstractEventLoop) -> Forecast | None:
+        """Fetch weather forecast from IMS.
+
+        Non-fatal: returns ``None`` on any failure (timeout, network error,
+        parse error, server outage) so a misbehaving forecast endpoint cannot
+        prevent the rest of the update from completing.  The upstream
+        ``weatheril`` library may raise ``AttributeError`` when the IMS API
+        returns unexpected data (e.g. ``None`` hourly payload).
+        """
+        try:
+            return await loop.run_in_executor(None, self.weather.get_forecast)
+        except Exception as error:  # noqa: BLE001 - intentional, see docstring
+            _LOGGER.warning(
+                "Failed to fetch IMS weather forecast; continuing without it: %s",
+                error,
+            )
+            return None
 
     async def _fetch_warnings(self, loop: asyncio.AbstractEventLoop) -> list[Warning]:
         """Fetch active IMS weather warnings.
