@@ -9,9 +9,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import homeassistant.util.dt as dt_util
-
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from weatheril import WeatherIL, Forecast, Weather, RadarSatellite, Warning
+from weatheril import Forecast, RadarSatellite, Warning, Weather, WeatherIL
 
 from .const import (
     DOMAIN,
@@ -84,7 +83,7 @@ class WeatherUpdateCoordinator(DataUpdateCoordinator[WeatherData]):
 
         try:
             loop = asyncio.get_event_loop()
-        except Exception:
+        except RuntimeError:
             loop = asyncio.new_event_loop()
 
         current_weather = await loop.run_in_executor(
