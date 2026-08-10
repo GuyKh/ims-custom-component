@@ -1,10 +1,10 @@
 """Consts for the OpenWeatherMap."""
 
 from __future__ import annotations
+
 import types
 
 import homeassistant.util.dt as dt_util
-
 from homeassistant.components.weather import (
     ATTR_CONDITION_CLEAR_NIGHT,
     ATTR_CONDITION_CLOUDY,
