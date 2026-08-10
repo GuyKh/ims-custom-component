@@ -3,35 +3,34 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any
 
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
-from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_MODE,
-    CONF_NAME,
     CONF_MONITORED_CONDITIONS,
+    CONF_NAME,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     CONF_CITY,
-    CONF_LANGUAGE,
     CONF_IMAGES_PATH,
+    CONF_LANGUAGE,
     CONF_UPDATE_INTERVAL,
+    DEFAULT_LANGUAGE,
     DOMAIN,
     ENTRY_NAME,
     ENTRY_WEATHER_COORDINATOR,
-    UPDATE_LISTENER,
-    PLATFORMS,
-    IMS_PLATFORMS,
-    IMS_PLATFORM,
-    DEFAULT_LANGUAGE,
     FORECAST_MODE_HOURLY,
+    IMS_PLATFORM,
+    IMS_PLATFORMS,
+    PLATFORMS,
+    UPDATE_LISTENER,
 )
-
 from .dependency_logging import remove_dependency_logging, setup_dependency_logging
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
@@ -109,7 +108,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
 
         # Register the debug service
-        async def handle_debug_get_coordinator_data(call) -> None:  # noqa: ANN001 ARG001
+        async def handle_debug_get_coordinator_data(call) -> None:
             # Log or return coordinator data
             data = weather_coordinator.data
             _LOGGER.info("Coordinator data: %s", data)

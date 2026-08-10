@@ -1,6 +1,6 @@
-from typing import Any
 import logging
 import types
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -22,15 +22,15 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import ImsEntity, ImsSensorEntityDescription
-from .weather_update_coordinator import WeatherData
 from .const import (
+    DATETIME_FORMAT,
     DOMAIN,
     ENTRY_WEATHER_COORDINATOR,
     FIELD_NAME_DEW_POINT_TEMP,
     FIELD_NAME_FEELS_LIKE,
     FIELD_NAME_FORECAST_TIME,
-    FIELD_NAME_HUMIDITY,
     FIELD_NAME_GUST_SPEED,
+    FIELD_NAME_HUMIDITY,
     FIELD_NAME_LOCATION,
     FIELD_NAME_PM10,
     FIELD_NAME_RAIN,
@@ -39,6 +39,7 @@ from .const import (
     FIELD_NAME_UV_INDEX,
     FIELD_NAME_UV_INDEX_MAX,
     FIELD_NAME_UV_LEVEL,
+    FIELD_NAME_WARNING,
     FIELD_NAME_WIND_DIRECTION_ID,
     FIELD_NAME_WIND_SPEED,
     FORECAST_MODE,
@@ -67,6 +68,7 @@ from .const import (
     TYPE_PRECIPITATION,
     TYPE_PRECIPITATION_PROBABILITY,
     TYPE_TEMPERATURE,
+    TYPE_WEATHER_WARNINGS,
     TYPE_WIND_DIRECTION,
     TYPE_WIND_SPEED,
     UV_LEVEL_EXTREME,
@@ -76,11 +78,9 @@ from .const import (
     UV_LEVEL_VHIGH,
     WEATHER_CODE_TO_ICON,
     WIND_DIRECTIONS,
-    FIELD_NAME_WARNING,
-    TYPE_WEATHER_WARNINGS,
-    DATETIME_FORMAT,
 )
 from .utils import get_hourly_weather_icon
+from .weather_update_coordinator import WeatherData
 
 sensor_keys = types.SimpleNamespace()
 sensor_keys.TYPE_CURRENT_UV_INDEX = IMS_SENSOR_KEY_PREFIX + TYPE_CURRENT_UV_INDEX
@@ -450,13 +450,14 @@ class ImsSensor(ImsEntity, SensorEntity):
                 )
                 self._attr_native_value = None
                 return
-        elif self.entity_description.forecast_mode == FORECAST_MODE.CURRENT:
-            if not data or not data.current_weather:
-                _LOGGER.warning(
-                    "For %s - no data.current_weather", self.entity_description.key
-                )
-                self._attr_native_value = None
-                return
+        elif self.entity_description.forecast_mode == FORECAST_MODE.CURRENT and (
+            not data or not data.current_weather
+        ):
+            _LOGGER.warning(
+                "For %s - no data.current_weather", self.entity_description.key
+            )
+            self._attr_native_value = None
+            return
 
         # After these checks, data is guaranteed to be not None
         assert data is not None

@@ -1,12 +1,7 @@
 from __future__ import annotations
+
 import logging
 from typing import Any
-
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import DiscoveryInfoType
-from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from homeassistant.components.weather import (
     # PLATFORM_SCHEMA,
@@ -14,26 +9,33 @@ from homeassistant.components.weather import (
     WeatherEntity,
     WeatherEntityFeature,
 )
-
-from homeassistant.const import CONF_NAME, UnitOfSpeed, UnitOfPressure, UnitOfLength
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
+from homeassistant.const import (
+    CONF_NAME,
+    UnitOfLength,
+    UnitOfPressure,
+    UnitOfSpeed,
+    UnitOfTemperature,
+)
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import DiscoveryInfoType
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     ATTRIBUTION,
     CONF_CITY,
     CONF_MODE,
     DOMAIN,
-    FORECAST_MODE_HOURLY,
-    IMS_PLATFORMS,
-    IMS_PLATFORM,
     ENTRY_WEATHER_COORDINATOR,
+    FORECAST_MODE_HOURLY,
+    IMS_PLATFORM,
+    IMS_PLATFORMS,
     WEATHER_CODE_TO_CONDITION,
     WIND_DIRECTIONS,
 )
-
-from homeassistant.const import UnitOfTemperature
-
 from .utils import get_hourly_weather_icon
-from .weather_update_coordinator import WeatherUpdateCoordinator, WeatherData
+from .weather_update_coordinator import WeatherData, WeatherUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -101,7 +103,7 @@ async def async_setup_entry(
     async_add_entities([ims_weather], False)
 
 
-def round_if_needed(value: int | float, output_round: bool):
+def round_if_needed(value: float, output_round: bool):
     if output_round:
         return round(value, 0) + 0
     else:
