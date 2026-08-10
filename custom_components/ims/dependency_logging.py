@@ -1,7 +1,7 @@
 """Dependency logging helpers for the IMS integration."""
 
-from copy import copy
 import logging
+from copy import copy
 
 from loguru import logger as loguru_logger
 
