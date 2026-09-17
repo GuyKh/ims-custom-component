@@ -348,7 +348,7 @@ class IMSWeather(CoordinatorEntity[WeatherUpdateCoordinator], WeatherEntity):
                             native_temperature=hourly_forecast.precise_temperature,
                             native_precipitation=max(hourly_forecast.rain or 0, 0),
                             precipitation_probability=int(
-                                hourly_forecast.rain_chance * 100
+                                hourly_forecast.rain_chance
                             )
                             if hourly_forecast.rain_chance is not None
                             else None,
