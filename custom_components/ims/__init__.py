@@ -64,6 +64,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
 
+    # Track if we created a new coordinator in this setup attempt
+    coordinator_created_here = False
     try:
         setup_dependency_logging(entry.entry_id)
 
@@ -83,6 +85,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 monitored_conditions=conditions,
             )
             hass.data[DOMAIN][unique_location] = weather_coordinator
+            coordinator_created_here = True
             # _LOGGER.warning('New Coordinator')
 
         # await weather_coordinator.async_refresh()
@@ -120,6 +123,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
         return True
     except Exception:
+        # If we created a new coordinator for this location and setup failed, remove it
+        # to prevent reuse of a partially initialized or failed coordinator
+        if coordinator_created_here and unique_location in hass.data[DOMAIN]:
+            hass.data[DOMAIN].pop(unique_location, None)
+            _LOGGER.debug("Cleaned up coordinator for location %s after failed setup", unique_location)
         remove_dependency_logging(entry.entry_id)
         raise
 
@@ -145,10 +153,35 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         hass.data[DOMAIN].pop(entry.entry_id)
 
-        has_other_entries = any(
-            config_entry.entry_id != entry.entry_id
-            for config_entry in hass.config_entries.async_entries(DOMAIN)
-        )
+        # Check if this was the last entry for this location
+        # If so, remove the shared coordinator to prevent reuse of shut-down coordinator
+        city = hass.data[DOMAIN][entry.entry_id][CONF_CITY]
+        language = hass.data[DOMAIN][entry.entry_id][CONF_LANGUAGE]
+        city_id = city if isinstance(city, int | str) else city["lid"]
+        unique_location = f"ims-{language}-{city_id}"
+        
+        # Check if any other entries still use this location
+        has_other_entries = False
+        for config_entry in hass.config_entries.async_entries(DOMAIN):
+            if config_entry.entry_id == entry.entry_id:
+                continue
+            # Only count entries that are actually loaded (not in setup/unload)
+            if config_entry.state.name != "loaded":
+                continue
+            other_city = hass.data[DOMAIN].get(config_entry.entry_id, {}).get(CONF_CITY)
+            other_language = hass.data[DOMAIN].get(config_entry.entry_id, {}).get(CONF_LANGUAGE)
+            if other_city is None or other_language is None:
+                continue
+            other_city_id = other_city if isinstance(other_city, int | str) else other_city["lid"]
+            other_unique_location = f"ims-{other_language}-{other_city_id}"
+            if other_unique_location == unique_location:
+                has_other_entries = True
+                break
+                
+        if not has_other_entries and unique_location in hass.data[DOMAIN]:
+            hass.data[DOMAIN].pop(unique_location)
+            _LOGGER.debug("Removed shared coordinator for location %s", unique_location)
+
         if not has_other_entries and hass.services.has_service(
             DOMAIN, "debug_get_coordinator_data"
         ):
