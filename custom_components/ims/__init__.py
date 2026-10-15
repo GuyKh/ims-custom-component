@@ -1,282 +1,594 @@
 import logging
+
 from dataclasses import dataclass
+
 from datetime import timedelta
+
 from typing import Any
 
+
+
 from homeassistant.components.binary_sensor import BinarySensorEntity
+
 from homeassistant.components.sensor import (
+
     SensorEntityDescription,
+
 )
+
 from homeassistant.config_entries import ConfigEntry
+
 from homeassistant.const import (
+
     CONF_MODE,
+
     CONF_MONITORED_CONDITIONS,
+
     CONF_NAME,
+
 )
+
 from homeassistant.core import HomeAssistant, callback
+
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+
+
 from .const import (
+
     CONF_CITY,
+
     CONF_IMAGES_PATH,
+
     CONF_LANGUAGE,
+
     CONF_UPDATE_INTERVAL,
+
     DEFAULT_LANGUAGE,
+
     DOMAIN,
+
     ENTRY_NAME,
+
     ENTRY_WEATHER_COORDINATOR,
+
     FORECAST_MODE_HOURLY,
+
     IMS_PLATFORM,
+
     IMS_PLATFORMS,
+
     PLATFORMS,
+
     UPDATE_LISTENER,
+
 )
+
 from .dependency_logging import remove_dependency_logging, setup_dependency_logging
+
 from .weather_update_coordinator import WeatherUpdateCoordinator
 
+
+
 CONF_FORECAST = "forecast"
+
 CONF_HOURLY_FORECAST = "hourly_forecast"
 
+
+
 _LOGGER = logging.getLogger(__name__)
+
 ATTRIBUTION = "Powered by IMS Weather"
 
 
+
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+
     """Set up IMS Weather as config entry."""
+
     name = entry.data[CONF_NAME]
+
     city = _get_config_value(entry, CONF_CITY)
+
     forecast_mode = _get_config_value(entry, CONF_MODE, FORECAST_MODE_HOURLY)
+
     images_path = _get_config_value(entry, CONF_IMAGES_PATH)
+
     language = _get_config_value(entry, CONF_LANGUAGE, DEFAULT_LANGUAGE)
+
     ims_entity_platform = _get_config_value(entry, IMS_PLATFORM, [IMS_PLATFORMS[1]])
+
     ims_scan_int = entry.data[CONF_UPDATE_INTERVAL]
+
     conditions = _get_config_value(entry, CONF_MONITORED_CONDITIONS)
 
+
+
     # Extract list of int from forecast days/ hours string if present
+
     # _LOGGER.warning('forecast_days_type: ' + str(type(forecast_days)))
+
     is_legacy_city = False
+
     if isinstance(city, int | str):
+
         is_legacy_city = True
+
+
 
     city_id = city if is_legacy_city else city["lid"]
 
+
+
     unique_location = f"ims-{language}-{city_id}"
+
+
 
     hass.data.setdefault(DOMAIN, {})
 
+
+
     # Track if we created a new coordinator in this setup attempt
+
     coordinator_created_here = False
+
     try:
+
         setup_dependency_logging(entry.entry_id)
 
+
+
         # If coordinator already exists for this API key, we'll use that, otherwise
+
         # we have to create a new one
+
         if unique_location in hass.data[DOMAIN]:
+
             weather_coordinator = hass.data[DOMAIN].get(unique_location)
+
             _LOGGER.info(
+
                 "An existing IMS weather coordinator already exists for this location. Using that one instead"
+
             )
+
         else:
+
             weather_coordinator = WeatherUpdateCoordinator(
+
                 city_id,
+
                 language,
+
                 timedelta(minutes=ims_scan_int),
+
                 hass,
+
                 monitored_conditions=conditions,
+
             )
+
             hass.data[DOMAIN][unique_location] = weather_coordinator
+
             coordinator_created_here = True
+
             # _LOGGER.warning('New Coordinator')
 
+
+
         # await weather_coordinator.async_refresh()
-        await weather_coordinator.async_config_entry_first_refresh()
+
+        try:
+            await weather_coordinator.async_config_entry_first_refresh()
+        except Exception:
+            # If refresh fails, clean up the coordinator we just created
+            if not coordinator_created_here and unique_location in hass.data[DOMAIN]:
+                hass.data[DOMAIN].pop(unique_location, None)
+            raise
+
+
 
         hass.data[DOMAIN][entry.entry_id] = {
+
             ENTRY_NAME: name,
+
             ENTRY_WEATHER_COORDINATOR: weather_coordinator,
+
             CONF_CITY: city,
+
             CONF_LANGUAGE: language,
+
             CONF_MODE: forecast_mode,
+
             CONF_IMAGES_PATH: images_path,
+
             CONF_UPDATE_INTERVAL: ims_scan_int,
+
             IMS_PLATFORM: ims_entity_platform,
+
             CONF_MONITORED_CONDITIONS: conditions,
+
         }
+
+
 
         platforms = _platforms_from_selection(ims_entity_platform)
 
+
+
         await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
+
+
         update_listener = entry.add_update_listener(async_update_options)
+
         hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER] = update_listener
 
+
+
         # Register the debug service
+
         async def handle_debug_get_coordinator_data(call) -> None:
+
             # Log or return coordinator data
+
             data = weather_coordinator.data
+
             _LOGGER.info("Coordinator data: %s", data)
+
             hass.bus.async_fire("custom_component_debug_event", {"data": data})
 
+
+
         if not hass.services.has_service(DOMAIN, "debug_get_coordinator_data"):
+
             hass.services.async_register(
+
                 DOMAIN, "debug_get_coordinator_data", handle_debug_get_coordinator_data
+
             )
-        return True
+
+        success = True
+
     except Exception:
-        # If we created a new coordinator for this location and setup failed, remove it
-        # to prevent reuse of a partially initialized or failed coordinator
-        if coordinator_created_here and unique_location in hass.data[DOMAIN]:
+
+        success = False
+
+        if unique_location in hass.data[DOMAIN]:
+
+            # Check if any other loaded entries still use this location
+
+            has_other_entries = False
+
+            for config_entry in hass.config_entries.async_entries(DOMAIN):
+
+                if config_entry.entry_id == entry.entry_id:
+
+                    continue
+
+                if config_entry.state.name != "loaded":
+
+                    continue
+
+            other_city = hass.data[DOMAIN].get(config_entry.entry_id, {}).get(CONF_CITY)
+
+            other_language = hass.data[DOMAIN].get(config_entry.entry_id, {}).get(CONF_LANGUAGE)
+
+            if other_city is None or other_language is None:
+
+                continue
+
+            other_city_id = other_city if isinstance(other_city, int | str) else other_city["lid"]
+
+            other_unique_location = f"ims-{other_language}-{other_city_id}"
+
+            if other_unique_location == unique_location:
+
+                has_other_entries = True
+
+                break
+        
+        
+        if not has_other_entries:
+
             hass.data[DOMAIN].pop(unique_location, None)
-            _LOGGER.debug("Cleaned up coordinator for location %s after failed setup", unique_location)
-        remove_dependency_logging(entry.entry_id)
+
+            _LOGGER.debug("Removed stale shared coordinator for location %s after setup", unique_location)
+
         raise
 
 
+
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
+
     """Update options."""
+
     await hass.config_entries.async_reload(entry.entry_id)
 
 
+
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+
     """Unload a config entry."""
+
     ims_entity_prevplatform = hass.data[DOMAIN][entry.entry_id][IMS_PLATFORM]
 
+
+
     unload_ok = await hass.config_entries.async_unload_platforms(
+
         entry, _platforms_from_selection(ims_entity_prevplatform)
+
     )
+
+
 
     _LOGGER.info(f"Unloading IMS Weather. Successful: {unload_ok}")
 
+
+
     if unload_ok:
+
         update_listener = hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER]
+
         update_listener()
+
+
 
         hass.data[DOMAIN].pop(entry.entry_id)
 
+
+
         # Check if this was the last entry for this location
+
         # If so, remove the shared coordinator to prevent reuse of shut-down coordinator
+
         city = hass.data[DOMAIN][entry.entry_id][CONF_CITY]
+
         language = hass.data[DOMAIN][entry.entry_id][CONF_LANGUAGE]
+
         city_id = city if isinstance(city, int | str) else city["lid"]
+
         unique_location = f"ims-{language}-{city_id}"
+
         
+
         # Check if any other entries still use this location
+
         has_other_entries = False
+
         for config_entry in hass.config_entries.async_entries(DOMAIN):
+
             if config_entry.entry_id == entry.entry_id:
+
                 continue
+
             # Only count entries that are actually loaded (not in setup/unload)
+
             if config_entry.state.name != "loaded":
+
                 continue
+
             other_city = hass.data[DOMAIN].get(config_entry.entry_id, {}).get(CONF_CITY)
+
             other_language = hass.data[DOMAIN].get(config_entry.entry_id, {}).get(CONF_LANGUAGE)
+
             if other_city is None or other_language is None:
+
                 continue
+
             other_city_id = other_city if isinstance(other_city, int | str) else other_city["lid"]
+
             other_unique_location = f"ims-{other_language}-{other_city_id}"
+
             if other_unique_location == unique_location:
+
                 has_other_entries = True
+
                 break
                 
         if not has_other_entries and unique_location in hass.data[DOMAIN]:
+
             hass.data[DOMAIN].pop(unique_location)
+
             _LOGGER.debug("Removed shared coordinator for location %s", unique_location)
 
+
+
         if not has_other_entries and hass.services.has_service(
+
             DOMAIN, "debug_get_coordinator_data"
+
         ):
+
             hass.services.async_remove(DOMAIN, "debug_get_coordinator_data")
 
+
+
         remove_dependency_logging(entry.entry_id)
+
+
 
     return unload_ok
 
 
+
+
+
 def _get_config_value(config_entry: ConfigEntry, key: str, default=None) -> Any:
+
     if config_entry.options:
+
         val = config_entry.options.get(key)
+
         if val is not None:
+
             return val
+
         else:
+
             _LOGGER.warning("Key %s is missing from config_entry.options", key)
+
             return default
+
     val = config_entry.data.get(key)
+
     if val is not None:
+
         return val
+
     else:
+
         _LOGGER.warning("Key %s is missing from config_entry.data", key)
+
         return default
 
 
+
+
+
 def _platforms_from_selection(ims_entity_platform: list[str] | None) -> list:
+
     """Convert config selection to platform list."""
+
     if not ims_entity_platform:
+
         return [PLATFORMS[1]]
 
+
+
     # If both platforms
+
     if (IMS_PLATFORMS[0] in ims_entity_platform) and (
+
         IMS_PLATFORMS[1] in ims_entity_platform
+
     ):
+
         return PLATFORMS
+
     # If only sensor
+
     if IMS_PLATFORMS[0] in ims_entity_platform:
+
         return [PLATFORMS[0], PLATFORMS[2]]
+
     # If only weather
+
     if IMS_PLATFORMS[1] in ims_entity_platform:
+
         return [PLATFORMS[1]]
+
+
 
     return [PLATFORMS[1]]
 
 
+
+
+
 def _filter_domain_configs(elements, domain):
+
     return list(filter(lambda elem: elem["platform"] == domain, elements))
 
 
+
+
+
 @dataclass(kw_only=True, frozen=True)
+
 class ImsSensorEntityDescription(SensorEntityDescription):
+
     """Describes IMS Weather sensor entity."""
 
+
+
     field_name: str | None = None
+
     forecast_mode: str | None = None
 
 
+
+
+
 class ImsEntity(CoordinatorEntity[WeatherUpdateCoordinator]):
+
     """Define a generic Ims entity."""
+
+
 
     _attr_has_entity_name = True
 
+
+
     def __init__(
+
         self,
+
         coordinator: WeatherUpdateCoordinator,
+
         description: ImsSensorEntityDescription,
+
     ) -> None:
+
         """Initialize."""
+
         super().__init__(coordinator)
 
+
+
         self._attr_extra_state_attributes: dict[str, Any] = {}
+
         self._attr_unique_id = (
+
             f"{description.key}_{coordinator.city}_{coordinator.language}"
+
         )
 
+
+
         if isinstance(self, BinarySensorEntity):
+
             self.entity_id = f"binary_sensor.{description.key}"
+
         else:
+
             self.entity_id = f"sensor.{description.key}"
+
         self._attr_translation_key = f"{description.key}_{coordinator.language}"
+
         self.entity_description = description
 
+
+
     @callback
+
     def _handle_coordinator_update(self) -> None:
+
         """Respond to a DataUpdateCoordinator update."""
+
         self._update_from_latest_data()
+
         self.async_write_ha_state()
 
+
+
     @callback
+
     def _update_from_latest_data(self) -> None:
+
         """Update the entity from the latest data."""
+
         raise NotImplementedError
 
+
+
     async def async_added_to_hass(self) -> None:
+
         """Handle entity which will be added."""
+
         await super().async_added_to_hass()
+
         self._update_from_latest_data()
