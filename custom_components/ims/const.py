@@ -61,6 +61,7 @@ ATTR_API_WIND_BEARING = "wind_direction_id"
 ATTR_API_WIND_CHILL = "wind_chill"
 ATTR_API_WIND_SPEED = "wind_speed"
 UPDATE_LISTENER = "update_listener"
+UNIQUE_LOCATION = "unique_location"
 PLATFORMS = [Platform.SENSOR, Platform.WEATHER, Platform.BINARY_SENSOR]
 IMS_PLATFORMS = ["Sensor", "Weather"]
 IMS_PLATFORM = "ims_platform"
