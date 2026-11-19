@@ -29,6 +29,7 @@ from .const import (
     IMS_PLATFORM,
     IMS_PLATFORMS,
     PLATFORMS,
+    UNIQUE_LOCATION,
     UPDATE_LISTENER,
 )
 from .dependency_logging import remove_dependency_logging, setup_dependency_logging
@@ -98,6 +99,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             CONF_UPDATE_INTERVAL: ims_scan_int,
             IMS_PLATFORM: ims_entity_platform,
             CONF_MONITORED_CONDITIONS: conditions,
+            UNIQUE_LOCATION: unique_location,
         }
 
         platforms = _platforms_from_selection(ims_entity_platform)
@@ -120,6 +122,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
         return True
     except Exception:
+        # Home Assistant shuts the coordinator down when setup fails, and a
+        # shut-down coordinator never refreshes again. Drop it so the setup
+        # retry (or a manual reload) creates a fresh one.
+        hass.data[DOMAIN].pop(unique_location, None)
         remove_dependency_logging(entry.entry_id)
         raise
 
@@ -143,7 +149,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_listener = hass.data[DOMAIN][entry.entry_id][UPDATE_LISTENER]
         update_listener()
 
-        hass.data[DOMAIN].pop(entry.entry_id)
+        entry_data = hass.data[DOMAIN].pop(entry.entry_id)
+
+        # The coordinator is shut down together with the entry; a shut-down
+        # coordinator never refreshes again, so it must not be reused on reload.
+        hass.data[DOMAIN].pop(entry_data.get(UNIQUE_LOCATION), None)
 
         has_other_entries = any(
             config_entry.entry_id != entry.entry_id
